@@ -1,0 +1,5 @@
+[mysqld]
+skip-host-cache
+skip_name_resolve
+character-set-server=UTF8MB4
+sql-mode="NO_ENGINE_SUBSTITUTION"
