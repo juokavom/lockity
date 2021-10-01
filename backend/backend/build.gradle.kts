@@ -25,14 +25,11 @@ dependencies {
 }
 
 application {
-    mainClass.set("lockity.ApplicationKt")
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 tasks {
     shadowJar {
-        manifest {
-            attributes(Pair("Main-Class", "lockity.ApplicationKt"))
-        }
         archiveFileName.set("server.jar")
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
