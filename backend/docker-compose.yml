@@ -4,7 +4,7 @@ services:
   mysql:
     image: mariadb:latest
     ports:
-      - 3306:3306
+      - "3397:3306"
     container_name: lockity_mysql
     volumes:
       - '.docker/conf.d/mysql.cnf:/etc/mysql/conf.d/docker.cnf:ro'
