@@ -1,14 +1,16 @@
-package lockity.config
+package plugins
 
 import org.jooq.codegen.DefaultGeneratorStrategy
+import org.jooq.codegen.GeneratorStrategy
 import org.jooq.meta.*
 
 class GeneratorStrategy : DefaultGeneratorStrategy() {
-    override fun getJavaClassName(definition: Definition, mode: org.jooq.codegen.GeneratorStrategy.Mode): String {
+
+    override fun getJavaClassName(definition: Definition, mode: GeneratorStrategy.Mode): String {
         return when (definition) {
             is TableDefinition -> when (mode) {
-                org.jooq.codegen.GeneratorStrategy.Mode.DEFAULT -> "${definition.outputName.toCamelCase(capitalize = true)}TableDefinition"
-                org.jooq.codegen.GeneratorStrategy.Mode.RECORD -> "${definition.outputName.toCamelCase(capitalize = true)}Record"
+                GeneratorStrategy.Mode.DEFAULT -> "${definition.outputName.toCamelCase(capitalize = true)}TableDefinition"
+                GeneratorStrategy.Mode.RECORD -> "${definition.outputName.toCamelCase(capitalize = true)}Record"
                 else -> super.getJavaClassName(definition, mode)
             }
             else -> super.getJavaClassName(definition, mode)
@@ -25,18 +27,16 @@ class GeneratorStrategy : DefaultGeneratorStrategy() {
         }
     }
 
-    override fun getJavaMethodName(definition: Definition, mode: org.jooq.codegen.GeneratorStrategy.Mode): String {
+    override fun getJavaMethodName(definition: Definition, mode: GeneratorStrategy.Mode): String {
         return when (definition) {
             is TableDefinition -> definition.outputName.toCamelCase(capitalize = true)
             else -> super.getJavaMethodName(definition, mode)
         }
     }
 
-    override fun getJavaMemberName(definition: Definition, mode: org.jooq.codegen.GeneratorStrategy.Mode): String {
+    override fun getJavaMemberName(definition: Definition, mode: GeneratorStrategy.Mode): String {
         return when (mode) {
-            org.jooq.codegen.GeneratorStrategy.Mode.DEFAULT, org.jooq.codegen.GeneratorStrategy.Mode.POJO -> definition.outputName.toCamelCase(
-                capitalize = false
-            )
+            GeneratorStrategy.Mode.DEFAULT, GeneratorStrategy.Mode.POJO -> definition.outputName.toCamelCase(capitalize = false)
             else -> super.getJavaMemberName(definition, mode)
         }
     }
@@ -79,15 +79,12 @@ private fun String.toCamelCase(capitalize: Boolean): String {
 private fun generateDelimiterSet(delimiters: CharArray): Set<Int> {
     val delimiterHashSet: MutableSet<Int> = HashSet()
     delimiterHashSet.add(Character.codePointAt(charArrayOf(' '), 0))
-
     if (delimiters.isEmpty()) {
         return delimiterHashSet
     }
-
     for (index in delimiters.indices) {
         delimiterHashSet.add(Character.codePointAt(delimiters, index))
     }
-
     return delimiterHashSet
 }
 
@@ -95,6 +92,5 @@ private fun String.splitLeadingUnderscores(): Pair<String, String> {
     for (index in indices) {
         if (this[index] != '_') return Pair(substring(0, index), substring(index, length))
     }
-
     return Pair(this, "")
 }

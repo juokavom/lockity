@@ -1,12 +1,12 @@
 package plugins
 
+import org.flywaydb.gradle.FlywayPlugin
+import org.flywaydb.gradle.task.FlywayCleanTask
+import org.flywaydb.gradle.task.FlywayMigrateTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.invoke
-import org.flywaydb.gradle.FlywayPlugin
-import org.flywaydb.gradle.task.FlywayCleanTask
-import org.flywaydb.gradle.task.FlywayMigrateTask
 import org.gradle.kotlin.dsl.register
 import java.io.File
 import java.time.Instant
@@ -14,20 +14,24 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 class DatabasePlugins : Plugin<Project> {
-    override fun apply(project: Project) = project.run {
-        val databaseConfig = groovy.util.ConfigSlurper().parse(
+    override fun apply(project: Project): Unit = project.run {
+        val databaseConfig = DatabaseConfig(groovy.util.ConfigSlurper().parse(
             File("$rootDir/backend/src/main/resources/application.conf").toURI().toURL()
-        )["database"] as groovy.util.ConfigObject
+        )["database"] as groovy.util.ConfigObject)
         val migrationPackage = "$rootDir/migrations"
         val migrations = listOf(
             "filesystem:$migrationPackage"
         )
+        val jooqDir = "$rootDir/backend/src/main/java"
         apply<FlywayPlugin>()
         gradle.projectsEvaluated {
             tasks {
                 register<FlywayCleanTask>("DatabaseClean") {
                     setGroup("database")
                     applyConfig(databaseConfig, migrations)
+                    doLast {
+                        delete(jooqDir)
+                    }
                 }
                 register<FlywayMigrateTask>("DatabaseMigrate") {
                     setGroup("database")
@@ -47,7 +51,7 @@ class DatabasePlugins : Plugin<Project> {
                     dependsOn("DatabaseMigrate")
 
                     doLast {
-//                        generateJooq()
+                        generateJooq(jooqDir, databaseConfig)
                     }
                 }
             }
@@ -60,12 +64,24 @@ class DatabasePlugins : Plugin<Project> {
 
 
     private fun org.flywaydb.gradle.task.AbstractFlywayTask.applyConfig(
-        databaseConfig: groovy.util.ConfigObject,
+        databaseConfig: DatabaseConfig,
         locs: List<String>
     ) {
-        url = databaseConfig["url"].toString()
-        user = databaseConfig["user"].toString()
-        password = databaseConfig["password"].toString()
+        url = databaseConfig.url
+        user = databaseConfig.user
+        password = databaseConfig.password
         locations = locs.toTypedArray()
+    }
+
+    data class DatabaseConfig(
+        val url: String,
+        val user: String,
+        val password: String
+    ) {
+        constructor(serialized: groovy.util.ConfigObject) : this(
+            url = serialized["url"].toString(),
+            user = serialized["user"].toString(),
+            password = serialized["password"].toString()
+        )
     }
 }

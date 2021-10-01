@@ -20,7 +20,7 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
     implementation("mysql:mysql-connector-java:8.0.22")
-    implementation("org.jooq:jooq-codegen:3.14.3")
+    implementation("org.jooq:jooq:3.14.4")
     implementation("io.github.classgraph:classgraph:4.8.87")
 }
 

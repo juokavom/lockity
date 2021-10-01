@@ -1,5 +1,6 @@
 plugins {
-    `kotlin-dsl` apply true
+    `kotlin-dsl`
+    `maven-publish`
 }
 
 gradlePlugin {
@@ -13,6 +14,8 @@ gradlePlugin {
 
 dependencies {
     implementation("org.flywaydb:flyway-gradle-plugin:7.4.0")
+    implementation("org.jooq:jooq-codegen:3.14.3")
+    implementation("mysql:mysql-connector-java:8.0.22")
 }
 
 repositories {
