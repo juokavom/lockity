@@ -1,4 +1,4 @@
-package com.akramas.lockity.plugins
+package lockity.plugins
 
 import io.ktor.routing.*
 import io.ktor.http.content.*

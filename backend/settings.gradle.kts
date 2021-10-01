@@ -1,1 +1,7 @@
-rootProject.name = "com.akramas.lockity"
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+include("backend")

@@ -1,4 +1,4 @@
-package com.akramas.lockity.config
+package lockity.config
 
 import org.jooq.codegen.DefaultGeneratorStrategy
 import org.jooq.meta.*
