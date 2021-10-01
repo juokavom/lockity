@@ -54,6 +54,10 @@ class DatabasePlugins : Plugin<Project> {
                         generateJooq(jooqDir, databaseConfig)
                     }
                 }
+                named("compileKotlin") {
+                    dependsOn("DatabaseMigrate")
+                    dependsOn("GenerateJooq")
+                }
             }
         }
     }
