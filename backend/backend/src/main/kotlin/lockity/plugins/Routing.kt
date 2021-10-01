@@ -9,14 +9,14 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.jooq.DSLContext
 
-fun Application.configureRouting(dsl: DSLContext) {
+fun Application.configureRouting(dsl: DSLContext?) {
 
     install(Locations) {
     }
 
     routing {
         get("/user") {
-            val user = dsl.select(UserTable.Name, UserTable.Email, RoleTable.Name)
+            val user = dsl!!.select(UserTable.Name, UserTable.Email, RoleTable.Name)
                 .from(UserTable)
                 .join(RoleTable)
                 .onKey(UserTable.Role)

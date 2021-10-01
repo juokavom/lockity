@@ -1,15 +1,15 @@
 package com.akramas.lockity
 
-import lockity.plugins.configureRouting
 import io.ktor.http.*
-import kotlin.test.*
 import io.ktor.server.testing.*
+import lockity.plugins.configureRouting
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class ApplicationTest {
     @Test
     fun testRoot() {
-        withTestApplication({ configureRouting() }) {
+        withTestApplication({ configureRouting(null) }) {
             handleRequest(HttpMethod.Get, "/test").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals("Test!", response.content)
