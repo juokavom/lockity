@@ -1,3 +1,5 @@
 build/
 .gradle/
-.idea/
+.idea
+!.idea/runConfigurations/runBackend.xml
+backend/src/main/java

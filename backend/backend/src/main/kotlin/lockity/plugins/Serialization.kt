@@ -1,4 +1,4 @@
-package com.akramas.lockity.plugins
+package lockity.plugins
 
 import io.ktor.serialization.*
 import io.ktor.features.*
