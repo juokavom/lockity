@@ -20,5 +20,5 @@ fun Application.databaseConnection() = DSL.using(
         setURL(environment.config.propertyOrNull("database.url")!!.getString())
         user = environment.config.propertyOrNull("database.user")!!.getString()
         password = environment.config.propertyOrNull("database.password")!!.getString()
-    }, SQLDialect.MYSQL
+    }, SQLDialect.MARIADB
 )
