@@ -4,6 +4,7 @@ import com.akramas.lockity.plugins.configureRouting
 import io.ktor.http.*
 import kotlin.test.*
 import io.ktor.server.testing.*
+import org.junit.Test
 
 class ApplicationTest {
     @Test
