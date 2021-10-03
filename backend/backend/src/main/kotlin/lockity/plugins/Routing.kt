@@ -7,6 +7,8 @@ import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.Routes.authenticationRoute
+import lockity.utils.installJwtVerifier
 import org.jooq.DSLContext
 
 fun Application.configureRouting(dsl: DSLContext?) {
@@ -14,7 +16,10 @@ fun Application.configureRouting(dsl: DSLContext?) {
     install(Locations) {
     }
 
+    installJwtVerifier()
+
     routing {
+        authenticationRoute()
         get("/user") {
             val user = dsl!!.select(UserTable.Name, UserTable.Email, RoleTable.Name)
                 .from(UserTable)
