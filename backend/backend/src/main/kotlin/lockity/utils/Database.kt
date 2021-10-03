@@ -8,8 +8,8 @@ import org.jooq.impl.DSL
 
 fun Application.databaseConnection() = DSL.using(
     MysqlDataSource().apply {
-        setURL(configValue("database.url"))
-        user = configValue("database.user")
-        password = configValue("database.password")
+        setURL(configValue(CONFIG.DATABASE_URL))
+        user = configValue(CONFIG.DATABASE_USER)
+        password = configValue(CONFIG.DATABASE_PASSWORD)
     }, SQLDialect.MARIADB
 )
