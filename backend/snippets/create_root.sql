@@ -1,0 +1,1 @@
+INSERT INTO `User` (`id`, `name`, `email`, `password`, `role`) VALUES (uuid_to_bin('877f2dca-373b-4ea2-a2d7-f9f92e180b64'), 'ROOT', 'root', '$2a$10$JdFMARJa0g5Bg5ug5H9x..O49LN81dsHUWYngHfirW3twvLddo2J.', uuid_to_bin('f22be018-983c-4abd-9aa0-4ad82a7bcef3'));
