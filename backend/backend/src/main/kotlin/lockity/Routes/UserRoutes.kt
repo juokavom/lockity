@@ -20,7 +20,25 @@ fun Application.userRoutes() {
             }
             get("/{userId}"){
                 val userId = call.parameters["userId"]!!.toInt()
-                call.respond(HttpStatusCode.OK, User(userId, "testEmail"))
+                val fileId = call.request.queryParameters["fileId"]
+                val startsWith = call.request.queryParameters["startsWith"]
+                if(fileId != null) {
+                    if(startsWith != null) {
+                        val users = listOf(
+                            User(1, "11 - userId = $userId, fileId = $fileId, startsWith = $startsWith"),
+                            User(2, "22 - userId = $userId, fileId = $fileId, startsWith = $startsWith")
+                        )
+                        return@get call.respond(HttpStatusCode.OK, users)
+                    }
+                    val users = listOf(
+                        User(1, "1 - userId = $userId, fileId = $fileId"),
+                        User(2, "2 - userId = $userId, fileId = $fileId"),
+                        User(2, "3 - userId = $userId, fileId = $fileId"),
+                        User(2, "4 - userId = $userId, fileId = $fileId"),
+                    )
+                    return@get call.respond(HttpStatusCode.OK, users)
+                }
+                return@get call.respond(HttpStatusCode.OK, User(userId, "single user email"))
             }
             put("/{userId}"){
                 call.respond(HttpStatusCode.NoContent)
