@@ -1,0 +1,846 @@
+swagger: "2.0"
+info:
+  description: "WebApp for file storage and sharing"
+  version: "1.0.0"
+  title: "Lockity"
+host: "api.lockity.akramas.com"
+tags:
+- name: "Auth"
+  description: "Authentification operations"
+- name: "User"
+  description: "User operations"
+- name: "Metadata"
+  description: "File metadata operations"
+- name: "File"
+  description: "Physical file operations"
+- name: "Dynamic link"
+  description: "Dynamic link operations"
+- name: "Shared access"
+  description: "Shared access operations"
+- name: "Email templates"
+  description: "Email templates operations"
+- name: "Email"
+  description: "Email operations"
+schemes:
+- "https"
+paths:
+  /auth/login:
+    post:
+      tags:
+      - "Auth"
+      summary: "Logs user into the system"
+      description: "This is accessible by all."
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Credentials"
+        description: "User credentials"
+        required: true
+        schema:
+          $ref: "#/definitions/Auth"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull login"
+          headers:
+            Set-Cookie:
+              type: "string"
+              description: "set JWT token"
+        "400":
+          description: "Invalid email/password supplied"
+  /auth/register:
+    post:
+      tags:
+      - "Auth"
+      summary: "Registers user to the system"
+      description: "This is accessible by all."
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "User"
+        description: "User object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull registration"
+        "400":
+          description: "Invalid user parameters supplied"
+  /auth/logout:
+    post:
+      tags:
+      - "Auth"
+      summary: "Logs user out of the system"
+      description: "This is accessible by all."
+      parameters:
+      - in: "header"
+        name: "cookie:jwt"
+        type: "string"
+        description: "User credentials"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull logout"
+          headers:
+            Set-Cookie:
+              type: "string"
+              description: "unset JWT token"
+  /auth/confirm:
+    post:
+      tags:
+      - "Auth"
+      summary: "Confirm account by email link"
+      description: "This is accessible by all."
+      consumes:
+      - "application/text"
+      parameters:
+      - in: "body"
+        name: "Token"
+        required: true
+        schema:
+          type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull account confirmation"
+        "404":
+          description: "Password reset token was not found"
+  /auth/password/reset/request:
+    post:
+      tags:
+      - "Auth"
+      summary: "Request password reset"
+      description: "This is accessible by all."
+      consumes:
+      - "application/text"
+      parameters:
+      - in: "body"
+        name: "Email"
+        description: "User email"
+        required: true
+        schema:
+          type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull password reset request"
+        "400":
+          description: "Invalid email supplied"
+  /auth/password/reset/confirm:
+    post:
+      tags:
+      - "Auth"
+      summary: "Change new password by email link"
+      description: "This is accessible by all."
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Password and token"
+        required: true
+        schema:
+          $ref: "#/definitions/PasswordReset"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Successfull password reset request"
+        "400":
+          description: "Bad password or token"
+        "404":
+          description: "Password reset token was not found"
+  /user:
+    get:
+      tags:
+      - "User"
+      summary: "Returns all users"
+      description: "This can only be done by authenticated user."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Users"
+        "401":
+          description: "Not authenticated" 
+    post:
+      tags:
+      - "User"
+      summary: "Creates new user"
+      description: "This can only be done by administrator."
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        "201":
+          description: "Created user"
+        "400":
+          description: "Bad user parameters" 
+        "403":
+          description: "Not authorized" 
+  /user/{userId}:
+    get:
+      tags:
+      - "User"
+      summary: "Gets specific user"
+      description: "This can be done by authenticated user."
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "Id of user that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: "Not authenticated" 
+        "404":
+          description: "User with {userId} was not found"
+    put:
+      tags:
+      - "User"
+      summary: "Edits specific user"
+      description: "This can be done by registered user (if he matches {userId}) and administrator."
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "Id of user that needs to be edited."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Edited"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/User"
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "User edited"
+        "400":
+          description: "Bad user parameters"
+        "403":
+          description: "Not authorized to edit this user"
+        "404":
+          description: "User with {userId} was not found"
+        
+    delete:
+      tags:
+      - "User"
+      summary: "Deletes specific user"
+      description: "This can be done by registered user (if he matches {userId}) and administrator."
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "Id of user that needs to be edited."
+        required: true
+        type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "User deleted"
+        "403":
+          description: "Not authorized to delete this user"
+        "404":
+          description: "User with {userId} was not found"
+  /file/metadata:
+    get:
+      tags:
+      - "Metadata"
+      summary: "Returns all file metadatas"
+      description: "This can only be done by authenticated user."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Metadatas"
+        "401":
+          description: "Not authenticated" 
+    post:
+      tags:
+      - "Metadata"
+      summary: "Creates new file metadata"
+      description: "This can be done by all."
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created metadata object"
+        required: true
+        schema:
+          $ref: "#/definitions/Metadata"
+      responses:
+        "201":
+          description: "Created metadata"
+        "400":
+          description: "Bad metadata parameters"
+  /file/metadata/{metadataId}:
+    get:
+      tags:
+      - "Metadata"
+      summary: "Gets specific metadata"
+      description: "This can be done by all."
+      parameters:
+      - name: "metadataId"
+        in: "path"
+        description: "Id of metadata that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Metadata"
+        "403":
+          description: "Not authorized (if file is shared not by link)"
+    put:
+      tags:
+      - "Metadata"
+      summary: "Edits specific metadata"
+      description: "This can be done by registered user (if he is owner) and administrator."
+      parameters:
+      - name: "metadataId"
+        in: "path"
+        description: "Id of metadata that needs to be edited."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Edited metadata"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/Metadata"
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Metadata edited"
+        "400":
+          description: "Bad metadata parameters"
+        "403":
+          description: "Not authorized to edit this metadata"
+        "404":
+          description: "Metadata with {metadataId} was not found"
+        
+    delete:
+      tags:
+      - "Metadata"
+      summary: "Deletes specific metadata"
+      description: "This can be done by registered user (if he is owner) and administrator."
+      parameters:
+      - name: "metadataId"
+        in: "path"
+        description: "Id of metadata that needs to be deletes."
+        required: true
+        type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Metadata deleted"
+        "403":
+          description: "Not authorized to delete this metadata"
+        "404":
+          description: "Metadata with {metadataId} was not found"
+    
+  /file:  
+    post:
+      tags:
+      - "File"
+      summary: "Uploads new file"
+      description: "This can be done by all."
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/text"
+      parameters:
+      - in: "body"
+        name: "file"
+        description: "Uploading file"
+        required: true
+        schema:
+          $ref: "#/definitions/File"
+      responses:
+        "201":
+          description: "Created file"
+          schema:
+            type: "string"
+            description: "File id"
+        "400":
+          description: "Exceeded size limit"
+  /file/{fileId}:
+    get:
+      tags:
+      - "File"
+      summary: "Gets specific file"
+      description: "This can be done by all."
+      parameters:
+      - name: "fileId"
+        in: "path"
+        description: "Id of file that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/octet-stream"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/File"
+        "403":
+          description: "Not authorized (if file is shared not by link) and user is not authorized"
+  /dynlink:
+    get:
+      tags:
+      - "Dynamic link"
+      summary: "Returns all dynamic links"
+      description: "This can only be done by administrator."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Dynlinks"
+        "403":
+          description: "Not authorized" 
+    post:
+      tags:
+      - "Dynamic link"
+      summary: "Creates new dynamic link"
+      description: "This can only be done by all."
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created dynamic link object"
+        required: true
+        schema:
+          $ref: "#/definitions/Dynlink"
+      responses:
+        "201":
+          description: "Created dynamic link"
+        "400":
+          description: "Bad dynamic link parameters or file does not exist" 
+  /dynlink/{dynlinkId}:
+    get:
+      tags:
+      - "Dynamic link"
+      summary: "Gets specific dynamic link"
+      description: "This can be done by registered user (if he is owner) and administrator."
+      parameters:
+      - name: "dynlinkId"
+        in: "path"
+        description: "Id of dynamic link that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Dynlink"
+        "403":
+          description: "Not authorized" 
+        "404":
+          description: "Dynamic link with {dynlinkId} was not found"
+    put:
+      tags:
+      - "Dynamic link"
+      summary: "Edits specific dynamic link"
+      description: "This can be done by registered user (if he is owner) and administrator."
+      parameters:
+      - name: "dynlinkId"
+        in: "path"
+        description: "Id of dynamic link that needs to be edited."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Edited dynamic link object"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/User"
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Dynamic link edited"
+        "400":
+          description: "Bad dynamic link parameters"
+        "403":
+          description: "Not authorized to edit this dynamic link"
+        "404":
+          description: "Dynamic link with {dynlinkId} was not found"
+        
+    delete:
+      tags:
+      - "Dynamic link"
+      summary: "Deletes specific dynamic link"
+      description: "This can be done by registered user (if he is owner) and administrator."
+      parameters:
+      - name: "dynlinkId"
+        in: "path"
+        description: "Id of shared access that needs to be deleted."
+        required: true
+        type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Dynamic link deleted"
+        "403":
+          description: "Not authorized to delete this dynamic link"
+        "404":
+          description: "Dynamic link with {dynlinkId} was not found"
+  /shared:
+    get:
+      tags:
+      - "Shared access"
+      summary: "Returns all shared access"
+      description: "This can only be done by administrator."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/SharedAccesses"
+        "403":
+          description: "Not authorized" 
+    post:
+      tags:
+      - "Shared access"
+      summary: "Creates new shared access object"
+      description: "This can be done by registered user (if he is file owner) and administrator."
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created shared access object"
+        required: true
+        schema:
+          $ref: "#/definitions/Dynlink"
+      responses:
+        "201":
+          description: "Created dynamic link"
+        "400":
+          description: "Bad dynamic link parameters or file does not exist" 
+  /shared/{sharedId}:
+    get:
+      tags:
+      - "Shared access"
+      summary: "Gets specific shared access object"
+      description: "This can be done by registered user (if he is file owner) and administrator."
+      parameters:
+      - name: "sharedId"
+        in: "path"
+        description: "Id of shared access that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/SharedAccess"
+        "403":
+          description: "Not authorized" 
+        "404":
+          description: "Shared access with {sharedId} was not found"
+    put:
+      tags:
+      - "Shared access"
+      summary: "Edits specific shared access"
+      description: "This can be done by registered user (if he is file owner) and administrator."
+      parameters:
+      - name: "sharedId"
+        in: "path"
+        description: "Id of shared access that needs to be edited."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Edited shared access object"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/SharedAccess"
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Shared access edited"
+        "400":
+          description: "Bad shared access parameters"
+        "403":
+          description: "Not authorized to edit this shared access"
+        "404":
+          description: "Shared access with {sharedId} was not found"
+        
+    delete:
+      tags:
+      - "Shared access"
+      summary: "Deletes specific shared access"
+      description: "This can be done by registered user (if he is file owner) and administrator."
+      parameters:
+      - name: "sharedId"
+        in: "path"
+        description: "Id of shared access that needs to be deleted."
+        required: true
+        type: "string"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Shared access deleted"
+        "403":
+          description: "Not authorized to delete this shared access"
+        "404":
+          description: "Shared access with {sharedId} was not found"
+  /email/templates:
+    get:
+      tags:
+      - "Email templates"
+      summary: "Returns all email templates"
+      description: "This can only be done by administrator."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/EmailTemplates"
+        "403":
+          description: "Not authorized" 
+  /email/templates/{templateId}:
+    get:
+      tags:
+      - "Email templates"
+      summary: "Gets specific email template object"
+      description: "This can only be done by administrator."
+      parameters:
+      - name: "templateId"
+        in: "path"
+        description: "Id of email template that needs to be fetched."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EmailTemplate"
+        "403":
+          description: "Not authorized" 
+        "404":
+          description: "Email template with {templateId} was not found"
+    put:
+      tags:
+      - "Email templates"
+      summary: "Edits specific email template"
+      description: "This can only be done by administrator."
+      parameters:
+      - name: "templateId"
+        in: "path"
+        description: "Id of email template that needs to be edited."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Edited email template object"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/EmailTemplate"
+      consumes:
+      - "application/json"
+      produces:
+      - "0"
+      responses:
+        "204":
+          description: "Email template edited"
+        "400":
+          description: "Bad email template parameters"
+        "403":
+          description: "Not authorized to edit this email template"
+        "404":
+          description: "Email template with {templateId} was not found"
+  /email/newsletter:
+    post:
+      tags:
+      - "Email"
+      summary: "Sends newsletter to subscribed users"
+      description: "This can be only done by administrator."
+      consumes:
+      - "application/html"
+      produces:
+      - "0"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Newsletter object"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "Success"
+        "403":
+          description: "Not authorized"
+          
+definitions:
+  Auth:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      password:
+        type: "string"
+  PasswordReset:
+    type: "object"
+    properties:
+      token:
+        type: "string"
+      password:
+        type: "string"
+  Users:
+    type: array
+    items:
+      $ref: '#/definitions/User'
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      surname:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+      role:
+        description: "User role"
+        enum:
+        - "Guest"
+        - "Registered"
+        - "Administrator"
+      activated:
+        type: "boolean"
+      subscribed:
+        type: "boolean"
+  File:
+    type: object
+  Metadatas:
+    type: array
+    items:
+      $ref: '#/definitions/Metadata'
+  Metadata:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      title:
+        type: "string"
+      size:
+        type: "number"
+      location:
+        type: "string"
+      owner:
+        type: "string"
+  Dynlinks:
+    type: array
+    items:
+      $ref: '#/definitions/Dynlink'
+  Dynlink:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      title:
+        type: "string"
+      fileId:
+        type: "number"
+  SharedAccesses:
+    type: array
+    items:
+      $ref: '#/definitions/SharedAccess'
+  SharedAccess:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      user:
+        type: "string"
+      fileId:
+        type: "number"
+  EmailTemplates:
+    type: array
+    items:
+      $ref: '#/definitions/EmailTemplate'
+  EmailTemplate:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      content:
+        type: "string"

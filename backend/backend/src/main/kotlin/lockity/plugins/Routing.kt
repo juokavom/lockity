@@ -23,25 +23,5 @@ fun Application.configureRouting(dsl: DSLContext?) {
 
     routing {
         authenticationRoute()
-        get("/user") {
-            val user = dsl!!.select(UserTable.Name, UserTable.Email, RoleTable.Name)
-                .from(UserTable)
-                .join(RoleTable)
-                .onKey(UserTable.Role)
-                .fetchOne()?.map {
-                    mapOf(
-                        "name" to it[UserTable.Name],
-                        "email" to it[UserTable.Email],
-                        "role" to it[RoleTable.Name]
-                    )
-                }
-            call.respondText(
-                "User #1. Name is ${user?.get("name")}," +
-                        " email: ${user?.get("email")} and role is ${user?.get("role")}"
-            )
-        }
-        get("/test") {
-            call.respondText("Test!")
-        }
     }
 }
