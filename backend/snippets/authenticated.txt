@@ -1,0 +1,6 @@
+
+            authenticate(ROLE.ADMIN) {
+                post("/secret") {
+                    call.respondText("nice")
+                }
+            }

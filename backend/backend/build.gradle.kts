@@ -24,6 +24,7 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.22")
     implementation("org.jooq:jooq:3.14.4")
     implementation("io.github.classgraph:classgraph:4.8.87")
+    implementation("io.ktor:ktor-gson:$ktor_version")
 }
 
 application {

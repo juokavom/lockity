@@ -13,4 +13,6 @@ object CONFIG {
     const val DATABASE_URL = "database.url"
     const val DATABASE_USER = "database.user"
     const val DATABASE_PASSWORD = "database.password"
+    const val STORAGE = "storage"
+    const val ROOT_PATH = "rootPath"
 }
