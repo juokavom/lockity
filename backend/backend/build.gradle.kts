@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jooq:jooq:3.14.4")
     implementation("io.github.classgraph:classgraph:4.8.87")
     implementation("io.ktor:ktor-gson:$ktor_version")
+    implementation("org.apache.commons:commons-email:1.5")
 }
 
 application {

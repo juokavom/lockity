@@ -15,3 +15,11 @@ services:
       MYSQL_PASSWORD: project
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
+  mailhog:
+    image: mailhog/mailhog
+    container_name: lockity_mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - "1025:1025" # smtp server
+      - "8025:8025" # web ui

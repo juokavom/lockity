@@ -32,5 +32,23 @@ fun Application.configureRouting(dsl: DSLContext?) {
         emailTemplateRoutes()
         emailRoutes()
         fileRoutes()
+
+        /*
+        get("/email") {
+            sendEmail(
+                "user123@email.com", "New email from someone!", """
+                    <html>
+                        <head>
+                        </head>
+                        <body>
+                            <p>
+                                Hi from lockity backend service, please visit <a href="https://www.youtube.com/watch?v=ebaY37b07Y8">this song</a>. See you!
+                            </p>
+                        </body>
+                    </html>
+                """.trimIndent()
+            )
+        }
+         */
     }
 }
