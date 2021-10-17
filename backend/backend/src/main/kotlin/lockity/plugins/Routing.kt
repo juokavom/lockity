@@ -10,7 +10,6 @@ import lockity.configValue
 import lockity.utils.CONFIG
 import lockity.utils.generateJwtToken
 import lockity.utils.installJwtVerifier
-import lockity.utils.sendEmail
 import org.jooq.DSLContext
 
 fun Application.configureRouting(dsl: DSLContext?) {
@@ -34,6 +33,7 @@ fun Application.configureRouting(dsl: DSLContext?) {
         emailRoutes()
         fileRoutes()
 
+        /*
         get("/email") {
             sendEmail(
                 "j.akramas@gmail.com", "New email from someone!", """
@@ -49,5 +49,6 @@ fun Application.configureRouting(dsl: DSLContext?) {
                 """.trimIndent()
             )
         }
+        */
     }
 }
