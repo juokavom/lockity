@@ -26,6 +26,7 @@ dependencies {
     implementation("io.github.classgraph:classgraph:4.8.87")
     implementation("io.ktor:ktor-gson:$ktor_version")
     implementation("org.apache.commons:commons-email:1.5")
+    implementation("io.insert-koin:koin-ktor:3.1.2")
 }
 
 application {

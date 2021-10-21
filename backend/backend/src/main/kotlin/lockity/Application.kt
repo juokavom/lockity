@@ -1,11 +1,23 @@
 package lockity
 
 import io.ktor.application.*
+import lockity.Service.ConfigurationService
 import lockity.plugins.configureRouting
-import lockity.utils.databaseConnection
+import lockity.utils.DatabaseService
+import lockity.utils.EmailService
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.dsl.module
 
 fun Application.main() {
-    configureRouting(databaseConnection())
+    startKoin {
+        modules(
+            module {
+                single { Application(get()) }
+                single { EmailService(get()) }
+                single { ConfigurationService(environment) }
+                single { DatabaseService(get()) }
+            }
+        )
+    }
+    configureRouting()
 }
-
-fun Application.configValue(key: String): String = environment.config.property(key).getString()
