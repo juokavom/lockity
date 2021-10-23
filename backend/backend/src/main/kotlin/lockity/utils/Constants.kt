@@ -1,9 +1,9 @@
 package lockity.utils
 
 object ROLE {
-    const val ADMIN = "administrator"
-    const val REGISTERED = "registered"
-    const val VIP = "vip"
+    const val ADMIN = "Administrator"
+    const val REGISTERED = "Registered"
+    const val VIP = "Vip"
 }
 
 const val JWT_COOKIE_NAME = "jwt"

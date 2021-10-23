@@ -3,6 +3,8 @@ package lockity
 import io.ktor.application.*
 import lockity.Service.ConfigurationService
 import lockity.plugins.configureRouting
+import lockity.repository.RoleRepository
+import lockity.repository.UserRepository
 import lockity.utils.DatabaseService
 import lockity.utils.EmailService
 import org.koin.core.context.GlobalContext.startKoin
@@ -16,6 +18,8 @@ fun Application.main() {
                 single { EmailService(get()) }
                 single { ConfigurationService(environment) }
                 single { DatabaseService(get()) }
+                single { UserRepository(get()) }
+                single { RoleRepository(get()) }
             }
         )
     }
