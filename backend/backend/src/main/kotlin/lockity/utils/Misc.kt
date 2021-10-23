@@ -5,16 +5,6 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
-import java.nio.ByteBuffer
-import java.util.*
-
-
-fun Application.generateBinaryUUID(uuid: UUID = UUID.randomUUID()): ByteArray {
-    val bb = ByteBuffer.wrap(ByteArray(16))
-    bb.putLong(uuid.mostSignificantBits)
-    bb.putLong(uuid.leastSignificantBits)
-    return bb.array()
-}
 
 suspend fun Application.withErrorHandler(call: ApplicationCall, block: suspend (ApplicationCall) -> Unit) {
     try {

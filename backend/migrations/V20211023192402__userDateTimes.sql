@@ -1,0 +1,2 @@
+ALTER TABLE `User` MODIFY registered DATETIME;
+ALTER TABLE `User` MODIFY lastActive DATETIME;

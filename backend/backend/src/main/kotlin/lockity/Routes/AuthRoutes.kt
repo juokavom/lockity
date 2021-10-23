@@ -12,17 +12,18 @@ import lockity.repository.RoleRepository
 import lockity.repository.UserRepository
 import lockity.utils.*
 import org.koin.ktor.ext.inject
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun Application.authRoutes() {
     val emailService: EmailService by inject()
     val userRepository: UserRepository by inject()
     val roleRepository: RoleRepository by inject()
+    val databaseService: DatabaseService by inject()
 
     routing {
         route("/auth") {
             post("/login") {
-                call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=${generateJwtToken(ROLE.ADMIN)}")
+                call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=${generateJwtToken("877f2dca-373b-4ea2-a2d7-f9f92e180b64", ROLE.ADMIN)}")
                 call.respond(HttpStatusCode.NoContent)
             }
             post("/register") {
@@ -32,14 +33,14 @@ fun Application.authRoutes() {
                     if (!userRepository.isEmailUnique(newUser.email)) throw BadRequestException("User exists.")
                     userRepository.insertUser(
                         UserRecord(
-                            id = generateBinaryUUID(),
+                            id = databaseService.generateBinaryUUID(),
                             name = newUser.name,
                             surname = newUser.surname,
                             email = newUser.email,
                             password = bcryptPassword(newUser.password),
                             role = roleRepository.roleUUID(ROLE.REGISTERED),
-                            registered = LocalDate.now(),
-                            lastActive = LocalDate.now(),
+                            registered = LocalDateTime.now(),
+                            lastActive = LocalDateTime.now(),
                             confirmed = 0
                         )
                     )

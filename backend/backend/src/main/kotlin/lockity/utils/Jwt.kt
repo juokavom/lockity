@@ -23,7 +23,7 @@ fun Application.installJwtVerifier() = install(Authentication) {
                     ).build()
                 )
                 validate { credential ->
-                    if (credential.payload.getClaim(ROLE_NAME).asString() == it) {
+                    if (credential.payload.getClaim(USER_ROLE).asString() == it) {
                         JWTPrincipal(credential.payload)
                     } else {
                         null
@@ -33,10 +33,11 @@ fun Application.installJwtVerifier() = install(Authentication) {
         }
     }
 
-fun Application.generateJwtToken(role: String): String {
+fun Application.generateJwtToken(id: String, role: String): String {
     val configurationService: ConfigurationService by inject()
     return JWT.create()
-        .withClaim(ROLE_NAME, role)
+        .withClaim(USER_ID, id)
+        .withClaim(USER_ROLE, role)
         .withExpiresAt(Date(System.currentTimeMillis() + configurationService.configValue(CONFIG.JWT_SESSION_TIME_MILLIS).toInt()))
         .sign(Algorithm.HMAC256(configurationService.configValue(CONFIG.JWT_SECRET)))
 }

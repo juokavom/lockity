@@ -7,7 +7,8 @@ object ROLE {
 }
 
 const val JWT_COOKIE_NAME = "jwt"
-const val ROLE_NAME = "role"
+const val USER_ID = "user.id"
+const val USER_ROLE = "user.role"
 
 object CONFIG {
     const val ENV = "environment"

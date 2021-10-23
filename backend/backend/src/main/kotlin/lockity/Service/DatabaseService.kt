@@ -4,6 +4,8 @@ import com.mysql.cj.jdbc.MysqlDataSource
 import lockity.Service.ConfigurationService
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import java.nio.ByteBuffer
+import java.util.*
 
 class DatabaseService(
     private val configurationService: ConfigurationService
@@ -15,4 +17,11 @@ class DatabaseService(
             password = configurationService.configValue(CONFIG.DATABASE_PASSWORD)
         }, SQLDialect.MARIADB
     )
+
+    fun generateBinaryUUID(uuid: UUID = UUID.randomUUID()): ByteArray {
+        val bb = ByteBuffer.wrap(ByteArray(16))
+        bb.putLong(uuid.mostSignificantBits)
+        bb.putLong(uuid.leastSignificantBits)
+        return bb.array()
+    }
 }

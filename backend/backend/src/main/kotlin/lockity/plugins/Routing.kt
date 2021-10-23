@@ -7,12 +7,15 @@ import io.ktor.locations.*
 import io.ktor.routing.*
 import lockity.Routes.*
 import lockity.Service.ConfigurationService
+import lockity.repository.UserRepository
 import lockity.utils.*
 import org.koin.ktor.ext.inject
+import java.util.*
 
 fun Application.configureRouting() {
     val configurationService: ConfigurationService by inject()
-//    val emailService: EmailService by inject()
+    val userRepository: UserRepository by inject()
+
     install(ContentNegotiation) {
         gson()
     }
@@ -20,7 +23,8 @@ fun Application.configureRouting() {
     installJwtVerifier()
     install(RefreshToken) {
         jwtSecret = configurationService.configValue(CONFIG.JWT_SECRET)
-        generateToken = { role -> generateJwtToken(role) }
+        generateToken = { id, role -> generateJwtToken(id, role) }
+        lastActive = { id -> userRepository.updateLastActive(UUID.fromString(id)) }
     }
 
     routing {
