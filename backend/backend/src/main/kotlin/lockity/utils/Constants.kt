@@ -1,5 +1,6 @@
 package lockity.utils
 
+const val AUTHENTICATED = "Authenticated"
 object ROLE {
     const val ADMIN = "Administrator"
     const val REGISTERED = "Registered"

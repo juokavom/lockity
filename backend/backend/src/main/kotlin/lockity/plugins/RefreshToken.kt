@@ -1,38 +1,32 @@
 package lockity.plugins
 
 import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.exceptions.SignatureVerificationException
-import com.auth0.jwt.exceptions.TokenExpiredException
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
+import lockity.services.JwtService
 import lockity.utils.JWT_COOKIE_NAME
 import lockity.utils.USER
 
 class RefreshToken(configuration: Configuration) {
-    private val jwtSecret = configuration.jwtSecret
-    private val generateToken = configuration.generateToken
+    private val jwtService = configuration.jwtTokenService
     private val lastActive = configuration.lastActive
 
     class Configuration {
-        lateinit var jwtSecret: String
-        lateinit var generateToken: (id: String, role: String) -> String
+        lateinit var jwtTokenService: JwtService
         lateinit var lastActive: (id: String) -> Unit
     }
 
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
-        val jwt = context.call.request.cookies[JWT_COOKIE_NAME]
-        if (jwt != null) {
-            try {
-                JWT.require(Algorithm.HMAC256(jwtSecret)).build().verify(jwt)
-                val decodedJWT = JWT.decode(jwt)
+        context.call.request.cookies[JWT_COOKIE_NAME]?.let{
+            if(jwtService.isValidToken(it)) {
+                val decodedJWT = JWT.decode(it)
                 // Refresh JWT token
                 context.call.response.header(
                     "Set-Cookie",
                     "$JWT_COOKIE_NAME=${
-                        generateToken(
+                        jwtService.generateToken(
                             decodedJWT.getClaim(USER.ID).asString(),
                             decodedJWT.getClaim(USER.ROLE).asString()
                         )
@@ -40,9 +34,6 @@ class RefreshToken(configuration: Configuration) {
                 )
                 // Update `LastActive` user column
                 lastActive(decodedJWT.getClaim(USER.ID).asString())
-            } catch (e: TokenExpiredException) {
-            } catch (e: SignatureVerificationException) {
-            } catch (e: Exception) {
             }
         }
     }

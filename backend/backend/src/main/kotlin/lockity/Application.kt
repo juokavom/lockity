@@ -1,10 +1,11 @@
 package lockity
 
 import io.ktor.application.*
-import lockity.services.ConfigurationService
 import lockity.plugins.configureRouting
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
+import lockity.services.ConfigurationService
+import lockity.services.JwtService
 import lockity.utils.DatabaseService
 import lockity.utils.EmailService
 import org.koin.core.context.GlobalContext.startKoin
@@ -15,11 +16,12 @@ fun Application.main() {
         modules(
             module {
                 single { Application(get()) }
-                single { EmailService(get()) }
                 single { ConfigurationService(environment) }
+                single { EmailService(get()) }
                 single { DatabaseService(get()) }
                 single { UserRepository(get()) }
                 single { RoleRepository(get()) }
+                single { JwtService(get()) }
             }
         )
     }

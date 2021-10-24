@@ -2,6 +2,7 @@ package lockity.routes
 
 import database.schema.tables.records.UserRecord
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -11,6 +12,7 @@ import lockity.models.RegistrableUser
 import lockity.models.SignInableUser
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
+import lockity.services.JwtService
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
@@ -21,6 +23,7 @@ fun Application.authRoutes() {
     val userRepository: UserRepository by inject()
     val roleRepository: RoleRepository by inject()
     val databaseService: DatabaseService by inject()
+    val jwtService: JwtService by inject()
 
     routing {
         route("/auth") {
@@ -29,7 +32,7 @@ fun Application.authRoutes() {
                     val signInUser = call.receive<SignInableUser>()
                     userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
                         dbUser[USER.CONFIRMED].let {
-                            if (it == null || it == "0") throw  throw BadRequestException("User is not confirmed.")
+                            if (it == null || it == "0") throw BadRequestException("User is not confirmed.")
                         }
                         dbUser[USER.PASSWORD].let { password ->
                             if (password == null || !passwordIsCorrect(signInUser.password, password)) {
@@ -40,7 +43,7 @@ fun Application.authRoutes() {
                             dbUser[USER.ROLE]?.let { urole ->
                                 call.response.header(
                                     "Set-Cookie",
-                                    "$JWT_COOKIE_NAME=${generateJwtToken(uid, urole)}"
+                                    "$JWT_COOKIE_NAME=${jwtService.generateToken(uid, urole)}"
                                 )
                                 userRepository.updateLastActive(UUID.fromString(uid))
                                 call.respondJSON("Login successful", HttpStatusCode.OK)
@@ -71,8 +74,26 @@ fun Application.authRoutes() {
                 }
             }
             post("/logout") {
-                call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=")
-                call.respond(HttpStatusCode.NoContent)
+                withErrorHandler(call) {
+                    val jwt = call.request.cookies[JWT_COOKIE_NAME]
+                    if (jwt != null && jwtService.isValidToken(jwt)) {
+                        call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=")
+                        call.respondJSON("Successful logout", HttpStatusCode.OK)
+                    } else {
+                        call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=")
+                        throw BadRequestException("User already logged out")
+                    }
+                }
+            }
+            authenticate(ROLE.ADMIN) {
+                post("/admin") {
+                    call.respondText("nice Admin")
+                }
+            }
+            authenticate(AUTHENTICATED) {
+                post("/authenticated") {
+                    call.respondText("nice authenticated")
+                }
             }
             post("/confirm") {
                 call.respond(HttpStatusCode.NoContent)
