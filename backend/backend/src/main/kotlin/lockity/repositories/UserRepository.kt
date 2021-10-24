@@ -21,6 +21,11 @@ class UserRepository(
         .batchInsert(userRecord)
         .execute()
 
+    fun updateUser(userRecord: UserRecord) = databaseService.dsl
+        .update(UserTable)
+        .set(userRecord)
+        .execute()
+
     fun fetch(): List<UserRecord> = databaseService.dsl
         .selectFrom(UserTable)
         .fetchArray()

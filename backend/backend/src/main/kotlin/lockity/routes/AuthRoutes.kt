@@ -1,17 +1,21 @@
 package lockity.routes
 
+import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.models.ConfirmableLink
 import lockity.models.RegistrableUser
 import lockity.models.SignInableUser
+import lockity.repositories.ConfirmationLinkRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
+import lockity.services.ConfigurationService
+import lockity.services.EmailService
 import lockity.services.JwtService
 import lockity.utils.*
 import org.koin.ktor.ext.inject
@@ -24,6 +28,8 @@ fun Application.authRoutes() {
     val roleRepository: RoleRepository by inject()
     val databaseService: DatabaseService by inject()
     val jwtService: JwtService by inject()
+    val confirmationLinkRepository: ConfirmationLinkRepository by inject()
+    val configurationService: ConfigurationService by inject()
 
     routing {
         route("/auth") {
@@ -49,7 +55,7 @@ fun Application.authRoutes() {
                                 call.respondJSON("Login successful", HttpStatusCode.OK)
                             }
                         }
-                    } ?: throw BadRequestException("User does not exists.")
+                    } ?: throw NotFoundException("User does not exists.")
                 }
             }
             post("/register") {
@@ -57,9 +63,10 @@ fun Application.authRoutes() {
                     val newUser = call.receive<RegistrableUser>()
                     if (!emailService.isEmailValid(newUser.email)) throw BadRequestException("Email is not in correct format.")
                     if (!userRepository.isEmailUnique(newUser.email)) throw BadRequestException("User exists.")
+                    val userId = databaseService.uuidToBin()
                     userRepository.insertUser(
                         UserRecord(
-                            id = databaseService.uuidToBin(),
+                            id = userId,
                             name = newUser.name,
                             surname = newUser.surname,
                             email = newUser.email,
@@ -70,7 +77,26 @@ fun Application.authRoutes() {
                             confirmed = 0
                         )
                     )
-                    call.respondJSON("User created", HttpStatusCode.Created)
+                    val confirmationLink = ConfirmationLinkRecord(
+                        id = databaseService.uuidToBin(),
+                        user = userId,
+                        link = UUID.randomUUID().toString(),
+                        validUntil = LocalDateTime.now().plusMinutes(
+                            configurationService.configValue(
+                                CONFIG.LINK_EXPIRY_MINUTES
+                            ).toLong()
+                        )
+                    )
+                    confirmationLinkRepository.insertLink(confirmationLink)
+                    emailService.sendEmail(
+                        newUser.email,
+                        "Welcome to lockity ${newUser.name ?: ""}!",
+                        emailService.confirmRegistrationTemplate(confirmationLink)
+                    )
+                    call.respondJSON(
+                        "Successful registration. Check your email for further steps.",
+                        HttpStatusCode.Created
+                    )
                 }
             }
             post("/logout") {
@@ -85,18 +111,21 @@ fun Application.authRoutes() {
                     }
                 }
             }
-            authenticate(ROLE.ADMIN) {
-                post("/admin") {
-                    call.respondText("nice Admin")
-                }
-            }
-            authenticate(AUTHENTICATED) {
-                post("/authenticated") {
-                    call.respondText("nice authenticated")
-                }
-            }
             post("/confirm") {
-                call.respond(HttpStatusCode.NoContent)
+                withErrorHandler(call) {
+                    val fetchLinkData = confirmationLinkRepository.fetchConfirmationLinkAndUserRecordMapByLink(
+                        call.receive<ConfirmableLink>().link
+                    )
+                    fetchLinkData?.confirmationLink?.let {
+                        if(it.validUntil!! < LocalDateTime.now()) throw BadRequestException("Confirmation link expired")
+                        fetchLinkData.user.let { user ->
+                            if(user.confirmed == "1".toByte()) throw BadRequestException("User already confirmed")
+                            user.confirmed = "1".toByte()
+                            userRepository.updateUser(user)
+                            call.respondJSON("Successful confirmation", HttpStatusCode.OK)
+                        }
+                    } ?: throw NotFoundException("Confirmation link does not exist.")
+                }
             }
             post("/password/reset/request") {
                 call.respond(HttpStatusCode.NoContent)

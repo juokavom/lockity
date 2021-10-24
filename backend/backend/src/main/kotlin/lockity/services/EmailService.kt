@@ -1,6 +1,7 @@
-package lockity.utils
+package lockity.services
 
-import lockity.services.ConfigurationService
+import database.schema.tables.records.ConfirmationLinkRecord
+import lockity.utils.CONFIG
 import org.apache.commons.mail.DefaultAuthenticator
 import org.apache.commons.mail.SimpleEmail
 import javax.mail.*
@@ -16,6 +17,31 @@ class EmailService(
             "prod" -> sendProdEmail(recipient, subject, body)
         }
     }
+
+    //TODO: pakeist i redirectinima i frona ir frontas kvies xmlHttp, del email provideriu galimo CORS konflikto
+    fun confirmRegistrationTemplate(confirmationLinkRecord: ConfirmationLinkRecord) = """
+       <html>
+             <head>
+             </head>
+             <body>
+                 <p>
+                        Please confirm your registration until ${
+        confirmationLinkRecord.validUntil!!.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    } by clicking the following button: <button type="button" onclick="sendConfirm()">confirm registration</button>. See you!
+                 </p>
+             </body>
+             <script>
+                function sendConfirm() {
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("POST", ${configurationService.configValue(CONFIG.FRONTEND_DOMAIN)}/confirm, true);
+                  xhr.setRequestHeader('Content-Type', 'application/json');
+                  xhr.send(JSON.stringify({
+                      link: ${confirmationLinkRecord.link}
+                  }));
+                }
+             </script>
+       </html>
+       """.trimIndent()
 
     fun isEmailValid(email: String): Boolean = Regex(
         "(?:[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*|\"(" +

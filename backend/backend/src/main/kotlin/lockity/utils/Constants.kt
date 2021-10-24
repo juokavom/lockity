@@ -26,6 +26,10 @@ object CONFIG {
     const val EMAIL_PORT = "email.port"
     const val EMAIL_USER = "email.user"
     const val EMAIL_PASSWORD = "email.password"
+
+    const val FRONTEND_DOMAIN = "frontendDomain"
+
+    const val LINK_EXPIRY_MINUTES = "link.expiryMinutes"
 }
 
 object USER {
