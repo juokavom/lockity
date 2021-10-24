@@ -1,10 +1,10 @@
 package lockity
 
 import io.ktor.application.*
-import lockity.Service.ConfigurationService
+import lockity.services.ConfigurationService
 import lockity.plugins.configureRouting
-import lockity.repository.RoleRepository
-import lockity.repository.UserRepository
+import lockity.repositories.RoleRepository
+import lockity.repositories.UserRepository
 import lockity.utils.DatabaseService
 import lockity.utils.EmailService
 import org.koin.core.context.GlobalContext.startKoin

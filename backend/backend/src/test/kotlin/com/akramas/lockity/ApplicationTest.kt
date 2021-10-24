@@ -1,11 +1,5 @@
 package com.akramas.lockity
 
-import io.ktor.http.*
-import io.ktor.server.testing.*
-import lockity.plugins.configureRouting
-import org.junit.Test
-import kotlin.test.assertEquals
-
 class ApplicationTest {
 //    @Test
 //    fun testRoot() {

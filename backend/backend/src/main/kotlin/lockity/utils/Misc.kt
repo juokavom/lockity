@@ -20,4 +20,4 @@ suspend fun ApplicationCall.respondJSON(message: String, httpStatusCode: HttpSta
 
 fun Application.bcryptPassword(password: String) = BCrypt.withDefaults().hashToString(12, password.toCharArray())
 
-fun Application.verifyPassword(input: String, hash: String) = BCrypt.verifyer().verify(input.toCharArray(), hash)
+fun Application.passwordIsCorrect(input: String, hash: String): Boolean = BCrypt.verifyer().verify(input.toCharArray(), hash).verified

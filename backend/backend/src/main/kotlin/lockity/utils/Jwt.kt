@@ -6,7 +6,7 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.http.auth.*
-import lockity.Service.ConfigurationService
+import lockity.services.ConfigurationService
 import org.koin.ktor.ext.inject
 import java.util.*
 
@@ -23,7 +23,7 @@ fun Application.installJwtVerifier() = install(Authentication) {
                     ).build()
                 )
                 validate { credential ->
-                    if (credential.payload.getClaim(USER_ROLE).asString() == it) {
+                    if (credential.payload.getClaim(USER.ROLE).asString() == it) {
                         JWTPrincipal(credential.payload)
                     } else {
                         null
@@ -36,8 +36,8 @@ fun Application.installJwtVerifier() = install(Authentication) {
 fun Application.generateJwtToken(id: String, role: String): String {
     val configurationService: ConfigurationService by inject()
     return JWT.create()
-        .withClaim(USER_ID, id)
-        .withClaim(USER_ROLE, role)
+        .withClaim(USER.ID, id)
+        .withClaim(USER.ROLE, role)
         .withExpiresAt(Date(System.currentTimeMillis() + configurationService.configValue(CONFIG.JWT_SESSION_TIME_MILLIS).toInt()))
         .sign(Algorithm.HMAC256(configurationService.configValue(CONFIG.JWT_SECRET)))
 }

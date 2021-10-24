@@ -1,4 +1,4 @@
-package lockity.Routes
+package lockity.routes
 
 import io.ktor.application.*
 import io.ktor.http.*

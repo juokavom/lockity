@@ -1,4 +1,4 @@
-package lockity.Routes
+package lockity.routes
 
 import database.schema.tables.records.UserRecord
 import io.ktor.application.*
@@ -7,12 +7,14 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.Models.RegistrableUser
-import lockity.repository.RoleRepository
-import lockity.repository.UserRepository
+import lockity.models.RegistrableUser
+import lockity.models.SignInableUser
+import lockity.repositories.RoleRepository
+import lockity.repositories.UserRepository
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
+import java.util.*
 
 fun Application.authRoutes() {
     val emailService: EmailService by inject()
@@ -23,8 +25,29 @@ fun Application.authRoutes() {
     routing {
         route("/auth") {
             post("/login") {
-                call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=${generateJwtToken("877f2dca-373b-4ea2-a2d7-f9f92e180b64", ROLE.ADMIN)}")
-                call.respond(HttpStatusCode.NoContent)
+                withErrorHandler(call) {
+                    val signInUser = call.receive<SignInableUser>()
+                    userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
+                        dbUser[USER.CONFIRMED].let {
+                            if (it == null || it == "0") throw  throw BadRequestException("User is not confirmed.")
+                        }
+                        dbUser[USER.PASSWORD].let { password ->
+                            if (password == null || !passwordIsCorrect(signInUser.password, password)) {
+                                throw BadRequestException("Password is incorrect")
+                            }
+                        }
+                        dbUser[USER.ID]?.let { uid ->
+                            dbUser[USER.ROLE]?.let { urole ->
+                                call.response.header(
+                                    "Set-Cookie",
+                                    "$JWT_COOKIE_NAME=${generateJwtToken(uid, urole)}"
+                                )
+                                userRepository.updateLastActive(UUID.fromString(uid))
+                                call.respondJSON("Login successful", HttpStatusCode.OK)
+                            }
+                        }
+                    } ?: throw BadRequestException("User does not exists.")
+                }
             }
             post("/register") {
                 withErrorHandler(call) {
@@ -33,7 +56,7 @@ fun Application.authRoutes() {
                     if (!userRepository.isEmailUnique(newUser.email)) throw BadRequestException("User exists.")
                     userRepository.insertUser(
                         UserRecord(
-                            id = databaseService.generateBinaryUUID(),
+                            id = databaseService.uuidToBin(),
                             name = newUser.name,
                             surname = newUser.surname,
                             email = newUser.email,

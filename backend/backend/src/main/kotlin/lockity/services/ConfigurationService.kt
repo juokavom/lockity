@@ -1,4 +1,4 @@
-package lockity.Service
+package lockity.services
 
 import io.ktor.application.*
 

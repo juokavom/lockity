@@ -9,8 +9,7 @@ import io.ktor.response.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import lockity.utils.JWT_COOKIE_NAME
-import lockity.utils.USER_ID
-import lockity.utils.USER_ROLE
+import lockity.utils.USER
 
 class RefreshToken(configuration: Configuration) {
     private val jwtSecret = configuration.jwtSecret
@@ -34,13 +33,13 @@ class RefreshToken(configuration: Configuration) {
                     "Set-Cookie",
                     "$JWT_COOKIE_NAME=${
                         generateToken(
-                            decodedJWT.getClaim(USER_ID).asString(),
-                            decodedJWT.getClaim(USER_ROLE).asString()
+                            decodedJWT.getClaim(USER.ID).asString(),
+                            decodedJWT.getClaim(USER.ROLE).asString()
                         )
                     }"
                 )
                 // Update `LastActive` user column
-                lastActive(decodedJWT.getClaim(USER_ID).asString())
+                lastActive(decodedJWT.getClaim(USER.ID).asString())
             } catch (e: TokenExpiredException) {
             } catch (e: SignatureVerificationException) {
             } catch (e: Exception) {

@@ -1,11 +1,7 @@
-package lockity.repository
+package lockity.repositories
 
-import database.schema.tables.records.UserRecord
 import database.schema.tables.references.RoleTable
-import database.schema.tables.references.UserTable
 import lockity.utils.DatabaseService
-import lockity.utils.ROLE
-import java.util.*
 
 class RoleRepository(
     private val databaseService: DatabaseService

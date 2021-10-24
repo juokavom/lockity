@@ -1,6 +1,6 @@
 package lockity.utils
 
-import lockity.Service.ConfigurationService
+import lockity.services.ConfigurationService
 import org.apache.commons.mail.DefaultAuthenticator
 import org.apache.commons.mail.SimpleEmail
 import javax.mail.*

@@ -5,9 +5,9 @@ import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.locations.*
 import io.ktor.routing.*
-import lockity.Routes.*
-import lockity.Service.ConfigurationService
-import lockity.repository.UserRepository
+import lockity.routes.*
+import lockity.services.ConfigurationService
+import lockity.repositories.UserRepository
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
