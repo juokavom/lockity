@@ -14,8 +14,8 @@ fun Application.fileRoutes() {
                 call.respond(HttpStatusCode.OK, "jf3io9f9s9sdfj32111")
             }
             get("/{fileId}") {
-                val rootPath = environment.config.property(CONFIG.ROOT_PATH).getString()
-                val storagePath = environment.config.property(CONFIG.STORAGE).getString()
+                val rootPath = environment.config.property(CONFIG.FILEPATH_ROOT_PATH).getString()
+                val storagePath = environment.config.property(CONFIG.FILEPATH_STORAGE).getString()
                 val file = File("$rootPath$storagePath/sample.mp4")
                 call.respondFile(file)
             }

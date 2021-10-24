@@ -19,8 +19,9 @@ object CONFIG {
     const val DATABASE_USER = "database.user"
     const val DATABASE_PASSWORD = "database.password"
 
-    const val STORAGE = "storage"
-    const val ROOT_PATH = "rootPath"
+    const val FILEPATH_STORAGE = "filePath.storage"
+    const val FILEPATH_ROOT_PATH = "filePath.rootPath"
+    const val FILEPATH_DEFAULT_USER_IMAGE = "filePath.defaultUserImage"
 
     const val EMAIL_HOST = "email.host"
     const val EMAIL_PORT = "email.port"
@@ -34,7 +35,9 @@ object CONFIG {
 
 object USER {
     const val ID = "user.id"
-    const val  ROLE = "user.role"
-    const val  PASSWORD = "user.password"
-    const val  CONFIRMED = "user.confirmed"
+    const val ROLE = "user.role"
+    const val PASSWORD = "user.password"
+    const val CONFIRMED = "user.confirmed"
 }
+
+const val DEFAULT_STORAGE_BYTES = 1_000_000_000L // 1GB

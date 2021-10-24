@@ -11,6 +11,7 @@ import io.ktor.routing.*
 import lockity.models.ConfirmableLink
 import lockity.models.RegistrableUser
 import lockity.models.SignInableUser
+import lockity.models.isValuesValid
 import lockity.repositories.ConfirmationLinkRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
@@ -36,6 +37,7 @@ fun Application.authRoutes() {
             post("/login") {
                 withErrorHandler(call) {
                     val signInUser = call.receive<SignInableUser>()
+                    signInUser.isValuesValid()
                     userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
                         dbUser[USER.CONFIRMED].let {
                             if (it == null || it == "0") throw BadRequestException("User is not confirmed.")
@@ -61,6 +63,7 @@ fun Application.authRoutes() {
             post("/register") {
                 withErrorHandler(call) {
                     val newUser = call.receive<RegistrableUser>()
+                    newUser.isValuesValid()
                     if (!emailService.isEmailValid(newUser.email)) throw BadRequestException("Email is not in correct format.")
                     if (!userRepository.isEmailUnique(newUser.email)) throw BadRequestException("User exists.")
                     val userId = databaseService.uuidToBin()
@@ -74,7 +77,10 @@ fun Application.authRoutes() {
                             role = roleRepository.roleUUID(ROLE.REGISTERED),
                             registered = LocalDateTime.now(),
                             lastActive = LocalDateTime.now(),
-                            confirmed = 0
+                            confirmed = 0,
+                            subscribed = if(newUser.subscribed) "1".toByte() else "0".toByte(),
+                            imagePath = configurationService.configValue(CONFIG.FILEPATH_DEFAULT_USER_IMAGE),
+                            storageSize = DEFAULT_STORAGE_BYTES
                         )
                     )
                     val confirmationLink = ConfirmationLinkRecord(
@@ -113,9 +119,9 @@ fun Application.authRoutes() {
             }
             post("/confirm") {
                 withErrorHandler(call) {
-                    val fetchLinkData = confirmationLinkRepository.fetchConfirmationLinkAndUserRecordMapByLink(
-                        call.receive<ConfirmableLink>().link
-                    )
+                    val link = call.receive<ConfirmableLink>()
+                    link.isValuesValid()
+                    val fetchLinkData = confirmationLinkRepository.fetchConfirmationLinkAndUserRecordMapByLink(link.link)
                     fetchLinkData?.confirmationLink?.let {
                         if(it.validUntil!! < LocalDateTime.now()) throw BadRequestException("Confirmation link expired")
                         fetchLinkData.user.let { user ->
@@ -128,10 +134,10 @@ fun Application.authRoutes() {
                 }
             }
             post("/password/reset/request") {
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NotImplemented)
             }
             post("/password/reset/confirm") {
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NotImplemented)
             }
         }
     }

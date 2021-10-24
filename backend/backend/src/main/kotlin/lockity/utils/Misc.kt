@@ -1,6 +1,7 @@
 package lockity.utils
 
 import at.favre.lib.crypto.bcrypt.BCrypt
+import com.google.gson.JsonSyntaxException
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -10,6 +11,12 @@ import java.util.*
 suspend fun Application.withErrorHandler(call: ApplicationCall, block: suspend (ApplicationCall) -> Unit) {
     try {
         block(call)
+    } catch (e: JsonSyntaxException) {
+        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+    } catch (e: IllegalStateException) {
+        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+    } catch (e: NullPointerException) {
+        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
     } catch (e: BadRequestException) {
         call.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {
