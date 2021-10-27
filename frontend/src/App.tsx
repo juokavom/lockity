@@ -1,13 +1,19 @@
 import React from 'react';
 import './App.css';
-import { SERVER } from './constants';
+import { BrowserRouter } from 'react-router-dom';
+import Main from './components/MainComponent';
+import { CookiesProvider } from 'react-cookie';
+
 
 function App() {
   return (
-    <div className="App">
-      <h1>lima</h1>
-      <h1>{SERVER.URL}</h1>
-    </div>
+    <CookiesProvider>
+      <BrowserRouter>
+        <div>
+          <Main />
+        </div>
+      </BrowserRouter>
+    </CookiesProvider>
   );
 }
 

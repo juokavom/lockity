@@ -21,6 +21,7 @@ fun Application.configureRouting() {
     val configurationService: ConfigurationService by inject()
 
     install(CORS) {
+        allowCredentials = true
         host(
             host = configurationService.configValue(CONFIG.CORS_HOST),
             subDomains = listOf(configurationService.configValue(CONFIG.CORS_SUBDOMAIN)),
