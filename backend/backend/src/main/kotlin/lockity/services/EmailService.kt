@@ -33,7 +33,7 @@ class EmailService(
              <script>
                 function sendConfirm() {
                   var xhr = new XMLHttpRequest();
-                  xhr.open("POST", ${configurationService.configValue(CONFIG.FRONTEND_DOMAIN)}/confirm, true);
+                  xhr.open("POST", ${configurationService.configValue(CONFIG.CORS_HOST)}/confirm, true);
                   xhr.setRequestHeader('Content-Type', 'application/json');
                   xhr.send(JSON.stringify({
                       link: ${confirmationLinkRecord.link}

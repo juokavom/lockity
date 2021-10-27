@@ -28,7 +28,9 @@ object CONFIG {
     const val EMAIL_USER = "email.user"
     const val EMAIL_PASSWORD = "email.password"
 
-    const val FRONTEND_DOMAIN = "frontendDomain"
+    const val CORS_HOST = "cors.host"
+    const val CORS_SCHEME = "cors.scheme"
+    const val CORS_SUBDOMAIN = "cors.subDomain"
 
     const val LINK_EXPIRY_MINUTES = "link.expiryMinutes"
 }

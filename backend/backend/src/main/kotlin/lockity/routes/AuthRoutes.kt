@@ -3,6 +3,7 @@ package lockity.routes
 import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -131,6 +132,19 @@ fun Application.authRoutes() {
                             call.respondJSON("Successful confirmation", HttpStatusCode.OK)
                         }
                     } ?: throw NotFoundException("Confirmation link does not exist.")
+                }
+            }
+            get("/simple") {
+                call.respond("Just simple!")
+            }
+            authenticate(AUTHENTICATED) {
+                get("/authenticated") {
+                    call.respond("Nice authed!")
+                }
+            }
+            authenticate(ROLE.ADMIN) {
+                get("/admin") {
+                    call.respond("Nice authed admin!")
                 }
             }
             post("/password/reset/request") {
