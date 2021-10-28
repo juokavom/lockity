@@ -6,6 +6,7 @@ import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import lockity.services.JwtService
 import lockity.services.setResponseJwtCookieHeader
+import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.JWT_COOKIE_NAME
 import lockity.utils.USER
 
@@ -29,6 +30,8 @@ class RefreshToken(configuration: Configuration) {
                 )
                 // Update `LastActive` user column
                 lastActive(decodedJWT.getClaim(USER.ID).asString())
+            } else {
+                context.call.unsetResponseJwtCookieHeader()
             }
         }
     }

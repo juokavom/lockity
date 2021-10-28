@@ -74,7 +74,7 @@ fun Application.authRoutes() {
                             registered = LocalDateTime.now(),
                             lastActive = LocalDateTime.now(),
                             confirmed = 0,
-                            subscribed = if(newUser.subscribed) "1".toByte() else "0".toByte(),
+                            subscribed = if (newUser.subscribed) "1".toByte() else "0".toByte(),
                             imagePath = configurationService.configValue(CONFIG.FILEPATH_DEFAULT_USER_IMAGE),
                             storageSize = DEFAULT_STORAGE_BYTES
                         )
@@ -103,22 +103,20 @@ fun Application.authRoutes() {
             }
             post("/logout") {
                 withErrorHandler(call) {
-                    val jwt = call.request.cookies[JWT_COOKIE_NAME]
-                    if (jwt != null && jwtService.isValidToken(jwt)) {
-                        call.unsetResponseJwtCookieHeader()
-                        call.respondJSON("Successful logout", HttpStatusCode.OK)
-                    }
+                    call.unsetResponseJwtCookieHeader()
+                    call.respondJSON("Successful logout", HttpStatusCode.OK)
                 }
             }
             post("/confirm") {
                 withErrorHandler(call) {
                     val link = call.receive<ConfirmableLink>()
                     link.isValuesValid()
-                    val fetchLinkData = confirmationLinkRepository.fetchConfirmationLinkAndUserRecordMapByLink(link.link)
+                    val fetchLinkData =
+                        confirmationLinkRepository.fetchConfirmationLinkAndUserRecordMapByLink(link.link)
                     fetchLinkData?.confirmationLink?.let {
-                        if(it.validUntil!! < LocalDateTime.now()) throw BadRequestException("Confirmation link expired")
+                        if (it.validUntil!! < LocalDateTime.now()) throw BadRequestException("Confirmation link expired")
                         fetchLinkData.user.let { user ->
-                            if(user.confirmed == "1".toByte()) throw BadRequestException("User already confirmed")
+                            if (user.confirmed == "1".toByte()) throw BadRequestException("User already confirmed")
                             user.confirmed = "1".toByte()
                             userRepository.updateUser(user)
                             call.respondJSON("Successful confirmation", HttpStatusCode.OK)
