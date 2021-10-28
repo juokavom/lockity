@@ -43,9 +43,13 @@ class JwtService(
 
 fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {
     val jwtService: JwtService by inject()
+    val configurationService: ConfigurationService by inject()
+
     this.response.header(
         "Set-Cookie", "$JWT_COOKIE_NAME=${
             jwtService.generateToken(id, role)
+        }; Max-Age=${
+            configurationService.configValue(CONFIG.JWT_SESSION_TIME_MILLIS).toInt() / 1000
         }; Secure; Path=/; HttpOnly"
     )
 }
