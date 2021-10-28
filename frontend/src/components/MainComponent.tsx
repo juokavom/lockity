@@ -7,6 +7,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Newsletter from './NewsletterComponent';
 import Login from './Auth/LoginComponent';
 import Cookies from 'universal-cookie';
+import Logout from './Auth/LogoutComponent';
 
 function Main() {
 
@@ -37,6 +38,7 @@ function Main() {
         <div>
             <Switch>
                 <Route exact path="/login" component={() => <Login />} />
+                <Route exact path="/logout" component={() => <Logout />} />
                 <Route exact path="/files" component={() => <Files />} />
                 <Route exact path="/upload" component={() => <Upload />} />
                 <Route exact path="/usersettings" component={() => <UserSettings />} />

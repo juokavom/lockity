@@ -16,10 +16,7 @@ import lockity.models.isValuesValid
 import lockity.repositories.ConfirmationLinkRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
-import lockity.services.ConfigurationService
-import lockity.services.EmailService
-import lockity.services.JwtService
-import lockity.services.setResponseJwtCookieHeader
+import lockity.services.*
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
@@ -108,11 +105,8 @@ fun Application.authRoutes() {
                 withErrorHandler(call) {
                     val jwt = call.request.cookies[JWT_COOKIE_NAME]
                     if (jwt != null && jwtService.isValidToken(jwt)) {
-                        call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=")
+                        call.unsetResponseJwtCookieHeader()
                         call.respondJSON("Successful logout", HttpStatusCode.OK)
-                    } else {
-                        call.response.header("Set-Cookie", "$JWT_COOKIE_NAME=")
-                        throw BadRequestException("User already logged out")
                     }
                 }
             }

@@ -54,6 +54,10 @@ fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {
     )
 }
 
+fun ApplicationCall.unsetResponseJwtCookieHeader() {
+    this.response.header("Set-Cookie", "$JWT_COOKIE_NAME=; Secure; Path=/; HttpOnly")
+}
+
 fun Application.installJwtVerifier() = install(Authentication) {
     val configurationService: ConfigurationService by inject()
     listOf(ROLE.ADMIN, ROLE.REGISTERED, ROLE.VIP).map {
