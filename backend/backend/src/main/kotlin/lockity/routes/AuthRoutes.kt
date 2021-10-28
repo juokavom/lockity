@@ -19,6 +19,7 @@ import lockity.repositories.UserRepository
 import lockity.services.ConfigurationService
 import lockity.services.EmailService
 import lockity.services.JwtService
+import lockity.services.setResponseJwtCookieHeader
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
@@ -50,10 +51,7 @@ fun Application.authRoutes() {
                         }
                         dbUser[USER.ID]?.let { uid ->
                             dbUser[USER.ROLE]?.let { urole ->
-                                call.response.header(
-                                    "Set-Cookie",
-                                    "$JWT_COOKIE_NAME=${jwtService.generateToken(uid, urole)}"
-                                )
+                                call.setResponseJwtCookieHeader(uid, urole)
                                 userRepository.updateLastActive(UUID.fromString(uid))
                                 call.respondJSON("Login successful", HttpStatusCode.OK)
                             }

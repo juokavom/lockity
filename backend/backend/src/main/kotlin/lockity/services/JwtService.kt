@@ -8,6 +8,7 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.http.auth.*
+import io.ktor.response.*
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
@@ -40,6 +41,14 @@ class JwtService(
         .sign(Algorithm.HMAC256(configurationService.configValue(CONFIG.JWT_SECRET)))
 }
 
+fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {
+    val jwtService: JwtService by inject()
+    this.response.header(
+        "Set-Cookie", "$JWT_COOKIE_NAME=${
+            jwtService.generateToken(id, role)
+        }; Secure; Path=/; HttpOnly"
+    )
+}
 
 fun Application.installJwtVerifier() = install(Authentication) {
     val configurationService: ConfigurationService by inject()
