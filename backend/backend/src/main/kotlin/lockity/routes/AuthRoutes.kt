@@ -9,10 +9,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.models.ConfirmableLink
-import lockity.models.RegistrableUser
-import lockity.models.SignInableUser
-import lockity.models.isValuesValid
+import lockity.models.*
 import lockity.repositories.ConfirmationLinkRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
@@ -50,7 +47,9 @@ fun Application.authRoutes() {
                             dbUser[USER.ROLE]?.let { urole ->
                                 call.setResponseJwtCookieHeader(uid, urole)
                                 userRepository.updateLastActive(UUID.fromString(uid))
-                                call.respondJSON("Login successful", HttpStatusCode.OK)
+                                userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
+                                    call.respond(HttpStatusCode.OK, FrontendUser.fromRecordAndRole(userRecord, urole))
+                                }
                             }
                         }
                     } ?: throw NotFoundException("User does not exists.")

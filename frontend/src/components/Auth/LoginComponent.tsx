@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { ENDPOINTS } from "../../shared/constants";
+import { Props } from "../MainComponent";
 
-export default function Login() {
+export default function Login(props: Props) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -13,20 +13,12 @@ export default function Login() {
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
-        const response = await fetch(ENDPOINTS.AUTH.login, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        });
-        console.log('response = ', response);
+        await props.login(email, password)
     }
+
+    useEffect(() => {
+        console.log('logged user = ', props.auth.user)
+    }, [props.auth]);
 
     return (
         <div className="Login">

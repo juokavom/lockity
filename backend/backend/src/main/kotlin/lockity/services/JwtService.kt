@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
+import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.response.*
 import lockity.utils.*
@@ -74,6 +75,7 @@ fun Application.installJwtVerifier() = install(Authentication) {
                 if (credential.payload.getClaim(USER.ROLE).asString() == it) {
                     JWTPrincipal(credential.payload)
                 } else {
+                    this.respondJSON("User does not have permission", HttpStatusCode.Forbidden)
                     null
                 }
             }
@@ -93,7 +95,10 @@ fun Application.installJwtVerifier() = install(Authentication) {
                 ROLE.ADMIN,
                 ROLE.REGISTERED,
                 ROLE.VIP -> JWTPrincipal(credential.payload)
-                else -> null
+                else -> {
+                    this.respondJSON("User not authenticated", HttpStatusCode.Unauthorized)
+                    null
+                }
             }
         }
     }

@@ -1,43 +1,34 @@
-import React, { Component } from 'react';
 import Files from './FilesComponent';
 import Upload from './UploadComponent';
 import UserSettings from './UserSettingsComponent';
 import Users from './UsersComponent';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { connect, ConnectedProps } from 'react-redux';
 import Newsletter from './NewsletterComponent';
-import Login from './Auth/LoginComponent';
-import Cookies from 'universal-cookie';
-import Logout from './Auth/LogoutComponent';
+import Login from './auth/LoginComponent';
+import Logout from './auth/LogoutComponent';
+import { LoginAction } from '../redux/ActionCreators';
 
-function Main() {
 
-    // const HomePage = () => {
-    //     return (
-    //         <Home dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
-    //             dishesLoading={this.props.dishes.isLoading}
-    //             dishesErrMess={this.props.dishes.errMess}
-    //             promotion={this.props.promotions.promotions.filter((promo) => promo.featured)[0]}
-    //             promoLoading={this.props.promotions.isLoading}
-    //             promoErrMess={this.props.promotions.errMess}
-    //             leader={this.props.leaders.leaders.filter((leader) => leader.featured)[0]}
-    //             leaderLoading={this.props.leaders.isLoading}
-    //             leaderErrMess={this.props.leaders.errMess}
-    //         />
-    //     );
-    // }
+const mapStateToProps = (state: any) => {
+    return {
+        auth: state.auth
+    };
+}
 
-    // const [jwtCookie, setCookie, removeCookie] = useCookies(['jwt']);
+const mapDispatchToProps = (dispatch: any) => ({
+    login: (email: string, password: string) => dispatch(LoginAction(email, password))
+})
 
-    // setCookie("jwt", "assasasas")
-    // console.log('jwt cookie = ', jwtCookie.jwt)
+const connector = connect(mapStateToProps, mapDispatchToProps)
 
-    // const cookies = new Cookies();
-    // console.log(cookies.get('jwt', { path: '/auth' }))
+export type Props = ConnectedProps<typeof connector>
 
+function Main(props: Props) {
     return (
         <div>
             <Switch>
-                <Route exact path="/login" component={() => <Login />} />
+                <Route exact path="/login" component={() => <Login {...props} />} />
                 <Route exact path="/logout" component={() => <Logout />} />
                 <Route exact path="/files" component={() => <Files />} />
                 <Route exact path="/upload" component={() => <Upload />} />
@@ -49,4 +40,4 @@ function Main() {
         </div>
     );
 }
-export default Main;
+export default withRouter(connector(Main));

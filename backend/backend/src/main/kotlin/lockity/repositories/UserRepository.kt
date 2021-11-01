@@ -26,7 +26,12 @@ class UserRepository(
         .set(userRecord)
         .execute()
 
-    fun fetch(): List<UserRecord> = databaseService.dsl
+    fun fetch(uuid: UUID): UserRecord? = databaseService.dsl
+        .selectFrom(UserTable)
+        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .fetchOne()
+
+    fun fetchAll(): List<UserRecord> = databaseService.dsl
         .selectFrom(UserTable)
         .fetchArray()
         .toList()

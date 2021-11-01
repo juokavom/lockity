@@ -1,19 +1,18 @@
-import React from 'react';
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import Main from './components/MainComponent';
-import { CookiesProvider } from 'react-cookie';
-
+import { Provider } from 'react-redux';
+import { ConfigureStore } from './redux/ConfigureStore';
 
 function App() {
   return (
-    <CookiesProvider>
+    <Provider store={ConfigureStore()}>
       <BrowserRouter>
         <div>
           <Main />
         </div>
       </BrowserRouter>
-    </CookiesProvider>
+    </Provider>
   );
 }
 

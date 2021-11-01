@@ -1,7 +1,5 @@
-import { useState } from "react";
-import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { ENDPOINTS } from "../../shared/constants";
+import { ENDPOINTS } from "../../models/Server";
 
 export default function Logout() {
     const handleLogout = async () => {        
