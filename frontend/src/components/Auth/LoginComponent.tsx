@@ -1,11 +1,32 @@
 import { useState } from "react";
+import './Login.scss';
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import Button from '@mui/material/Button';
 import { DefaultToastOptions, RequestBuilder } from "../../models/RequestBuilder";
 import { ENDPOINTS } from "../../models/Server";
 import { User } from "../../models/User";
 import { toast } from "react-toastify";
 import { ROUTES } from "../../models/Routes";
+import TextField from '@mui/material/TextField';
+import { Box, Checkbox, Grid } from "@mui/material";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import Link from '@mui/material/Link';
+
+function Copyright(prop: any) {
+    return (
+        <Typography variant="body2" color="text.secondary" align="center" {...prop}>
+            {'Copyright © '}
+            <Link color="inherit" href="https://lockity.akramas.com/">
+                Lockity
+            </Link>{' '}
+            {new Date().getFullYear()}
+            {'.'}
+        </Typography>
+    );
+}
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -29,37 +50,69 @@ export default function Login() {
                 email: email,
                 password: password
             })
-            .send((loggedUser: User.FrontendUser) => {               
-                toast.success('Login successful', DefaultToastOptions)      
-                localStorage.setItem(User.storagename, JSON.stringify(loggedUser))   
+            .send((loggedUser: User.FrontendUser) => {
+                toast.success('Login successful', DefaultToastOptions)
+                localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
                 window.location.replace(ROUTES.DEFAULT)
             })
     };
 
     return (
-        <div className="Login">
-            <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="email" >
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                        autoFocus
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </Form.Group>
-                <Form.Group controlId="password">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </Form.Group>
-                <Button type="submit" disabled={!validateForm()}>
-                    Login
-                </Button>
-            </Form>
-        </div >
+        <div>
+            <div className="backImage"></div>
+            <div className="spinner" >
+                <div>
+                    <Typography align="center" component="h1" variant="h5">
+                        Log in
+                    </Typography>
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Password"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                            disabled={!validateForm()}
+                        >
+                            Sign In
+                        </Button>
+                        <Grid container>
+                            <Grid item xs>
+                                <Link href="#" variant="body2">
+                                    Forgot password?
+                                </Link>
+                            </Grid>
+                            <Grid item>
+                                <Link href="#" variant="body2">
+                                    {"Sign up"}
+                                </Link>
+                            </Grid>
+                        </Grid>
+                        <Copyright sx={{ mt: 5 }} />
+                    </Box>
+                </div>
+            </div >
+        </div>
     );
 }

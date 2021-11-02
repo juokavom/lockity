@@ -18,8 +18,6 @@ function Main() {
         if (localStorageUser) setUser(JSON.parse(localStorageUser))
     }, [])
 
-    console.log('user = ', user)
-
     return (
         <div>
             <Switch>
