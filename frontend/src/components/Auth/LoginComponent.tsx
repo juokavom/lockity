@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { Props } from "../MainComponent";
+import { DefaultToastOptions, RequestBuilder } from "../../models/RequestBuilder";
+import { ENDPOINTS } from "../../models/Server";
+import { User } from "../../models/User";
+import { toast } from "react-toastify";
+import { ROUTES } from "../../models/Routes";
 
-export default function Login(props: Props) {
+export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -13,12 +17,24 @@ export default function Login(props: Props) {
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
-        await props.login(email, password)
+        await LoginAction(email, password)
     }
 
-    useEffect(() => {
-        console.log('logged user = ', props.auth.user)
-    }, [props.auth]);
+    const LoginAction = async (email: string, password: string) => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.AUTH.login)
+            .withMethod('POST')
+            .withDefaults()
+            .withBody({
+                email: email,
+                password: password
+            })
+            .send((loggedUser: User.FrontendUser) => {               
+                toast.success('Login successful', DefaultToastOptions)      
+                localStorage.setItem(User.storagename, JSON.stringify(loggedUser))   
+                window.location.replace(ROUTES.DEFAULT)
+            })
+    };
 
     return (
         <div className="Login">
@@ -44,6 +60,6 @@ export default function Login(props: Props) {
                     Login
                 </Button>
             </Form>
-        </div>
+        </div >
     );
 }

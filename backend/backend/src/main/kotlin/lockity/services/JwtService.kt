@@ -10,6 +10,8 @@ import io.ktor.auth.jwt.*
 import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.response.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
@@ -64,7 +66,14 @@ fun Application.installJwtVerifier() = install(Authentication) {
     listOf(ROLE.ADMIN, ROLE.REGISTERED, ROLE.VIP).map {
         jwt(it) {
             authHeader { call ->
-                parseAuthorizationHeader("Bearer ${call.request.cookies[JWT_COOKIE_NAME] ?: ""}")
+                val jwtCookie = call.request.cookies[JWT_COOKIE_NAME]
+                if (jwtCookie == null || jwtCookie == "") {
+                    runBlocking {
+                        call.respondJSON("User not authenticated", HttpStatusCode.Unauthorized)
+                    }
+                    return@authHeader null
+                }
+                parseAuthorizationHeader("Bearer $jwtCookie")
             }
             verifier(
                 JWT.require(
@@ -83,7 +92,14 @@ fun Application.installJwtVerifier() = install(Authentication) {
     }
     jwt(AUTHENTICATED) {
         authHeader { call ->
-            parseAuthorizationHeader("Bearer ${call.request.cookies[JWT_COOKIE_NAME] ?: ""}")
+            val jwtCookie = call.request.cookies[JWT_COOKIE_NAME]
+            if (jwtCookie == null || jwtCookie == "") {
+                runBlocking {
+                    call.respondJSON("User not authenticated", HttpStatusCode.Unauthorized)
+                }
+                return@authHeader null
+            }
+            parseAuthorizationHeader("Bearer $jwtCookie")
         }
         verifier(
             JWT.require(

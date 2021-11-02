@@ -1,9 +1,7 @@
-function Files() {
+export default function Files() {
     return (
-        <div> 
+        <div>
             <h1>TAKE ME FILE</h1>
         </div>
     );
 }
-
-export default Files;

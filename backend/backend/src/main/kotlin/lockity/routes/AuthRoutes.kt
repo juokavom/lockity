@@ -124,16 +124,16 @@ fun Application.authRoutes() {
                 }
             }
             get("/simple") {
-                call.respond("Just simple!")
+                call.respondJSON("Just simple!", HttpStatusCode.OK)
             }
             authenticate(AUTHENTICATED) {
                 get("/authenticated") {
-                    call.respond("Nice authed!")
+                    call.respondJSON("Nice authed!", HttpStatusCode.OK)
                 }
             }
             authenticate(ROLE.ADMIN) {
                 get("/admin") {
-                    call.respond("Nice authed admin!")
+                    call.respondJSON("Nice authed admin!", HttpStatusCode.OK)
                 }
             }
             post("/password/reset/request") {
