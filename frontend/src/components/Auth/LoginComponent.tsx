@@ -28,7 +28,7 @@ function Copyright(prop: any) {
     );
 }
 
-export default function Login() {
+function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -75,7 +75,7 @@ export default function Login() {
                             name="email"
                             autoComplete="email"
                             autoFocus
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e: any) => setEmail(e.target.value)}
                         />
                         <TextField
                             margin="normal"
@@ -86,7 +86,7 @@ export default function Login() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e: any) => setPassword(e.target.value)}
                         />
                         <Button
                             type="submit"
@@ -116,3 +116,5 @@ export default function Login() {
         </div>
     );
 }
+
+export default Login;
