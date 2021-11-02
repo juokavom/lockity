@@ -8,6 +8,7 @@ import Newsletter from './NewsletterComponent';
 import Login from './auth/LoginComponent';
 import Logout from './auth/LogoutComponent';
 import { LoginAction } from '../redux/ActionCreators';
+import { ROUTES } from '../models/Routes';
 
 
 const mapStateToProps = (state: any) => {
@@ -28,14 +29,14 @@ function Main(props: Props) {
     return (
         <div>
             <Switch>
-                <Route exact path="/login" component={() => <Login {...props} />} />
-                <Route exact path="/logout" component={() => <Logout />} />
-                <Route exact path="/files" component={() => <Files />} />
-                <Route exact path="/upload" component={() => <Upload />} />
-                <Route exact path="/usersettings" component={() => <UserSettings />} />
-                <Route exact path="/users" component={() => <Users />} />
-                <Route exact path="/newsletter" component={() => <Newsletter />} />
-                <Redirect to="/files" />
+                <Route exact path={ROUTES.login} component={() => <Login {...props} />} />
+                <Route exact path={ROUTES.logout} component={() => <Logout />} />
+                <Route exact path={ROUTES.files} component={() => <Files />} />
+                <Route exact path={ROUTES.upload} component={() => <Upload />} />
+                <Route exact path={ROUTES.userSettings} component={() => <UserSettings />} />
+                <Route exact path={ROUTES.users} component={() => <Users />} />
+                <Route exact path={ROUTES.newsletter} component={() => <Newsletter />} />
+                <Redirect to={ROUTES.DEFAULT} />
             </Switch>
         </div>
     );

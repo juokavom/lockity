@@ -20,20 +20,20 @@ class RefreshToken(configuration: Configuration) {
     }
 
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
-//        context.call.request.cookies[JWT_COOKIE_NAME]?.let{
-//            if(jwtService.isValidToken(it)) {
-//                val decodedJWT = JWT.decode(it)
-//                // Refresh JWT token
-//                context.call.setResponseJwtCookieHeader(
-//                    decodedJWT.getClaim(USER.ID).asString(),
-//                    decodedJWT.getClaim(USER.ROLE).asString()
-//                )
-//                // Update `LastActive` user column
-//                lastActive(decodedJWT.getClaim(USER.ID).asString())
-//            } else {
-//                context.call.unsetResponseJwtCookieHeader()
-//            }
-//        }
+        context.call.request.cookies[JWT_COOKIE_NAME]?.let{
+            if(jwtService.isValidToken(it)) {
+                val decodedJWT = JWT.decode(it)
+                // Refresh JWT token
+                context.call.setResponseJwtCookieHeader(
+                    decodedJWT.getClaim(USER.ID).asString(),
+                    decodedJWT.getClaim(USER.ROLE).asString()
+                )
+                // Update `LastActive` user column
+                lastActive(decodedJWT.getClaim(USER.ID).asString())
+            } else {
+                context.call.unsetResponseJwtCookieHeader()
+            }
+        }
     }
 
     companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, RefreshToken> {
