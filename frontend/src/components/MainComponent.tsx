@@ -33,4 +33,4 @@ function Main() {
         </div>
     );
 }
-export default withRouter(Main);
+export default Main;
