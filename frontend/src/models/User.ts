@@ -6,9 +6,10 @@ export namespace User {
         Registered = "Registered"
     }
 
-    export const isRole = (role: Role, input: string) => role === input
+    export const isAuthed = (input: Role) => input === Role.Admin || input === Role.Registered
+    export const isAdmin = (input: Role) => input === Role.Admin
         
-    export type FrontendUser = {
+    export interface FrontendUser {
         name: string;
         surname: string;
         email: string;

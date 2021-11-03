@@ -1,6 +1,5 @@
 import { useState } from "react";
 import './Login.scss';
-import Form from "react-bootstrap/Form";
 import Button from '@mui/material/Button';
 import { DefaultToastOptions, RequestBuilder } from "../../models/RequestBuilder";
 import { ENDPOINTS } from "../../models/Server";
@@ -8,10 +7,7 @@ import { User } from "../../models/User";
 import { toast } from "react-toastify";
 import { ROUTES } from "../../models/Routes";
 import TextField from '@mui/material/TextField';
-import { Box, Checkbox, Grid } from "@mui/material";
-import FormControlLabel from '@mui/material/FormControlLabel';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Avatar from '@mui/material/Avatar';
+import { Box , Grid } from "@mui/material";
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 

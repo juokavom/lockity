@@ -7,5 +7,5 @@ export namespace ROUTES {
     export const newsletter = '/newsletter'
 
     export const test = '/test'
-    export const DEFAULT = files
+    export const DEFAULT = upload
 }
