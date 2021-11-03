@@ -4,7 +4,7 @@ import UserSettings from './UserSettingsComponent';
 import Users from './UsersComponent';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import Newsletter from './NewsletterComponent';
-import Login from './auth/LoginComponent';
+import Login from './eyo/LoginComponent';
 import { ROUTES } from '../models/Routes';
 import { useEffect, useState } from 'react';
 import { User } from '../models/User';
