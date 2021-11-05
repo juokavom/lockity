@@ -1,14 +1,15 @@
-import Files from './FilesComponent';
-import Upload from './UploadComponent';
-import UserSettings from './UserSettingsComponent';
-import Users from './UsersComponent';
+import Files from '../FilesPage';
+import Upload from '../upload/UploadPage';
+import UserSettings from '../UserSettings';
+import Users from '../UsersPage';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import Newsletter from './NewsletterComponent';
-import Login from './login/LoginComponent';
-import { ROUTES } from '../models/Routes';
+import Newsletter from '../NewsletterPage';
+import Login from '../login/LoginPage';
+import { ROUTES } from '../../model/Routes';
 import { useState } from 'react';
-import { User } from '../models/User';
-import Test from './TestComponent';
+import { User } from '../../model/User';
+import Test from '../TestPage';
+import './Main.scss';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -26,11 +27,11 @@ function Main() {
     return (
         <div>
             <Switch>
-                {isAdmin ? <Route exact path={ROUTES.users} component={() => <Users />} /> : null}
-                {isAdmin ? <Route exact path={ROUTES.newsletter} component={() => <Newsletter />} /> : null}
+                <Route exact path={ROUTES.users} component={() => isAdmin ? <Users /> : <Login />} />
+                <Route exact path={ROUTES.newsletter} component={() => isAdmin ? <Newsletter /> : <Login />} />
 
-                {isAuthed ? <Route exact path={ROUTES.files} component={() => <Files />} /> : null}
-                {isAuthed ? <Route exact path={ROUTES.userSettings} component={() => <UserSettings />} /> : null}
+                <Route exact path={ROUTES.files} component={() => isAuthed ? <Files /> : <Login />} />
+                <Route exact path={ROUTES.userSettings} component={() => isAuthed? <UserSettings /> : <Login /> } />
 
                 <Route exact path={ROUTES.login} component={() => <Login />} />
                 <Route exact path={ROUTES.upload} component={() => <Upload />} />

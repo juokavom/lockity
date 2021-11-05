@@ -1,11 +1,11 @@
 import { useState } from "react";
 import './Login.scss';
 import Button from '@mui/material/Button';
-import { DefaultToastOptions, RequestBuilder } from "../../models/RequestBuilder";
-import { ENDPOINTS } from "../../models/Server";
-import { User } from "../../models/User";
+import { DefaultToastOptions, RequestBuilder } from "../../model/RequestBuilder";
+import { ENDPOINTS } from "../../model/Server";
+import { User } from "../../model/User";
 import { toast } from "react-toastify";
-import { ROUTES } from "../../models/Routes";
+import { ROUTES } from "../../model/Routes";
 import TextField from '@mui/material/TextField';
 import { Box , Grid } from "@mui/material";
 import Typography from '@mui/material/Typography';
@@ -56,7 +56,7 @@ function Login() {
     return (
         <div>
             <div className="backImage"></div>
-            <div className="spinner" >
+            <div className="loginspinner" >
                 <div>
                     <Typography align="center" component="h1" variant="h5">
                         Log in

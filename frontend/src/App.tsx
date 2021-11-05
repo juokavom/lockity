@@ -1,8 +1,9 @@
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
-import Main from './components/MainComponent';
+import Main from './page/main/MainPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
   return (

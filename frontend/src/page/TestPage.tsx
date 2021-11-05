@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-import { SimpleAction, RegisteredAction, AdminAction, LogoutAction } from "../models/RequestActions";
+import { SimpleAction, RegisteredAction, AdminAction, LogoutAction } from "../model/RequestActions";
 
 export default function Test() {
     return (

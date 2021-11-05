@@ -3,7 +3,7 @@ body {
 }
 
 .backImage {    
-    background-image: url('https://thumbs.gfycat.com/OccasionalDamagedIggypops-size_restricted.gif');
+    background: url('https://thumbs.gfycat.com/OccasionalDamagedIggypops-size_restricted.gif')  no-repeat center center fixed;
     background-size: cover;
     filter: blur(12px);
     -webkit-filter: blur(12px);
@@ -24,7 +24,7 @@ body {
     }
 }
 
-.spinner {
+.loginspinner {
     padding: 40px;
     display: flex;
     justify-content: center;
