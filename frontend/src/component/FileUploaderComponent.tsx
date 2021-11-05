@@ -31,7 +31,7 @@ export default function FileUploader() {
                         </div>
                         <aside className="selected-file-wrapper">
                             <button
-                                className="btn btn-success"
+                                className="upload-button"
                                 disabled={!file}
                                 onClick={upload}
                             >

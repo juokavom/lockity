@@ -7,14 +7,14 @@ import { User } from "../../model/User";
 import { toast } from "react-toastify";
 import { ROUTES } from "../../model/Routes";
 import TextField from '@mui/material/TextField';
-import { Box , Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 
-function Copyright(prop: any) {
+export function Copyright(prop: any) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...prop}>
-            {'Copyright © '}
+            {'© '}
             <Link color="inherit" href="https://lockity.akramas.com/">
                 Lockity
             </Link>{' '}
@@ -81,7 +81,7 @@ function Login() {
                             label="Password"
                             type="password"
                             id="password"
-                            autoComplete="current-password"
+                            autoComplete="password"
                             onChange={(e: any) => setPassword(e.target.value)}
                         />
                         <Button
@@ -105,7 +105,16 @@ function Login() {
                                 </Link>
                             </Grid>
                         </Grid>
-                        <Copyright sx={{ mt: 5 }} />
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                            style={{color: "#ebf0f"}}
+                            onClick={() => window.location.replace(ROUTES.upload)}
+                        >
+                            Proceed to upload page
+                        </Button>
+                        <Copyright sx={{ mt: 2 }} />
                     </Box>
                 </div>
             </div >
