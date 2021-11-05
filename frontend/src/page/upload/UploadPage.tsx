@@ -15,7 +15,7 @@ function Upload() {
                             <div className="float-welcome">
                                 <p>
                                     This is a platform for file storing and sharing. Here you can upload
-                                    your file and select sharing method either by link or email.
+                                    your file and select sharing method either by a link or email.
                                 </p>
                             </div>
                             <div className="float-login">
@@ -41,7 +41,7 @@ function Upload() {
                             Please consider signing in to unlock full features of the platform, such as
                             easier file management and playback in browser!
                         </p>
-                        <Copyright sx={{ mt: 5 }} />
+                        <Copyright sx={{ mt: 3 }} />
                     </div>
                 </div>
             </div>
