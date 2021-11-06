@@ -1,4 +1,4 @@
-import { Button } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { SimpleAction, RegisteredAction, AdminAction, LogoutAction } from "../model/RequestActions";
 
 export default function Test() {
