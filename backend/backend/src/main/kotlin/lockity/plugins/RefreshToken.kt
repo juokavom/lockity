@@ -20,16 +20,13 @@ class RefreshToken(configuration: Configuration) {
     }
 
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
-        context.call.request.cookies[JWT_COOKIE_NAME]?.let{
-            if(jwtService.isValidToken(it)) {
-                val decodedJWT = JWT.decode(it)
+        context.call.request.cookies[JWT_COOKIE_NAME]?.let {
+            if (jwtService.isValidToken(it)) {
+                val jwtClaims = jwtService.getJwtClaims(it)
                 // Refresh JWT token
-                context.call.setResponseJwtCookieHeader(
-                    decodedJWT.getClaim(USER.ID).asString(),
-                    decodedJWT.getClaim(USER.ROLE).asString()
-                )
+                context.call.setResponseJwtCookieHeader(jwtClaims.userId, jwtClaims.role)
                 // Update `LastActive` user column
-                lastActive(decodedJWT.getClaim(USER.ID).asString())
+                lastActive(jwtClaims.userId)
             } else {
                 context.call.unsetResponseJwtCookieHeader()
             }

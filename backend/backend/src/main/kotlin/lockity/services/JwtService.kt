@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.SignatureVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
+import database.schema.tables.records.UserRecord
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -12,9 +13,13 @@ import io.ktor.http.auth.*
 import io.ktor.response.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import lockity.repositories.UserRepository
+import lockity.routes.User
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
+
+data class JwtClaims(val userId: String, val role: String)
 
 class JwtService(
     private val configurationService: ConfigurationService
@@ -32,6 +37,14 @@ class JwtService(
         return true
     }
 
+    fun getJwtClaims(token: String): JwtClaims = JWT.decode(token).let { jwt ->
+        JwtClaims(
+            jwt.getClaim(USER.ID).asString(),
+            jwt.getClaim(USER.ROLE).asString()
+        )
+    }
+
+
     fun generateToken(id: String, role: String): String = JWT.create()
         .withClaim(USER.ID, id)
         .withClaim(USER.ROLE, role)
@@ -42,6 +55,15 @@ class JwtService(
             )
         )
         .sign(Algorithm.HMAC256(configurationService.configValue(CONFIG.JWT_SECRET)))
+}
+
+fun ApplicationCall.jwtUser(): UserRecord? {
+    val userRepository: UserRepository by inject()
+    val jwtService: JwtService by inject()
+
+    return this.request.cookies[JWT_COOKIE_NAME]?.let {
+        userRepository.fetch(UUID.fromString(jwtService.getJwtClaims(it).toString()))
+    }
 }
 
 fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {

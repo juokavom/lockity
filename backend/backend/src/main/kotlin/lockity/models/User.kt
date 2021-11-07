@@ -2,9 +2,8 @@ package lockity.models
 
 import database.schema.tables.records.UserRecord
 import io.ktor.features.*
-import lockity.utils.ROLE
 
-data class RegistrableUser(
+open class RegistrableUser(
     val name: String?,
     val surname: String?,
     val email: String,
@@ -13,13 +12,13 @@ data class RegistrableUser(
 )
 
 class FrontendUser(
-    val name: String?,
-    val surname: String?,
-    val email: String,
-    val subscribed: Boolean,
-    val password: String,
+    name: String?,
+    surname: String?,
+    email: String,
+    password: String,
+    subscribed: Boolean,
     val role: String
-) {
+) : RegistrableUser(name, surname, email, password, subscribed) {
     companion object {
         fun fromRecordAndRole(userRecord: UserRecord, role: String) = FrontendUser(
             name = userRecord.name,

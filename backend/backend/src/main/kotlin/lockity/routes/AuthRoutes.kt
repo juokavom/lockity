@@ -24,14 +24,13 @@ fun Application.authRoutes() {
     val userRepository: UserRepository by inject()
     val roleRepository: RoleRepository by inject()
     val databaseService: DatabaseService by inject()
-    val jwtService: JwtService by inject()
     val confirmationLinkRepository: ConfirmationLinkRepository by inject()
     val configurationService: ConfigurationService by inject()
 
     routing {
         route("/auth") {
             post("/login") {
-                withErrorHandler(call) {
+                call.withErrorHandler {
                     val signInUser = call.receive<SignInableUser>()
                     signInUser.isValuesValid()
                     userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
@@ -56,7 +55,7 @@ fun Application.authRoutes() {
                 }
             }
             post("/register") {
-                withErrorHandler(call) {
+                call.withErrorHandler {
                     val newUser = call.receive<RegistrableUser>()
                     newUser.isValuesValid()
                     if (!emailService.isEmailValid(newUser.email)) throw BadRequestException("Email is not in correct format.")
@@ -101,13 +100,13 @@ fun Application.authRoutes() {
                 }
             }
             post("/logout") {
-                withErrorHandler(call) {
+                call.withErrorHandler {
                     call.unsetResponseJwtCookieHeader()
                     call.respondJSON("Successful logout", HttpStatusCode.OK)
                 }
             }
             post("/confirm") {
-                withErrorHandler(call) {
+                call.withErrorHandler {
                     val link = call.receive<ConfirmableLink>()
                     link.isValuesValid()
                     val fetchLinkData =

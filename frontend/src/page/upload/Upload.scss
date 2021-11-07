@@ -49,11 +49,8 @@
     width: 110%;
 }
 
-.float-welcome {
-    width: 80%;
-    float: left;
-}
 .float-login {
-    width: 15%;
-    float: right;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }

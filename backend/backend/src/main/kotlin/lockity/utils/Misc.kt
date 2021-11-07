@@ -8,24 +8,24 @@ import io.ktor.http.*
 import io.ktor.response.*
 import java.util.*
 
-suspend fun Application.withErrorHandler(call: ApplicationCall, block: suspend (ApplicationCall) -> Unit) {
+suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     try {
-        block(call)
+        block()
     } catch (e: JsonSyntaxException) {
-        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+        this.respondJSON("Bad json parameters", HttpStatusCode.BadRequest)
     } catch (e: IllegalStateException) {
-        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+        this.respondJSON("Illegal parameters", HttpStatusCode.BadRequest)
     } catch (e: NullPointerException) {
-        call.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+        this.respondJSON("Null parameters", HttpStatusCode.BadRequest)
     } catch (e: BadRequestException) {
-        call.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
+        this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {
-        call.respondJSON(e.message.toString(), HttpStatusCode.NotFound)
+        this.respondJSON(e.message.toString(), HttpStatusCode.NotFound)
     }
 }
 
-suspend fun ApplicationCall.respondJSON(message: String, httpStatusCode: HttpStatusCode) {
-    this.respondText("{\"message\":\"$message\"}", ContentType.Application.Json, httpStatusCode)
+suspend fun ApplicationCall.respondJSON(message: String, httpStatusCode: HttpStatusCode, title: String? = "message") {
+    this.respondText("{\"$title\":\"$message\"}", ContentType.Application.Json, httpStatusCode)
 }
 
 fun Application.bcryptPassword(password: String) = BCrypt.withDefaults().hashToString(12, password.toCharArray())

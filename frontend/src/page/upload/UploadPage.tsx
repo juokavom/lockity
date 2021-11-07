@@ -12,21 +12,20 @@ function Upload() {
                     <div className="jumbotron-top">
                         <div>
                             <h1>Welcome to Lockity!</h1>
-                            <div className="float-welcome">
+                            <div>
                                 <p>
                                     This is a platform for file storing and sharing. Here you can upload
                                     your file and select sharing method either by a link or email.
                                 </p>
+                                <div className="float-login">
+                                    <button
+                                        className="upload-button"
+                                        onClick={() => window.location.replace(ROUTES.login)}
+                                    >
+                                        Login
+                                    </button>
+                                </div>
                             </div>
-                            <div className="float-login">
-                                <button
-                                    className="upload-button"
-                                    onClick={() => window.location.replace(ROUTES.login)}
-                                >
-                                    Login
-                                </button>
-                            </div>
-
                         </div>
                     </div>
                     <div className="border-box">

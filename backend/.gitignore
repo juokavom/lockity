@@ -3,3 +3,4 @@ build/
 .idea
 !.idea/runConfigurations/runBackend.xml
 backend/src/main/java
+storage/

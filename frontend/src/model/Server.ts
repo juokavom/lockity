@@ -14,9 +14,14 @@ export const SERVER: Server = process.env.NODE_ENV === "production" ? prod : dev
 
 export namespace ENDPOINTS {
     const endpoint = SERVER.URL
+    
     export namespace AUTH {
         const auth = endpoint + '/auth'        
         export const login = auth + '/login'
         export const logout = auth + '/logout'
+    }
+    export namespace FILE {
+        export const file = endpoint + '/file'
+        export const fileAnonymous = (isAnonymous: Boolean) => file + '/anonymous/' + isAnonymous       
     }
 }
