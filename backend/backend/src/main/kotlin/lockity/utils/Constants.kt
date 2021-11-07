@@ -20,7 +20,6 @@ object CONFIG {
     const val DATABASE_PASSWORD = "database.password"
 
     const val FILEPATH_STORAGE = "filePath.storage"
-    const val FILEPATH_ROOT_PATH = "filePath.rootPath"
     const val FILEPATH_DEFAULT_USER_IMAGE = "filePath.defaultUserImage"
     const val FILEPATH_UPLOADS = "filePath.uploads"
     const val FILEPATH_PROFILES = "filePath.profiles"
