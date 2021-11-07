@@ -7,6 +7,7 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
 import java.util.*
+import javax.naming.NoPermissionException
 
 suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     try {
@@ -21,6 +22,8 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
         this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.NotFound)
+    } catch (e: NoPermissionException) {
+        this.respondJSON(e.message.toString(), HttpStatusCode.Forbidden)
     }
 }
 

@@ -23,6 +23,7 @@ class DatabasePlugins : Plugin<Project> {
             "filesystem:$migrationPackage"
         )
         val jooqDir = "$rootDir/backend/src/main/java"
+        val uploadsDir = "$rootDir/storage/uploads"
         apply<FlywayPlugin>()
         gradle.projectsEvaluated {
             tasks {
@@ -31,6 +32,8 @@ class DatabasePlugins : Plugin<Project> {
                     applyConfig(databaseConfig, migrations)
                     doLast {
                         delete(jooqDir)
+                        delete(uploadsDir)
+                        mkdir(uploadsDir)
                     }
                 }
                 register<FlywayMigrateTask>("DatabaseMigrate") {

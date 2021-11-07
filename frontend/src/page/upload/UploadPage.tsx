@@ -1,5 +1,5 @@
 import './Upload.scss';
-import UploadFiles from '../../component/FileUploaderComponent';
+import FileUploader from '../../component/FileUploaderComponent';
 import { ROUTES } from '../../model/Routes';
 import { Copyright } from '../login/LoginPage';
 
@@ -28,13 +28,7 @@ function Upload() {
                             </div>
                         </div>
                     </div>
-                    <div className="border-box">
-                        <h1 className="ellipse-text">Upload your file here</h1>
-                        <h5 className="ellipse-text"><i>(up to 1Gb)</i></h5><br />
-                        <div className="col-12 col-md-10 col-xl-8">
-                            <UploadFiles />
-                        </div>
-                    </div>
+                    <FileUploader />
                     <div className="jumbotron-bottom">
                         <p>
                             Please consider signing in to unlock full features of the platform, such as

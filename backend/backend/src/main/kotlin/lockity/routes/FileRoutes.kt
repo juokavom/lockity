@@ -6,7 +6,9 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.models.AnonymousFileMetadata
 import lockity.repositories.ConfirmationLinkRepository
 import lockity.repositories.FileRepository
 import lockity.repositories.RoleRepository
@@ -54,6 +56,7 @@ fun Application.fileRoutes() {
                             if (jwtService.isValidToken(jwt)) jwtService.getJwtClaims(jwt) else null
                         }?.userId
 
+                        val fileKey = UUID.randomUUID().toString()
                         fileRepository.insert(
                             FileRecord(
                                 id = fileId,
@@ -64,16 +67,13 @@ fun Application.fileRoutes() {
                                         currentUserId
                                     )
                                 ),
+                                key = if (isAnonymous) fileKey else null,
                                 link = null,
                                 uploaded = LocalDate.now(),
                                 lastAccessed = null
                             )
                         )
-                        call.respondJSON(
-                            databaseService.binToUuid(fileId).toString(),
-                            HttpStatusCode.OK,
-                            "fileId"
-                        )
+                        call.respond(AnonymousFileMetadata(fileIdStringed, fileKey))
                     } else throw BadRequestException("Multipart data is not file type")
                 }
             }
