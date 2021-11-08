@@ -20,6 +20,7 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import javax.naming.NoPermissionException
 
 fun Application.fileRoutes() {
     val emailService: EmailService by inject()
@@ -34,6 +35,12 @@ fun Application.fileRoutes() {
 
     routing {
         route("/file") {
+            /**
+             * Upload physical file, save metadata to database and generate fileKey
+             * which is returned to client to later generate file link
+             * (if upload is anonymous)
+             * SCOPE = ALL: (guest (anonymous upload), registered (not anonymous))
+             */
             post("/anonymous/{anonymous}") {
                 call.withErrorHandler {
                     val isAnonymous = call.parameters["anonymous"]?.toBooleanStrictOrNull()
@@ -78,9 +85,71 @@ fun Application.fileRoutes() {
                     } else throw BadRequestException("Multipart data is not file type")
                 }
             }
-            get("/{fileId}") {
-//                val file = filePath("/sample.mp4")
-//                call.respondFile(file)
+            /**
+             * Generate dynamic link for file access
+             * SCOPE = ALL: (guest (with key), registered (his file))
+             */
+            post("/dynlink/file-id/{fileId}") {
+                call.withErrorHandler {
+                    val fileId = call.parameters["fileId"]
+                        ?: throw BadRequestException("File id is not present in the parameters.")
+                    val key = call.request.queryParameters["key"]
+                    val user = call.jwtUser()
+                    val file = fileRepository.fetch(UUID.fromString(fileId))
+                        ?: throw NotFoundException("File was not found")
+
+                    if (file.user != null) {
+                        if (user == null || !file.user.contentEquals(user.id)) {
+                            throw NoPermissionException("User do not own the file.")
+                        }
+                    } else if (key != null) {
+                        if (file.key != key) {
+                            throw NoPermissionException("File key does not match.")
+                        }
+                    }
+
+                    file.link = UUID.randomUUID().toString()
+                    file.key = null
+                    fileRepository.update(file)
+
+                    call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
+                }
+            }
+            /**
+             * Get physical file by providing file id
+             * SCOPE = Registered (gets his own file or file is shared access with him)
+             */
+            get("/file-id/{fileId}") {
+            }
+            /**
+             * Get physical file by providing dynamic link id
+             * SCOPE = Guest
+             */
+            get("/dynlink-id/{dynlinkId}") {
+            }
+            /**
+             * Edits file data (title)
+             * SCOPE = Registered (edits his own file)
+             */
+            put("/file-id/{fileId}") {
+            }
+            /**
+             * Deletes file (and shared access)
+             * SCOPE = Registered (deletes his own file)
+             */
+            delete("/file-id/{fileId}") {
+            }
+            /**
+             * Gets list of user's files metadata whose titles start with
+             * SCOPE = Registered
+             */
+            get("/metadata/user/{userId}/starts-with/{startsWith}") {
+            }
+            /**
+             * Gets list of user's shared access files
+             * SCOPE = Registered
+             */
+            get("/shared/user/{userId}") {
             }
         }
     }

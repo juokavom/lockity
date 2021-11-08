@@ -8,34 +8,44 @@ import io.ktor.routing.*
 fun Application.userRoutes() {
     routing {
         route("/user") {
-            get {
+            /**
+             * Get registered users with email filter
+             * SCOPE = REGISTERED
+             */
+            get("/email-like/{emailLike}}") {
                 val users = listOf(
                     User(1, "test1"),
                     User(2, "test2")
                 )
                 call.respond(HttpStatusCode.OK, users)
             }
+            /**
+             * Post new user
+             * SCOPE = ADMIN
+             */
             post {
                 call.respond(HttpStatusCode.Created)
             }
-            get("/{userId}"){
+            /**
+             * Get user with id
+             * SCOPE = Registered
+             */
+            get("/{userId}") {
                 val userId = call.parameters["userId"]!!.toInt()
                 return@get call.respond(HttpStatusCode.OK, User(userId, "single user email"))
             }
-            get("/{userId}/{fileId}/{startsWith}"){
-                val userId = call.parameters["userId"]!!.toInt()
-                val fileId = call.parameters["fileId"]
-                val startsWith = call.parameters["startsWith"]
-                val users = listOf(
-                    User(1, "11 - userId = $userId, fileId = $fileId, startsWith = $startsWith"),
-                    User(2, "22 - userId = $userId, fileId = $fileId, startsWith = $startsWith")
-                )
-                return@get call.respond(HttpStatusCode.OK, users)
-            }
-            put("/{userId}"){
+            /**
+             * Edit user with id
+             * SCOPE = Registered (if self), Admin
+             */
+            put("/{userId}") {
                 call.respond(HttpStatusCode.NoContent)
             }
-            delete("/{userId}"){
+            /**
+             * Delete user with id
+             * SCOPE = Admin
+             */
+            delete("/{userId}") {
                 call.respond(HttpStatusCode.NoContent)
             }
         }

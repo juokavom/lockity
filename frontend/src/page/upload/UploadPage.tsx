@@ -3,6 +3,10 @@ import FileUploader, { FileUploadedMetadata } from '../../component/FileUploader
 import { ROUTES } from '../../model/Routes';
 import { Copyright } from '../login/LoginPage';
 import { useState } from 'react';
+import { UncontrolledTooltip } from 'reactstrap';
+import { toast } from 'react-toastify';
+import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
+import { ENDPOINTS } from '../../model/Server';
 
 enum UploadPageState {
     Initial,
@@ -12,11 +16,30 @@ enum UploadPageState {
 function Upload() {
     const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
     const [fileMeta, setFileMeta] = useState<FileUploadedMetadata | null>(null)
+    const [fileLink, setFileLink] = useState<string | null>(null)
 
-    const onFileUploaded = (uploadMetadata: FileUploadedMetadata) => {
+    const onFileUploaded = async (uploadMetadata: FileUploadedMetadata) => {
         setFileMeta(uploadMetadata)
         setState(UploadPageState.Uploaded)
+        await GenerateLinkAction(uploadMetadata)
     }
+
+    const copyFileUrl = async () => {
+        if (fileLink) {
+            await navigator.clipboard.writeText(fileLink);
+            toast.info("Link copied to clipboard!", DefaultToastOptions)
+        }
+    }
+
+    const GenerateLinkAction = async (fileMetaData: FileUploadedMetadata) => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.DYNLINK.generateLink(fileMetaData.fileId, fileMetaData.fileKey))
+            .withMethod('POST')
+            .withDefaults()
+            .send((response: any) => {
+                setFileLink(response.fileLink)
+            })
+    };
 
     return (
         <div className="container center-main">
@@ -50,6 +73,15 @@ function Upload() {
                             <h1>Sharing options</h1>
                             <div className="col-12 col-md-10 col-xl-10">
                                 <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5><br />
+                                <div id="fileLink" className="dropzone selected-file ellipse-text" style={{ cursor: "default" }} onClick={copyFileUrl}>
+                                    {fileLink}
+                                </div>
+                                <UncontrolledTooltip
+                                    placement="auto"
+                                    target="fileLink"
+                                >
+                                    Copy to clipboard
+                                </UncontrolledTooltip>
                             </div>
                         </div>
                     }

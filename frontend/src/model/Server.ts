@@ -27,6 +27,6 @@ export namespace ENDPOINTS {
     export namespace DYNLINK {
         export const dynlink = endpoint + '/dynlink'
         export const generateLink = (fileId: string, key: string | null) =>
-            dynlink + '/file-id/' + fileId + key != null ? "?key=" + key : ""
+            dynlink + '/file-id/' + fileId + (key != null ? "?key=" + key : "")
     }
 }

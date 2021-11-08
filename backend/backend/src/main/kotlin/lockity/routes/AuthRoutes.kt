@@ -135,12 +135,6 @@ fun Application.authRoutes() {
                     call.respondJSON("Nice authed admin!", HttpStatusCode.OK)
                 }
             }
-            post("/password/reset/request") {
-                call.respond(HttpStatusCode.NotImplemented)
-            }
-            post("/password/reset/confirm") {
-                call.respond(HttpStatusCode.NotImplemented)
-            }
         }
     }
 }

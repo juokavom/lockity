@@ -7,8 +7,19 @@ import io.ktor.routing.*
 
 fun Application.emailRoutes() {
     routing {
-        route("/email/") {
+        route("/email") {
+            /**
+             * Send newsletter to all subscribers
+             * SCOPE = ADMIN
+             */
             post("/newsletter") {
+                call.respond(HttpStatusCode.NoContent)
+            }
+            /**
+             * Send newsletter to all subscribers
+             * SCOPE = ADMIN
+             */
+            post("/file-share") {
                 call.respond(HttpStatusCode.NoContent)
             }
         }
