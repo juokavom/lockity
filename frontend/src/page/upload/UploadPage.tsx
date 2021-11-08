@@ -1,10 +1,23 @@
 import './Upload.scss';
-import FileUploader from '../../component/FileUploaderComponent';
+import FileUploader, { FileUploadedMetadata } from '../../component/FileUploaderComponent';
 import { ROUTES } from '../../model/Routes';
 import { Copyright } from '../login/LoginPage';
+import { useState } from 'react';
 
+enum UploadPageState {
+    Initial,
+    Uploaded
+}
 
 function Upload() {
+    const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
+    const [fileMeta, setFileMeta] = useState<FileUploadedMetadata | null>(null)
+
+    const onFileUploaded = (uploadMetadata: FileUploadedMetadata) => {
+        setFileMeta(uploadMetadata)
+        setState(UploadPageState.Uploaded)
+    }
+
     return (
         <div className="container center-main">
             <div className="row justify-content-center">
@@ -20,15 +33,26 @@ function Upload() {
                                 <div className="float-login">
                                     <button
                                         className="upload-button"
-                                        onClick={() => window.location.replace(ROUTES.login)}
-                                    >
+                                        onClick={() => window.location.replace(ROUTES.login)}>
                                         Login
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <FileUploader />
+                    {
+                        state === UploadPageState.Initial &&
+                        <FileUploader {...{ onUpload: onFileUploaded }} />
+                    }
+                    {
+                        state === UploadPageState.Uploaded &&
+                        <div className="border-box">
+                            <h1>Sharing options</h1>
+                            <div className="col-12 col-md-10 col-xl-10">
+                                <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5><br />
+                            </div>
+                        </div>
+                    }
                     <div className="jumbotron-bottom">
                         <p>
                             Please consider signing in to unlock full features of the platform, such as

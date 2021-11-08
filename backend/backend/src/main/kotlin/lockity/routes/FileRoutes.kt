@@ -18,6 +18,7 @@ import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 fun Application.fileRoutes() {
@@ -69,7 +70,7 @@ fun Application.fileRoutes() {
                                 ),
                                 key = if (isAnonymous) fileKey else null,
                                 link = null,
-                                uploaded = LocalDate.now(),
+                                uploaded = LocalDateTime.now(),
                                 lastAccessed = null
                             )
                         )

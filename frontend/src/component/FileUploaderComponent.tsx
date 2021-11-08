@@ -5,30 +5,34 @@ import { toast } from "react-toastify";
 import { DefaultToastOptions } from '../model/RequestBuilder';
 import { Progress, Spinner } from 'reactstrap';
 
-enum UploaderState {
-    None,
-    Uploading,
-    Saving,
-    Uploaded
+interface FileUploaderProps {
+    onUpload: (uploadMetadata: FileUploadedMetadata) => void
 }
 
-export default function FileUploader() {
+export interface FileUploadedMetadata {
+    fileId: string,
+    fileKey: string,
+    fileName: string
+}
+
+enum UploaderState {
+    Initial,
+    Uploading,
+    Saving
+}
+
+export default function FileUploader(props: FileUploaderProps) {
     const [file, setFile] = useState<any>()
     const [progress, setProgress] = useState<{
         uploadPercent: number;
         uploadText: string;
     } | null>(null)
-    const [state, setState] = useState<UploaderState>(UploaderState.None)
-    const [response, setResponse] = useState<{
-        fileId: string,
-        fileKey: string
-    } | null>(null)
+    const [state, setState] = useState<UploaderState>(UploaderState.Initial)
 
     const clearStateHooks = () => {
         setFile(null)
         setProgress(null)
-        setState(UploaderState.None)
-        setResponse(null)
+        setState(UploaderState.Initial)
     }
 
     const onDrop = (files: any) => {
@@ -59,13 +63,17 @@ export default function FileUploader() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 var status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
-                    setResponse(xhr.response)
-                    setState(UploaderState.Uploaded)
                     toast.success('Your file was uploaded successfully', DefaultToastOptions)
+                    const response = JSON.parse(xhr.response)
+                    props.onUpload({
+                        fileId: response.fileId,
+                        fileKey: response.fileKey,
+                        fileName: file[0].name
+                    })
                 } else {
-                    clearStateHooks()
                     toast.error('Upload failed!', DefaultToastOptions)
                 }
+                clearStateHooks()
             }
         }
 
@@ -73,73 +81,62 @@ export default function FileUploader() {
         xhr.send(formData);
     }
 
-    if (state === UploaderState.Uploaded) {
-        return (
-            <div className="border-box">
-            <h1>Sharing options</h1>
-                <div className="col-12 col-md-10 col-xl-10">
-                    <h5 className="ellipse-text"><i>({file[0].name})</i></h5><br />
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <div className="border-box">
-                {
-                    state === UploaderState.None &&
-                    <>
-                        <h1 className="ellipse-text">Upload your file here</h1>
-                        <h5 className="ellipse-text"><i>(up to 1Gb)</i></h5>
-                    </>
-                }
-                <div className="col-12 col-md-10 col-xl-10">
-                    <Dropzone onDrop={onDrop} multiple={false} disabled={state !== UploaderState.None}>
-                        {({ getRootProps, getInputProps }: any) => (
-                            <section>
-                                {
-                                    state === UploaderState.Uploading &&
-                                    <div>
-                                        <h5 className="ellipse-text"><i>Uploading</i></h5>
-                                        <Progress style={{ height: "20px" }} animated color="info" value={progress?.uploadPercent} >
-                                            {progress?.uploadText}
-                                        </Progress>
-                                    </div>
-                                }
-
-                                {
-                                    state === UploaderState.Saving &&
-                                    <div>
-                                        <h5 className="ellipse-text"><i>Saving</i></h5>
-                                        <Spinner color="warning" type="grow" />
-                                    </div>
-                                }
-                                <br />
-                                <div {...getRootProps({ className: 'dropzone' })}>
-                                    <input {...getInputProps()} />
-                                    {file && file[0].name ? (
-                                        <div className="selected-file ellipse-text">
-                                            {file && file[0].name}
-                                        </div>
-                                    ) : (
-                                        'Drag and drop file here, or click to select file'
-                                    )}
+    return (
+        <div className="border-box">
+            {
+                state === UploaderState.Initial &&
+                <>
+                    <h1 className="ellipse-text">Upload your file here</h1>
+                    <h5 className="ellipse-text"><i>(up to 1Gb)</i></h5>
+                </>
+            }
+            <div className="col-12 col-md-10 col-xl-10">
+                <Dropzone onDrop={onDrop} multiple={false} disabled={state !== UploaderState.Initial}>
+                    {({ getRootProps, getInputProps }: any) => (
+                        <section>
+                            {
+                                state === UploaderState.Uploading &&
+                                <div>
+                                    <h5 className="ellipse-text"><i>Uploading</i></h5>
+                                    <Progress style={{ height: "20px" }} animated color="info" value={progress?.uploadPercent} >
+                                        {progress?.uploadText}
+                                    </Progress>
                                 </div>
-                                <aside className="selected-file-wrapper">
-                                    {
-                                        state === UploaderState.None &&
-                                        <button
-                                            className="upload-button"
-                                            disabled={!file}
-                                            onClick={upload}>
-                                            Upload
-                                        </button>
-                                    }
-                                </aside>
-                            </section>
-                        )}
-                    </Dropzone>
-                </div>
+                            }
+
+                            {
+                                state === UploaderState.Saving &&
+                                <div>
+                                    <h5 className="ellipse-text"><i>Saving</i></h5>
+                                    <Spinner color="warning" type="grow" />
+                                </div>
+                            }
+                            <br />
+                            <div {...getRootProps({ className: 'dropzone' })}>
+                                <input {...getInputProps()} />
+                                {file && file[0].name ? (
+                                    <div className="selected-file ellipse-text">
+                                        {file && file[0].name}
+                                    </div>
+                                ) : (
+                                    'Drag and drop file here, or click to select file'
+                                )}
+                            </div>
+                            <aside className="selected-file-wrapper">
+                                {
+                                    state === UploaderState.Initial &&
+                                    <button
+                                        className="upload-button"
+                                        disabled={!file}
+                                        onClick={upload}>
+                                        Upload
+                                    </button>
+                                }
+                            </aside>
+                        </section>
+                    )}
+                </Dropzone>
             </div>
-        );
-    }
+        </div>
+    );
 }

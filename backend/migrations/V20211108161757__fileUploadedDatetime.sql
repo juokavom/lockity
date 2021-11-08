@@ -1,0 +1,1 @@
+ALTER TABLE `File` MODIFY `uploaded` DATETIME NOT NULL;
