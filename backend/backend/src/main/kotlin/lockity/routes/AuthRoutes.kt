@@ -32,7 +32,6 @@ fun Application.authRoutes() {
             post("/login") {
                 call.withErrorHandler {
                     val signInUser = call.receive<SignInableUser>()
-                    signInUser.isValuesValid()
                     userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
                         dbUser[USER.CONFIRMED].let {
                             if (it == null || it == "0") throw BadRequestException("User is not confirmed.")
@@ -47,7 +46,7 @@ fun Application.authRoutes() {
                                 call.setResponseJwtCookieHeader(uid, urole)
                                 userRepository.updateLastActive(UUID.fromString(uid))
                                 userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
-                                    call.respond(HttpStatusCode.OK, FrontendUser.fromRecordAndRole(userRecord, urole))
+                                    call.respond(HttpStatusCode.OK, frontendUserFromUserRecordAndRole(userRecord, urole))
                                 }
                             }
                         }

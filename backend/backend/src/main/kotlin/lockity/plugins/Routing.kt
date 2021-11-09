@@ -6,6 +6,8 @@ import io.ktor.gson.*
 import io.ktor.http.*
 import io.ktor.locations.*
 import io.ktor.routing.*
+import io.ktor.serialization.*
+import kotlinx.serialization.json.Json
 import lockity.repositories.UserRepository
 import lockity.routes.*
 import lockity.services.ConfigurationService
@@ -34,7 +36,10 @@ fun Application.configureRouting() {
         method(HttpMethod.Delete)
     }
     install(ContentNegotiation) {
-        gson()
+        json(Json {
+            prettyPrint = true
+            isLenient = true
+        })
     }
     install(Locations)
     installJwtVerifier()
@@ -46,10 +51,7 @@ fun Application.configureRouting() {
     routing {
         authRoutes()
         userRoutes()
-        metadataRoutes()
-        dynlinkRoutes()
         sharedRoutes()
-        emailTemplateRoutes()
         emailRoutes()
         fileRoutes()
     }

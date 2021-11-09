@@ -75,12 +75,12 @@ fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {
             jwtService.generateToken(id, role)
         }; Max-Age=${
             configurationService.configValue(CONFIG.JWT_SESSION_TIME_MILLIS).toInt() / 1000
-        }; Secure; Path=/; HttpOnly"
+        }; Path=/; HttpOnly"
     )
 }
 
 fun ApplicationCall.unsetResponseJwtCookieHeader() {
-    this.response.header("Set-Cookie", "$JWT_COOKIE_NAME=; Secure; Path=/; HttpOnly")
+    this.response.header("Set-Cookie", "$JWT_COOKIE_NAME=; Path=/; HttpOnly")
 }
 
 fun Application.installJwtVerifier() = install(Authentication) {

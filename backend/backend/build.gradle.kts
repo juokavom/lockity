@@ -28,6 +28,7 @@ dependencies {
     implementation("org.apache.commons:commons-email:1.5")
     implementation("io.insert-koin:koin-ktor:3.1.2")
     implementation("at.favre.lib:bcrypt:0.9.0")
+    implementation("io.ktor:ktor-serialization:$ktor_version")
 }
 
 application {

@@ -6,6 +6,7 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
+import kotlinx.serialization.SerializationException
 import java.util.*
 import javax.naming.NoPermissionException
 
@@ -13,11 +14,13 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     try {
         block()
     } catch (e: JsonSyntaxException) {
-        this.respondJSON("Bad json parameters", HttpStatusCode.BadRequest)
+        this.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
+    } catch (e: SerializationException) {
+        this.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
     } catch (e: IllegalStateException) {
         this.respondJSON("Illegal parameters", HttpStatusCode.BadRequest)
     } catch (e: NullPointerException) {
-        this.respondJSON("Null parameters", HttpStatusCode.BadRequest)
+        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
     } catch (e: BadRequestException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {
