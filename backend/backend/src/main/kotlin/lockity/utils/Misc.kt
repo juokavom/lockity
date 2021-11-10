@@ -7,7 +7,6 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
 import kotlinx.serialization.SerializationException
-import java.util.*
 import javax.naming.NoPermissionException
 
 suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
@@ -21,6 +20,14 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
         this.respondJSON("Illegal parameters", HttpStatusCode.BadRequest)
     } catch (e: NullPointerException) {
         this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+    } catch (e: java.lang.IllegalArgumentException) {
+        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+    } catch (e: java.lang.NumberFormatException) {
+        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+    } catch (e: java.time.format.DateTimeParseException) {
+        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+    } catch (e: java.io.IOException) {
+        this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
     } catch (e: BadRequestException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {

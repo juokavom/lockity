@@ -5,9 +5,10 @@ val logback_version: String by project
 plugins {
     application
     kotlin("jvm") version "1.5.30" apply true
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.30"
+//    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.30"
     id("db-plugins")
     id("com.github.johnrengelman.shadow") version "7.0.0"
+    kotlin("plugin.serialization") version "1.5.30"
 }
 
 dependencies {

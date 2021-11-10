@@ -24,7 +24,7 @@ fun Application.main() {
                 single { DatabaseService(get()) }
                 single { UserRepository(get()) }
                 single { FileRepository(get()) }
-                single { FileService(get()) }
+                single { FileService(get(), get(), get()) }
                 single { RoleRepository(get()) }
                 single { JwtService(get()) }
                 single { ConfirmationLinkRepository(get()) }

@@ -1,12 +1,9 @@
 package lockity.models
 
-import io.ktor.features.*
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AnonymousFileMetadata(
     val fileId: String,
-    val fileKey: String
+    val fileKey: String?
 )
-
-fun AnonymousFileMetadata.isValuesValid() {
-    if (fileId == "" || fileKey == "") throw BadRequestException("Email and password cannot be empty.")
-}

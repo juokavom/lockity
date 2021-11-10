@@ -22,6 +22,17 @@ class FileRepository(
         .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
         .fetchOne()
 
+    fun fetchUserFiles(userUuid: UUID): List<FileRecord> = databaseService.dsl
+        .selectFrom(FileTable)
+        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .fetchArray()
+        .toList()
+
+    fun deleteUserFiles(userUuid: UUID) = databaseService.dsl
+        .deleteFrom(FileTable)
+        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .execute()
+
     fun update(fileRecord: FileRecord) = databaseService.dsl
         .update(FileTable)
         .set(fileRecord)

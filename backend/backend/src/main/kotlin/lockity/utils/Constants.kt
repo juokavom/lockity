@@ -20,9 +20,7 @@ object CONFIG {
     const val DATABASE_PASSWORD = "database.password"
 
     const val FILEPATH_STORAGE = "filePath.storage"
-    const val FILEPATH_DEFAULT_USER_IMAGE = "filePath.defaultUserImage"
     const val FILEPATH_UPLOADS = "filePath.uploads"
-    const val FILEPATH_PROFILES = "filePath.profiles"
 
     const val EMAIL_HOST = "email.host"
     const val EMAIL_PORT = "email.port"
@@ -43,4 +41,4 @@ object USER {
     const val CONFIRMED = "user.confirmed"
 }
 
-const val DEFAULT_STORAGE_BYTES = 1_000_000_000L // 1GB
+const val DEFAULT_STORAGE_BYTES = 15_000_000_000L // 15GB

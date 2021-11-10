@@ -1,9 +1,11 @@
 package lockity.routes
 
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.utils.ROLE
 
 fun Application.sharedRoutes() {
     routing {

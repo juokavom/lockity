@@ -17,19 +17,38 @@ class UserRepository(
         .where(UserTable.Email.eq(email))
         .fetchOne()?.value1() == 0
 
+    fun isAnyoneElseEmailUnique(uuid: UUID, email: String): Boolean = databaseService.dsl
+        .selectCount()
+        .from(UserTable)
+        .where(UserTable.Email.eq(email)
+            .and(UserTable.Id.ne(databaseService.uuidToBin(uuid))))
+        .fetchOne()?.value1() == 0
+
     fun insertUser(userRecord: UserRecord) = databaseService.dsl
         .batchInsert(userRecord)
+        .execute()
+
+    fun delete(uuid: UUID) = databaseService.dsl
+        .deleteFrom(UserTable)
+        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
         .execute()
 
     fun updateUser(userRecord: UserRecord) = databaseService.dsl
         .update(UserTable)
         .set(userRecord)
+        .where(UserTable.Id.eq(userRecord.id))
         .execute()
 
     fun fetch(uuid: UUID): UserRecord? = databaseService.dsl
         .selectFrom(UserTable)
         .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
         .fetchOne()
+
+    fun fetchWithEmailLike(email: String): List<UserRecord> = databaseService.dsl
+        .selectFrom(UserTable)
+        .where(UserTable.Email.like("%$email%"))
+        .fetchArray()
+        .toList()
 
     fun fetchAll(): List<UserRecord> = databaseService.dsl
         .selectFrom(UserTable)

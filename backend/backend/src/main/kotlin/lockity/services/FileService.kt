@@ -1,11 +1,17 @@
 package lockity.services
 
+import lockity.repositories.FileRepository
 import lockity.utils.CONFIG
+import lockity.utils.DatabaseService
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.*
 
 class FileService(
-    private val configurationService: ConfigurationService
+    private val configurationService: ConfigurationService,
+    private val fileRepository: FileRepository,
+    private val databaseService: DatabaseService
 ) {
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
@@ -21,5 +27,15 @@ class FileService(
             bytesCopied += bytes
             bytes = inputStream.read(buffer)
         }
+    }
+
+    fun deleteUserFiles(uuid: UUID) {
+        val userFiles = fileRepository.fetchUserFiles(uuid)
+        userFiles.forEach {
+            File(
+                uploadsLocation(databaseService.binToUuid(it.id!!).toString())
+            ).deleteRecursively()
+        }
+//        fileRepository.deleteUserFiles(uuid)
     }
 }

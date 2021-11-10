@@ -11,10 +11,8 @@ import io.ktor.auth.jwt.*
 import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.response.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import lockity.repositories.UserRepository
-import lockity.routes.User
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
@@ -62,7 +60,9 @@ fun ApplicationCall.jwtUser(): UserRecord? {
     val jwtService: JwtService by inject()
 
     return this.request.cookies[JWT_COOKIE_NAME]?.let {
-        userRepository.fetch(UUID.fromString(jwtService.getJwtClaims(it).toString()))
+        if (jwtService.isValidToken(it)) {
+            userRepository.fetch(UUID.fromString(jwtService.getJwtClaims(it).userId))
+        } else null
     }
 }
 
