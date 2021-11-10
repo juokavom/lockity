@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.response.*
 import kotlinx.serialization.SerializationException
 import javax.naming.NoPermissionException
+import javax.security.auth.login.AccountLockedException
 
 suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     try {
@@ -28,6 +29,8 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
         this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
     } catch (e: java.io.IOException) {
         this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
+    }  catch (e: AccountLockedException) {
+        this.respondJSON(e.message.toString(), HttpStatusCode.Locked)
     } catch (e: BadRequestException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
     } catch (e: NotFoundException) {

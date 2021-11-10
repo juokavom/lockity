@@ -13,6 +13,8 @@ import lockity.services.EmailService
 import lockity.services.FileService
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
+import org.koin.ktor.ext.inject
+import java.io.File
 
 fun Application.main() {
     startKoin {

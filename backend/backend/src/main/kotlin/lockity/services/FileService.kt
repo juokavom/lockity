@@ -3,6 +3,7 @@ package lockity.services
 import lockity.repositories.FileRepository
 import lockity.utils.CONFIG
 import lockity.utils.DatabaseService
+import sun.rmi.runtime.Log
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -29,13 +30,16 @@ class FileService(
         }
     }
 
-    fun deleteUserFiles(uuid: UUID) {
+    fun deletePhysicalUserFiles(uuid: UUID): Boolean {
         val userFiles = fileRepository.fetchUserFiles(uuid)
+        println("Delete user files invoked. User: $uuid")
+        var success = true
         userFiles.forEach {
-            File(
-                uploadsLocation(databaseService.binToUuid(it.id!!).toString())
-            ).deleteRecursively()
+            val folderName = databaseService.binToUuid(it.id!!).toString()
+            val deleted = File(uploadsLocation(folderName)).deleteRecursively()
+            println("Folder $folderName deleted. Status = $deleted")
+            if(!deleted) success = false
         }
-//        fileRepository.deleteUserFiles(uuid)
+        return success
     }
 }

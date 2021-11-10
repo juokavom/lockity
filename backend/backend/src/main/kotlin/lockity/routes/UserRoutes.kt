@@ -9,21 +9,26 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.*
+import lockity.repositories.FileRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
-import lockity.services.*
+import lockity.services.EmailService
+import lockity.services.FileService
+import lockity.services.jwtUser
+import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
 import javax.naming.NoPermissionException
+import javax.security.auth.login.AccountLockedException
 
 fun Application.userRoutes() {
     val emailService: EmailService by inject()
     val userRepository: UserRepository by inject()
     val databaseService: DatabaseService by inject()
-    val configurationService: ConfigurationService by inject()
     val roleRepository: RoleRepository by inject()
     val fileService: FileService by inject()
+    val fileRepository: FileRepository by inject()
 
     routing {
         route("/user") {
@@ -84,14 +89,16 @@ fun Application.userRoutes() {
                         userRepository.fetch(UUID.fromString(userId))
                             ?: throw NotFoundException("User was not found")
                         val userUUID = UUID.fromString(userId)
-                        fileService.deleteUserFiles(userUUID)
+                        val successfulDeletion = fileService.deletePhysicalUserFiles(userUUID)
+                        if (!successfulDeletion) throw AccountLockedException("Unable to delete physical files")
+                        fileRepository.deleteUserFiles(userUUID)
                         if (databaseService.binToUuid(call.jwtUser()!!.id!!) == userUUID) {
                             call.unsetResponseJwtCookieHeader()
                         }
-//                        userRepository.delete(userUUID)
+                        userRepository.delete(userUUID)
                         call.respondJSON(
                             "User deletion successful.",
-                            HttpStatusCode.Created
+                            HttpStatusCode.OK
                         )
                     }
                 }
@@ -208,15 +215,16 @@ fun Application.userRoutes() {
                 }
 
                 /**
-                 * Description: Get user list
-                 * Params: {emailLike}
+                 * Description: Get user list with %like% parameter
+                 * Params: { emailLike }
                  * Body: null
-                 * Validation: email like
-                 * OK Response: Full User
+                 * Validation: Email like
+                 * OK Response: FrontEndUser { name, surname, email, password, subscribed, role }
                  * Scope: Authenticated
                  */
                 get("/email-like/{emailLike}") {
-                    val emailLike = call.parameters["emailLike"] ?: ""
+                    var emailLike = call.parameters["emailLike"] ?: ""
+                    emailLike = if (emailLike == "*") "%" else "%$emailLike%"
                     val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
                     call.respond(
                         fetchedUserRecords.map {

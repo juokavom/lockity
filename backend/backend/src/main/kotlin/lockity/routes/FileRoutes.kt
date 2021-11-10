@@ -56,9 +56,11 @@ fun Application.fileRoutes() {
                         val fileName = part.originalFileName!!
                         File(fileService.uploadsLocation(fileIdStringed)).mkdir()
                         val fileLocation = fileService.uploadsLocation("$fileIdStringed/$fileName")
-                        val inputStream = part.streamProvider()
-                        val outputStream = File(fileLocation).outputStream().buffered()
-                        fileService.copyTo(inputStream, outputStream)
+                        part.streamProvider().use { inputStream ->
+                            File(fileLocation).outputStream().buffered().use { outputStream ->
+                                fileService.copyTo(inputStream, outputStream)
+                            }
+                        }
                         part.dispose
 
                         val fileKey = UUID.randomUUID().toString()
@@ -102,9 +104,11 @@ fun Application.fileRoutes() {
                             val fileName = part.originalFileName!!
                             File(fileService.uploadsLocation(fileIdStringed)).mkdir()
                             val fileLocation = fileService.uploadsLocation("$fileIdStringed/$fileName")
-                            val inputStream = part.streamProvider()
-                            val outputStream = File(fileLocation).outputStream().buffered()
-                            fileService.copyTo(inputStream, outputStream)
+                            part.streamProvider().use { inputStream ->
+                                File(fileLocation).outputStream().buffered().use { outputStream ->
+                                    fileService.copyTo(inputStream, outputStream)
+                                }
+                            }
                             part.dispose
 
                             fileRepository.insert(
