@@ -10,6 +10,6 @@ class RoleRepository(
 ) {
     fun roleUUID(role: String): ByteArray? = databaseService.dsl.select(RoleTable.Id)
         .from(RoleTable).where(RoleTable.Name.eq(role)).fetchOne()?.value1()
-    fun fetch(uuid: UUID): RoleRecord? = databaseService.dsl.selectFrom(RoleTable)
-        .where(RoleTable.Id.eq(databaseService.uuidToBin(uuid))).fetchOne()
+    fun fetch(uuidBin: ByteArray): RoleRecord? = databaseService.dsl.selectFrom(RoleTable)
+        .where(RoleTable.Id.eq(uuidBin)).fetchOne()
 }

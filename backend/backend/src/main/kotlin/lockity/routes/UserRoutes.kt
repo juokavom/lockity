@@ -104,13 +104,45 @@ fun Application.userRoutes() {
                 }
             }
             authenticate(AUTHENTICATED) {
+                /**
+                 * Description: Gets user storage info
+                 * Params: { userId }
+                 * Body: null
+                 * Validation: Check if user exist and requester have permission
+                 * OK Response: StorageData { totalSize, usedSize }
+                 * Scope: Authenticated
+                 */
+                get("/{userId}/storage") {
+                    call.withErrorHandler {
+                        val userId = call.parameters["userId"]
+                            ?: throw BadRequestException("User id is not present in the parameters.")
+                        val userUuid = UUID.fromString(userId)
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this user")
+                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
+                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid))
+                            && currentUserRole!!.name != ROLE.ADMIN
+                        ) {
+                            throw NoPermissionException("User do not have permission to get this user")
+                        }
+                        val userRecord = userRepository.fetch(userUuid)
+                            ?: throw NotFoundException("User was not found")
+
+                        call.respond(
+                            StorageData(
+                                totalSize = userRecord.storageSize!!,
+                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!).toLong()
+                            )
+                        )
+                    }
+                }
 
                 /**
                  * Description: Get full user
                  * Params: {userId}
                  * Body: null
-                 * Validation: Check if user exist
-                 * OK Response: message, delete user files and shared lists
+                 * Validation: Check if user exist and requester have permission
+                 * OK Response: Full User
                  * Scope: Registered (his own file), Admin (all)
                  */
                 get("/{userId}") {
@@ -120,7 +152,7 @@ fun Application.userRoutes() {
                         val userUuid = UUID.fromString(userId)
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this user")
-                        val currentUserRole = roleRepository.fetch(databaseService.binToUuid(currentUser.role!!))
+                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
                         if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid))
                             && currentUserRole!!.name != ROLE.ADMIN
                         ) {
@@ -132,7 +164,7 @@ fun Application.userRoutes() {
                             fullUserFromUserRecordAndRole(
                                 userId = userId,
                                 userRecord = userRecord,
-                                role = roleRepository.fetch(databaseService.binToUuid(userRecord.role!!))!!.name!!
+                                role = roleRepository.fetch(userRecord.role!!)!!.name!!
                             )
                         )
                     }
@@ -154,7 +186,7 @@ fun Application.userRoutes() {
                         val userUUID = UUID.fromString(userId)
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to edit this user")
-                        val currentUserRole = roleRepository.fetch(databaseService.binToUuid(currentUser.role!!))
+                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
                         if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUUID))
                             && currentUserRole!!.name != ROLE.ADMIN
                         ) {
@@ -208,7 +240,7 @@ fun Application.userRoutes() {
                             fullUserFromUserRecordAndRole(
                                 userId = userId,
                                 userRecord = editedUserRecord,
-                                role = roleRepository.fetch(databaseService.binToUuid(userRecord.role!!))!!.name!!
+                                role = roleRepository.fetch(userRecord.role!!)!!.name!!
                             )
                         )
                     }
@@ -223,18 +255,20 @@ fun Application.userRoutes() {
                  * Scope: Authenticated
                  */
                 get("/email-like/{emailLike}") {
-                    var emailLike = call.parameters["emailLike"] ?: ""
-                    emailLike = if (emailLike == "*") "%" else "%$emailLike%"
-                    val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
-                    call.respond(
-                        fetchedUserRecords.map {
-                            frontendUserFromUserRecordAndRole(
-                                userId = databaseService.binToUuid(it.id!!).toString(),
-                                userRecord = it,
-                                role = roleRepository.fetch(databaseService.binToUuid(it.role!!))!!.name!!
-                            )
-                        }
-                    )
+                    call.withErrorHandler {
+                        var emailLike = call.parameters["emailLike"] ?: ""
+                        emailLike = if (emailLike == "*") "%" else "%$emailLike%"
+                        val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
+                        call.respond(
+                            fetchedUserRecords.map {
+                                frontendUserFromUserRecordAndRole(
+                                    userId = databaseService.binToUuid(it.id!!).toString(),
+                                    userRecord = it,
+                                    role = roleRepository.fetch(it.role!!)!!.name!!
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

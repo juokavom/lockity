@@ -1,6 +1,5 @@
 package lockity.plugins
 
-import com.auth0.jwt.JWT
 import io.ktor.application.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
@@ -8,7 +7,6 @@ import lockity.services.JwtService
 import lockity.services.setResponseJwtCookieHeader
 import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.JWT_COOKIE_NAME
-import lockity.utils.USER
 
 class RefreshToken(configuration: Configuration) {
     private val jwtService = configuration.jwtTokenService
@@ -22,11 +20,11 @@ class RefreshToken(configuration: Configuration) {
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
         context.call.request.cookies[JWT_COOKIE_NAME]?.let {
             if (jwtService.isValidToken(it)) {
-                val jwtClaims = jwtService.getJwtClaims(it)
+                val jwtUserId = jwtService.getJwtUserId(it)
                 // Refresh JWT token
-                context.call.setResponseJwtCookieHeader(jwtClaims.userId, jwtClaims.role)
+                context.call.setResponseJwtCookieHeader(jwtUserId)
                 // Update `LastActive` user column
-                lastActive(jwtClaims.userId)
+                lastActive(jwtUserId)
             } else {
                 context.call.unsetResponseJwtCookieHeader()
             }

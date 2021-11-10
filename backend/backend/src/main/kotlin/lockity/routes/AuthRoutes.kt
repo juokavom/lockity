@@ -3,7 +3,6 @@ package lockity.routes
 import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -55,15 +54,17 @@ fun Application.authRoutes() {
                         }
                     }
                     dbUser[USER.ID]?.let { uid ->
-                        dbUser[USER.ROLE]?.let { urole ->
-                            call.setResponseJwtCookieHeader(uid, urole)
-                            userRepository.updateLastActive(UUID.fromString(uid))
-                            userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
-                                call.respond(
-                                    HttpStatusCode.OK,
-                                    frontendUserFromUserRecordAndRole(uid, userRecord, urole)
+                        call.setResponseJwtCookieHeader(uid)
+                        userRepository.updateLastActive(UUID.fromString(uid))
+                        userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
+                            call.respond(
+                                HttpStatusCode.OK,
+                                frontendUserFromUserRecordAndRole(
+                                    userId = uid,
+                                    userRecord = userRecord,
+                                    role = roleRepository.fetch(userRecord.role!!)!!.name!!
                                 )
-                            }
+                            )
                         }
                     }
                 } ?: throw NotFoundException("User does not exists.")

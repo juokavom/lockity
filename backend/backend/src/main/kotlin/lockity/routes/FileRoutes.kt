@@ -73,7 +73,8 @@ fun Application.fileRoutes() {
                                 key = fileKey,
                                 link = null,
                                 uploaded = LocalDateTime.now(),
-                                lastAccessed = null
+                                lastAccessed = null,
+                                size = fileSize
                             )
                         )
                         call.respond(AnonymousFileMetadata(fileIdStringed, fileKey))
@@ -98,6 +99,10 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("User not found")
 
                         val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
+                        val userFileSizeSum = fileRepository.userFileSizeSum(currentUser.id!!).toLong()
+                        if (userFileSizeSum + fileSize > currentUser.storageSize!!)
+                            throw NoPermissionException("User storage size is exceeded")
+
                         val fileId = databaseService.uuidToBin()
                         val fileIdStringed = databaseService.binToUuid(fileId).toString()
                         if (part is PartData.FileItem) {
@@ -120,7 +125,8 @@ fun Application.fileRoutes() {
                                     key = null,
                                     link = null,
                                     uploaded = LocalDateTime.now(),
-                                    lastAccessed = null
+                                    lastAccessed = null,
+                                    size = fileSize
                                 )
                             )
                             call.respond(AnonymousFileMetadata(fileIdStringed, null))

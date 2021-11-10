@@ -73,7 +73,6 @@ class UserRepository(
                 USER.ID to it[UserTable.Id]?.let { it1 -> databaseService.binToUuid(it1).toString() },
                 USER.PASSWORD to it[UserTable.Password],
                 USER.CONFIRMED to it[UserTable.Confirmed].toString(),
-                USER.ROLE to it[RoleTable.Name]
             )
         }
 }

@@ -36,7 +36,6 @@ object CONFIG {
 
 object USER {
     const val ID = "user.id"
-    const val ROLE = "user.role"
     const val PASSWORD = "user.password"
     const val CONFIRMED = "user.confirmed"
 }

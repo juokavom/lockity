@@ -12,12 +12,11 @@ import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.response.*
 import kotlinx.coroutines.runBlocking
+import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.util.*
-
-data class JwtClaims(val userId: String, val role: String)
 
 class JwtService(
     private val configurationService: ConfigurationService
@@ -35,17 +34,10 @@ class JwtService(
         return true
     }
 
-    fun getJwtClaims(token: String): JwtClaims = JWT.decode(token).let { jwt ->
-        JwtClaims(
-            jwt.getClaim(USER.ID).asString(),
-            jwt.getClaim(USER.ROLE).asString()
-        )
-    }
+    fun getJwtUserId(token: String): String = JWT.decode(token).getClaim(USER.ID).asString()
 
-
-    fun generateToken(id: String, role: String): String = JWT.create()
+    fun generateToken(id: String): String = JWT.create()
         .withClaim(USER.ID, id)
-        .withClaim(USER.ROLE, role)
         .withExpiresAt(
             Date(
                 System.currentTimeMillis() + configurationService
@@ -61,18 +53,18 @@ fun ApplicationCall.jwtUser(): UserRecord? {
 
     return this.request.cookies[JWT_COOKIE_NAME]?.let {
         if (jwtService.isValidToken(it)) {
-            userRepository.fetch(UUID.fromString(jwtService.getJwtClaims(it).userId))
+            userRepository.fetch(UUID.fromString(jwtService.getJwtUserId(it)))
         } else null
     }
 }
 
-fun ApplicationCall.setResponseJwtCookieHeader(id: String, role: String) {
+fun ApplicationCall.setResponseJwtCookieHeader(id: String) {
     val jwtService: JwtService by inject()
     val configurationService: ConfigurationService by inject()
 
     this.response.header(
         "Set-Cookie", "$JWT_COOKIE_NAME=${
-            jwtService.generateToken(id, role)
+            jwtService.generateToken(id)
         }; Max-Age=${
             configurationService.configValue(CONFIG.JWT_SESSION_TIME_MILLIS).toInt() / 1000
         }; Path=/; HttpOnly"
@@ -85,6 +77,8 @@ fun ApplicationCall.unsetResponseJwtCookieHeader() {
 
 fun Application.installJwtVerifier() = install(Authentication) {
     val configurationService: ConfigurationService by inject()
+    val roleRepository: RoleRepository by inject()
+
     listOf(ROLE.ADMIN, ROLE.REGISTERED, ROLE.VIP).map {
         jwt(it) {
             authHeader { call ->
@@ -103,11 +97,14 @@ fun Application.installJwtVerifier() = install(Authentication) {
                 ).build()
             )
             validate { credential ->
-                if (credential.payload.getClaim(USER.ROLE).asString() == it) {
-                    JWTPrincipal(credential.payload)
-                } else {
+                val role = this.jwtUser()?.let { userRecord ->
+                    roleRepository.fetch(userRecord.role!!)?.name
+                }
+                if (role == null || role != it) {
                     this.respondJSON("User does not have permission", HttpStatusCode.Forbidden)
                     null
+                } else {
+                    JWTPrincipal(credential.payload)
                 }
             }
         }
@@ -129,14 +126,20 @@ fun Application.installJwtVerifier() = install(Authentication) {
             ).build()
         )
         validate { credential ->
-            when (credential.payload.getClaim(USER.ROLE).asString()) {
-                ROLE.ADMIN,
-                ROLE.REGISTERED,
-                ROLE.VIP -> JWTPrincipal(credential.payload)
-                else -> {
-                    this.respondJSON("User not authenticated", HttpStatusCode.Unauthorized)
-                    null
+            val role = this.jwtUser()?.let { userRecord ->
+                roleRepository.fetch(userRecord.role!!)?.name
+            }
+            if (role != null && when (role) {
+                    ROLE.ADMIN,
+                    ROLE.REGISTERED,
+                    ROLE.VIP -> true
+                    else -> false
                 }
+            ) {
+                JWTPrincipal(credential.payload)
+            } else {
+                this.respondJSON("User does not have permission", HttpStatusCode.Forbidden)
+                null
             }
         }
     }
