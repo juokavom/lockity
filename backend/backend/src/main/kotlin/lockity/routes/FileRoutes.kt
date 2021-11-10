@@ -99,7 +99,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("User not found")
 
                         val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
-                        val userFileSizeSum = fileRepository.userFileSizeSum(currentUser.id!!).toLong()
+                        val userFileSizeSum = fileRepository.userFileSizeSum(currentUser.id!!)?.toLong() ?: 0L
                         if (userFileSizeSum + fileSize > currentUser.storageSize!!)
                             throw NoPermissionException("User storage size is exceeded")
 

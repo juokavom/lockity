@@ -118,12 +118,12 @@ fun Application.userRoutes() {
                             ?: throw BadRequestException("User id is not present in the parameters.")
                         val userUuid = UUID.fromString(userId)
                         val currentUser = call.jwtUser()
-                            ?: throw NoPermissionException("User do not have permission to get this user")
+                            ?: throw NoPermissionException("User do not have permission to get this users storage info")
                         val currentUserRole = roleRepository.fetch(currentUser.role!!)
                         if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid))
                             && currentUserRole!!.name != ROLE.ADMIN
                         ) {
-                            throw NoPermissionException("User do not have permission to get this user")
+                            throw NoPermissionException("\"User do not have permission to get this users storage info")
                         }
                         val userRecord = userRepository.fetch(userUuid)
                             ?: throw NotFoundException("User was not found")
@@ -131,7 +131,7 @@ fun Application.userRoutes() {
                         call.respond(
                             StorageData(
                                 totalSize = userRecord.storageSize!!,
-                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!).toLong()
+                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!)?.toLong() ?: 0L
                             )
                         )
                     }
@@ -240,7 +240,7 @@ fun Application.userRoutes() {
                             fullUserFromUserRecordAndRole(
                                 userId = userId,
                                 userRecord = editedUserRecord,
-                                role = roleRepository.fetch(userRecord.role!!)!!.name!!
+                                role = roleRepository.fetch(editedUserRecord.role!!)!!.name!!
                             )
                         )
                     }

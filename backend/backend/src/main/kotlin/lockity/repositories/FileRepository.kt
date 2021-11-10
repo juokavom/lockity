@@ -35,9 +35,9 @@ class FileRepository(
         .set(fileRecord)
         .execute()
 
-    fun userFileSizeSum(userBinId: ByteArray): BigDecimal = databaseService.dsl
+    fun userFileSizeSum(userBinId: ByteArray): BigDecimal? = databaseService.dsl
         .select(DSL.sum(FileTable.Size))
         .from(FileTable)
         .where(FileTable.User.eq(userBinId))
-        .fetchOne()?.value1()!!
+        .fetchOne()?.value1()
 }
