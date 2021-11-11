@@ -1,0 +1,16 @@
++++ intall(PartialContent) +++
+
+get("/download/{file}") {
+    val fileId = call.parameters["file"].toString()
+    call.response.header(
+        HttpHeaders.ContentDisposition,
+        ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, fileId)
+            .toString()
+    )
+    call.respondFile(File(fileService.storageLocation(fileId)))
+}
+get("/stream/{file}") {
+    val fileId = call.parameters["file"].toString()
+    val file = File(fileService.storageLocation(fileId))
+    call.respondFile(file)
+}

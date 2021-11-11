@@ -17,6 +17,7 @@ class FileService(
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
 
+    fun storageLocation(fileName: String) = "$storagePath/$fileName"
     fun uploadsLocation(fileName: String) = "$storagePath$uploadsPath/$fileName"
 
     fun copyTo(inputStream: InputStream, outputStream: OutputStream) {

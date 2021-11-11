@@ -11,6 +11,7 @@ import javax.naming.NoPermissionException
 import javax.security.auth.login.AccountLockedException
 
 suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
+    val badRequestParameters = "Bad request parameters"
     try {
         block()
     } catch (e: JsonSyntaxException) {
@@ -18,15 +19,15 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     } catch (e: SerializationException) {
         this.respondJSON("Bad body parameters", HttpStatusCode.BadRequest)
     } catch (e: IllegalStateException) {
-        this.respondJSON("Illegal parameters", HttpStatusCode.BadRequest)
+        this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: NullPointerException) {
-        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+        this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.lang.IllegalArgumentException) {
-        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+        this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.lang.NumberFormatException) {
-        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+        this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.time.format.DateTimeParseException) {
-        this.respondJSON("Bad parameters", HttpStatusCode.BadRequest)
+        this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.io.IOException) {
         this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
     }  catch (e: AccountLockedException) {

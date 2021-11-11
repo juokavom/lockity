@@ -1,8 +1,24 @@
-function Files() {
+export default function MyFiles() {
     return (
         <div>
-            <h1>TAKE ME FILE</h1>
+        test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
+            test<br />
         </div>
     );
 }
-export default Files;

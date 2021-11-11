@@ -31,23 +31,8 @@ fun RegistrableUser.isValuesValid() {
 
 @Serializable
 data class FrontendUser(
-    val id: String,
-    val name: String?,
-    val surname: String?,
     val email: String,
-    val password: String,
-    val subscribed: Boolean,
     val role: String
-)
-
-fun frontendUserFromUserRecordAndRole(userId: String, userRecord: UserRecord, role: String) = FrontendUser(
-    id = userId,
-    name = userRecord.name,
-    surname = userRecord.surname,
-    email = userRecord.email!!,
-    password = "",
-    subscribed = userRecord.subscribed == "1".toByte(),
-    role = role
 )
 
 @Serializable

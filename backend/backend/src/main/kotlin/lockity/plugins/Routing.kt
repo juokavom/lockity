@@ -51,6 +51,7 @@ fun Application.configureRouting() {
         jwtTokenService = jwtService
         lastActive = { id -> userRepository.updateLastActive(UUID.fromString(id)) }
     }
+    install(PartialContent)
 
     routing {
         authRoutes()

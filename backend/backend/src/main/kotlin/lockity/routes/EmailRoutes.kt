@@ -4,6 +4,7 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.utils.withErrorHandler
 
 fun Application.emailRoutes() {
     routing {
@@ -18,7 +19,10 @@ fun Application.emailRoutes() {
              * Scope: Admin
              */
             post("/newsletter") {
-                call.respond(HttpStatusCode.NoContent)
+                call.withErrorHandler {
+
+                    call.respond(HttpStatusCode.NoContent)
+                }
             }
 
             /**
@@ -30,7 +34,10 @@ fun Application.emailRoutes() {
              * Scope: all
              */
             post("/file-share") {
-                call.respond(HttpStatusCode.NoContent)
+                call.withErrorHandler {
+
+                    call.respond(HttpStatusCode.NoContent)
+                }
             }
         }
     }

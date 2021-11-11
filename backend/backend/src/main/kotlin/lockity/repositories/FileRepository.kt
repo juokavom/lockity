@@ -2,6 +2,10 @@ package lockity.repositories
 
 import database.schema.tables.records.FileRecord
 import database.schema.tables.references.FileTable
+import database.schema.tables.references.SharedAccessTable
+import database.schema.tables.references.UserTable
+import lockity.models.FileMetadata
+import lockity.models.SharedAccess
 import lockity.utils.DatabaseService
 import org.jooq.impl.DSL
 import java.math.BigDecimal
@@ -10,6 +14,18 @@ import java.util.*
 class FileRepository(
     private val databaseService: DatabaseService
 ) {
+    fun fileExist(uuid: UUID): Boolean = databaseService.dsl
+        .selectCount()
+        .from(FileTable)
+        .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .fetchOne()?.value1() == 1
+
+    fun fileOwner(uuid: UUID): ByteArray? = databaseService.dsl
+        .select(FileTable.User)
+        .from(FileTable)
+        .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .fetchOne()?.value1()
+
     fun insert(fileRecord: FileRecord) = databaseService.dsl
         .batchInsert(fileRecord)
         .execute()
@@ -40,4 +56,18 @@ class FileRepository(
         .from(FileTable)
         .where(FileTable.User.eq(userBinId))
         .fetchOne()?.value1()
+
+    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
+        .select()
+        .from(SharedAccessTable)
+        .join(FileTable).onKey()
+        .where(SharedAccessTable.OwnerId.eq(userBin))
+        .fetchArray()
+        .toList()
+        .map {
+            FileMetadata(
+                title = it[FileTable.Title]!!,
+                size = it[FileTable.Size]!!
+            )
+        }
 }

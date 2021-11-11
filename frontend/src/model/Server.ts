@@ -16,9 +16,8 @@ export namespace ENDPOINTS {
     const endpoint = SERVER.URL
 
     export namespace AUTH {
-        const auth = endpoint + '/auth'
-        export const login = auth + '/login'
-        export const logout = auth + '/logout'
+        export const login = endpoint + '/login'
+        export const logout = endpoint + '/logout'
     }
     export namespace FILE {
         export const file = endpoint + '/file'

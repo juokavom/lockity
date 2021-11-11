@@ -59,9 +59,8 @@ fun Application.authRoutes() {
                         userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
                             call.respond(
                                 HttpStatusCode.OK,
-                                frontendUserFromUserRecordAndRole(
-                                    userId = uid,
-                                    userRecord = userRecord,
+                                FrontendUser(
+                                    email = userRecord.email!!,
                                     role = roleRepository.fetch(userRecord.role!!)!!.name!!
                                 )
                             )

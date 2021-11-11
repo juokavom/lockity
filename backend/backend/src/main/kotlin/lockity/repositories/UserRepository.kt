@@ -11,6 +11,12 @@ import java.util.*
 class UserRepository(
     private val databaseService: DatabaseService
 ) {
+    fun userExist(uuid: UUID): Boolean = databaseService.dsl
+        .selectCount()
+        .from(UserTable)
+        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .fetchOne()?.value1() == 1
+
     fun isEmailUnique(email: String): Boolean = databaseService.dsl
         .selectCount()
         .from(UserTable)
@@ -20,8 +26,10 @@ class UserRepository(
     fun isAnyoneElseEmailUnique(uuid: UUID, email: String): Boolean = databaseService.dsl
         .selectCount()
         .from(UserTable)
-        .where(UserTable.Email.eq(email)
-            .and(UserTable.Id.ne(databaseService.uuidToBin(uuid))))
+        .where(
+            UserTable.Email.eq(email)
+                .and(UserTable.Id.ne(databaseService.uuidToBin(uuid)))
+        )
         .fetchOne()?.value1() == 0
 
     fun insertUser(userRecord: UserRecord) = databaseService.dsl

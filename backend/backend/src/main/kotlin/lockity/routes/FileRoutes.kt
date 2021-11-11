@@ -10,10 +10,8 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.AnonymousFileMetadata
-import lockity.repositories.ConfirmationLinkRepository
-import lockity.repositories.FileRepository
-import lockity.repositories.RoleRepository
-import lockity.repositories.UserRepository
+import lockity.models.FileMetadata
+import lockity.repositories.*
 import lockity.services.*
 import lockity.utils.*
 import org.koin.ktor.ext.inject
@@ -32,6 +30,7 @@ fun Application.fileRoutes() {
     val confirmationLinkRepository: ConfirmationLinkRepository by inject()
     val configurationService: ConfigurationService by inject()
     val jwtService: JwtService by inject()
+    val sharedAccessRepository: SharedAccessRepository by inject()
 
     routing {
         route("/file") {
@@ -133,80 +132,194 @@ fun Application.fileRoutes() {
                         } else throw BadRequestException("Multipart data is not file type")
                     }
                 }
+
                 /**
                  * Get physical file by providing file id
-                 * SCOPE = Registered (gets his own file or file is shared access with him)
+                 * SCOPE = Registered (gets his own file)
                  */
                 get("/file-id/{fileId}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file")
+
+                        call.respondFile(File(fileRecord.location!!))
+                    }
                 }
                 /**
                  * Get shared physical file by providing file id
                  * SCOPE = Registered (gets shared access file with him)
                  */
-                get("/shared/file-id/{fileId}") {
+                get("/share-id/{shareId}") {
+                    call.withErrorHandler {
+
+                        val shareId = call.parameters["shareId"]
+                            ?: throw BadRequestException("Share id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
+                            ?: throw NotFoundException("Shared access was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file")
+                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file")
+
+                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+                            ?: throw NotFoundException("File was not found")
+
+                        call.respondFile(File(fileRecord.location!!))
+                    }
+                }
+                /**
+                 * Get physical file by providing file id
+                 * SCOPE = Registered (gets his own file or file is shared access with him)
+                 */
+                get("/metadata/file-id/{fileId}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file metadata")
+
+                        call.respond(
+                            FileMetadata(
+                                title = fileRecord.title!!,
+                                size = fileRecord.size!!
+                            )
+                        )
+                    }
+                }
+
+                /**
+                 * Get physical file by providing file id
+                 * SCOPE = Registered (gets his own file or file is shared access with him)
+                 */
+                get("/metadata/shared-id/{shareId}") {
+                    call.withErrorHandler {
+                        val shareId = call.parameters["shareId"]
+                            ?: throw BadRequestException("Share id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
+                            ?: throw NotFoundException("Shared access was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file metadata")
+
+                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+                            ?: throw NotFoundException("File was not found")
+
+                        call.respond(
+                            FileMetadata(
+                                title = fileRecord.title!!,
+                                size = fileRecord.size!!
+                            )
+                        )
+                    }
+                }
+                /**
+                 * Gets list of user's files metadata whose titles start with
+                 * SCOPE = Registered
+                 */
+                get("/metadata") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        val userFiles = fileRepository.fetchUserFiles(databaseService.binToUuid(currentUser.id!!))
+
+                        call.respond(
+                            userFiles.map {
+                                FileMetadata(
+                                    title = it.title!!,
+                                    size = it.size!!
+                                )
+                            }
+                        )
+                    }
+                }
+                /**
+                 * Gets list of user's files metadata whose titles start with
+                 * SCOPE = Registered
+                 */
+                get("/metadata/shared") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        val userSharedFiles = fileRepository.fetchUserReceivedSharedFiles(currentUser.id!!)
+                        call.respond(userSharedFiles)
+                    }
                 }
                 /**
                  * Edits file data (title)
                  * SCOPE = Registered (edits his own file)
                  */
                 put("/file-id/{fileId}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file metadata")
+
+                    }
                 }
                 /**
                  * Deletes file (and shared access)
                  * SCOPE = Registered (deletes his own file)
                  */
                 delete("/file-id/{fileId}") {
-                }
-                /**
-                 * Gets list of user's files metadata whose titles start with
-                 * SCOPE = Registered
-                 */
-                get("/metadata/user/{userId}/starts-with/{startsWith}") {
-                }
-                /**
-                 * Gets list of user's shared access files metadata
-                 * SCOPE = Registered
-                 */
-                get("/metadata/shared/user/{userId}") {
-                }
-            }
-            /**
-             * Generate dynamic link for file access
-             * SCOPE = ALL: (guest (with key), registered (his file))
-             */
-            post("/dynlink/file-id/{fileId}") {
-                call.withErrorHandler {
-                    val fileId = call.parameters["fileId"]
-                        ?: throw BadRequestException("File id is not present in the parameters.")
-                    val key = call.request.queryParameters["fileKey"]
-                    val user = call.jwtUser()
-                    val file = fileRepository.fetch(UUID.fromString(fileId))
-                        ?: throw NotFoundException("File was not found")
-
-                    if (file.link != null) throw BadRequestException("File has link already")
-                    if (file.user != null) {
-                        if (user == null || !file.user.contentEquals(user.id)) {
-                            throw NoPermissionException("User do not own the file.")
-                        }
-                    } else {
-                        if (key == null) throw BadRequestException("File key is not provided.")
-                        else if (file.key != key) {
-                            throw BadRequestException("File key is not correct.")
-                        }
+                    call.withErrorHandler {
                     }
-
-                    file.link = UUID.randomUUID().toString()
-                    file.key = null
-                    fileRepository.update(file)
-
-                    call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
                 }
             }
-            /**
-             * Get physical file by providing dynamic link id
-             * SCOPE = Guest
-             */
-            get("/dynlink-id/{dynlinkId}") {
+        }
+        /**
+         * Generate dynamic link for file access
+         * SCOPE = ALL: (guest (with key), registered (his file))
+         */
+        post("/dynlink/file-id/{fileId}") {
+            call.withErrorHandler {
+                val fileId = call.parameters["fileId"]
+                    ?: throw BadRequestException("File id is not present in the parameters.")
+                val key = call.request.queryParameters["fileKey"]
+                val user = call.jwtUser()
+                val file = fileRepository.fetch(UUID.fromString(fileId))
+                    ?: throw NotFoundException("File was not found")
+
+                if (file.link != null) throw BadRequestException("File has link already")
+                if (file.user != null) {
+                    if (user == null || !file.user.contentEquals(user.id)) {
+                        throw NoPermissionException("User do not own the file.")
+                    }
+                } else {
+                    if (key == null) throw BadRequestException("File key is not provided.")
+                    else if (file.key != key) {
+                        throw BadRequestException("File key is not correct.")
+                    }
+                }
+
+                file.link = UUID.randomUUID().toString()
+                file.key = null
+                fileRepository.update(file)
+
+                call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
+            }
+        }
+        /**
+         * Get physical file by providing dynamic link id
+         * SCOPE = Guest
+         */
+        get("/dynlink-id/{dynlinkId}") {
+            call.withErrorHandler {
             }
         }
     }

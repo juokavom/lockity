@@ -1,4 +1,3 @@
-import './Upload.scss';
 import FileUploader, { FileUploadedMetadata } from '../../component/FileUploaderComponent';
 import { ROUTES } from '../../model/Routes';
 import { Copyright } from '../login/LoginPage';

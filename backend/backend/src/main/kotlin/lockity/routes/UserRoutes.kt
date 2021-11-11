@@ -125,6 +125,7 @@ fun Application.userRoutes() {
                         ) {
                             throw NoPermissionException("\"User do not have permission to get this users storage info")
                         }
+
                         val userRecord = userRepository.fetch(userUuid)
                             ?: throw NotFoundException("User was not found")
 
@@ -255,20 +256,20 @@ fun Application.userRoutes() {
                  * Scope: Authenticated
                  */
                 get("/email-like/{emailLike}") {
-                    call.withErrorHandler {
-                        var emailLike = call.parameters["emailLike"] ?: ""
-                        emailLike = if (emailLike == "*") "%" else "%$emailLike%"
-                        val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
-                        call.respond(
-                            fetchedUserRecords.map {
-                                frontendUserFromUserRecordAndRole(
-                                    userId = databaseService.binToUuid(it.id!!).toString(),
-                                    userRecord = it,
-                                    role = roleRepository.fetch(it.role!!)!!.name!!
-                                )
-                            }
-                        )
-                    }
+//                    call.withErrorHandler {
+//                        var emailLike = call.parameters["emailLike"] ?: ""
+//                        emailLike = if (emailLike == "*") "%" else "%$emailLike%"
+//                        val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
+//                        call.respond(
+//                            fetchedUserRecords.map {
+//                                frontendUserFromUserRecordAndRole(
+//                                    userId = databaseService.binToUuid(it.id!!).toString(),
+//                                    userRecord = it,
+//                                    role = roleRepository.fetch(it.role!!)!!.name!!
+//                                )
+//                            }
+//                        )
+//                    }
                 }
             }
         }

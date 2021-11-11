@@ -2,10 +2,7 @@ package lockity
 
 import io.ktor.application.*
 import lockity.plugins.configureRouting
-import lockity.repositories.ConfirmationLinkRepository
-import lockity.repositories.FileRepository
-import lockity.repositories.RoleRepository
-import lockity.repositories.UserRepository
+import lockity.repositories.*
 import lockity.services.ConfigurationService
 import lockity.services.JwtService
 import lockity.utils.DatabaseService
@@ -30,6 +27,7 @@ fun Application.main() {
                 single { RoleRepository(get()) }
                 single { JwtService(get()) }
                 single { ConfirmationLinkRepository(get()) }
+                single { SharedAccessRepository(get()) }
             }
         )
     }

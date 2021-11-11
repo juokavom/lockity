@@ -49,7 +49,7 @@ function Login() {
             .send((loggedUser: User.FrontendUser) => {
                 toast.success('Login successful', DefaultToastOptions)
                 localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
-                window.location.replace(ROUTES.DEFAULT)
+                window.location.replace(ROUTES.myFiles)
             })
     };
 
@@ -63,17 +63,20 @@ function Login() {
                     </Typography>
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
                         <TextField
+                            key="email"
                             margin="normal"
                             required
                             fullWidth
                             id="email"
-                            label="Email Address"
+                            label="Email"
                             name="email"
                             autoComplete="email"
                             autoFocus
+                            variant="standard"
                             onChange={(e: any) => setEmail(e.target.value)}
                         />
-                        <TextField
+                        <TextField                           
+                            key="password"
                             margin="normal"
                             required
                             fullWidth
@@ -82,6 +85,7 @@ function Login() {
                             type="password"
                             id="password"
                             autoComplete="password"
+                            variant="standard"
                             onChange={(e: any) => setPassword(e.target.value)}
                         />
                         <Button
@@ -109,7 +113,7 @@ function Login() {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
-                            style={{color: "#ebf0f"}}
+                            style={{ color: "#ebf0f" }}
                             onClick={() => window.location.replace(ROUTES.upload)}
                         >
                             Proceed to upload page

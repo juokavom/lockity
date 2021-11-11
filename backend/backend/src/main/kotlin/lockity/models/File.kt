@@ -13,3 +13,9 @@ data class StorageData(
     val totalSize: Long,
     val usedSize: Long
 )
+
+@Serializable
+data class FileMetadata(
+    val title: String,
+    val size: Long
+)
