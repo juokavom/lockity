@@ -7,7 +7,11 @@ import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
 import MyFiles from '../FilesPage';
+import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
+import Newsletter from '../NewsletterPage';
+import Users from '../UsersPage';
+import SharedFiles from '../SharedFilesPage';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -38,12 +42,21 @@ export default function Main() {
             <div className="container center-main">
                 <div className="row justify-content-center">
                     <div className="mainbox col-10 col-sm-12">
-                        <Header />
+                        <Header {...{ user: user!, isAdmin: isAdmin }} />
                         <Switch>
                             <Route exact path={ROUTES.test} component={() => <Test />} />
-                            {/* <Route exact path={ROUTES.users} component={() => isAdmin ? <Users /> : <Login />} /> */}
-    
+
                             <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
+                            <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
+                            <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
+
+                            {isAdmin &&
+                                <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />
+                            }
+                            {isAdmin &&
+                                <Route exact path={ROUTES.users} component={() => <Users />} />
+                            }
+
                             <Redirect to={ROUTES.myFiles} />
                         </Switch>
                     </div>
@@ -58,19 +71,19 @@ export function useWindowSize() {
         width: number | null,
         height: number | null
     }>({
-      width: null,
-      height: null,
+        width: null,
+        height: null,
     });
     useEffect(() => {
-      function handleResize() {
-        setWindowSize({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      }
-      window.addEventListener("resize", handleResize);
-      handleResize();
-      return () => window.removeEventListener("resize", handleResize);
+        function handleResize() {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        }
+        window.addEventListener("resize", handleResize);
+        handleResize();
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
     return windowSize;
-  }
+}

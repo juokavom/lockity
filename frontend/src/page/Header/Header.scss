@@ -33,20 +33,22 @@ p {
 }
 
 @media (max-width: 992px) {
-    .container-fluid {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
     .text-color-toggler {
         margin-right: 0rem;
     }
 }
 
+
 .center-vertically {
-    height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.center-horizontally {
+    display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
 }

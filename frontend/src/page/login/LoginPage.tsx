@@ -47,7 +47,7 @@ function Login() {
                 password: password
             })
             .send((loggedUser: User.FrontendUser) => {
-                toast.success('Login successful', DefaultToastOptions)
+                // toast.success('Login successful', DefaultToastOptions)
                 localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
                 window.location.replace(ROUTES.myFiles)
             })
