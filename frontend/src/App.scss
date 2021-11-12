@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
 
 .dropzone {
   text-align: center;
@@ -83,18 +83,18 @@ $color: #0cf;
 
 @media (max-width: 600px) {
   .upload-main {
-      top: 5%;
+    top: 5%;
   }
   .upload {
-      margin-bottom: 5%;
+    margin-bottom: 5%;
   }
 }
 @media (min-width: 600px) {
   .upload-main {
-      top: 15%;
+    top: 15%;
   }
   .upload {
-      margin-bottom: 15%;
+    margin-bottom: 15%;
   }
 }
 
@@ -179,7 +179,7 @@ $color: #0cf;
 }
 
 .permanent-marker {
-  font-family: 'Permanent Marker', cursive;
+  font-family: "Permanent Marker", cursive;
   font-size: 24px;
 }
 
@@ -189,15 +189,13 @@ $color: #0cf;
   }
 }
 
-.MyFiles {
-  
+.route-holder {
+  width: 90%;
 }
 
 .file {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
   border-radius: 1em;
   margin-top: 2rem;
-  // margin-left: 2rem;
-  // margin-right: 2rem;
-  padding: 1rem;
+  padding: 0.75rem;
 }

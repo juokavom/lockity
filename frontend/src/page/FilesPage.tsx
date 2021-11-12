@@ -2,47 +2,115 @@ import React, { Component, useEffect, useState } from 'react';
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
     Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu
+    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
-import { IUserProps, User } from '../model/User';
+import { User } from '../model/User';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import { IconButton } from '@mui/material';
+import { IPageProps } from './main/MainPage';
 
-interface FileMetadata {
+interface IFileMetadata {
     fileId: string,
     title: string,
     size: number,
     dynlink: string | null
 }
 
-function File(FileMetadata: FileMetadata) {
+interface IFileProps {
+    fileMetadata: IFileMetadata,
+    changedLayout: Boolean
+}
+
+function formatBytes(bytes: number, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+function File({ fileMetadata, changedLayout }: IFileProps) {
+    const buttons = (
+        <>
+            <div className="col-auto">
+                <IconButton >
+                    <EditOutlinedIcon />
+                </IconButton>
+            </div>
+            <div className="col-auto">
+                <IconButton >
+                    <VisibilityOutlinedIcon />
+                </IconButton>
+            </div>
+            <div className="col-auto">
+                <IconButton >
+                    <GetAppOutlinedIcon />
+                </IconButton>
+            </div>
+            <div className="col-auto">
+                <IconButton >
+                    <ShareOutlinedIcon />
+                </IconButton>
+            </div>
+            <div className="col-auto">
+                <IconButton >
+                    <DeleteOutlineOutlinedIcon />
+                </IconButton>
+            </div>
+        </>
+    );
+
+
     return (
         <div className="file container" >
-            <div className="row">
-                <div className="col">
-                {FileMetadata.title}
+            <div className="row align-items-center">
+                <div className="col ellipse-text d-flex justify-content-center">
+                    <p className="ellipse-text" style={{ maxWidth: "400px" }}>{fileMetadata.title}</p>
                 </div>
-                <div className="col">{FileMetadata.size}
+                <div className="col-4 col-lg-2 d-flex justify-content-center">
+                    {formatBytes(fileMetadata.size)}
                 </div>
+                {!changedLayout && buttons}
             </div>
+            {changedLayout &&
+                <div className="row align-items-center d-flex justify-content-center">
+                    {buttons}
+                </div>
+            }
         </div>
     );
 }
 
-export default function MyFiles({ user, isAdmin }: IUserProps) {
-    const file: FileMetadata = {
+export default function MyFiles({ user, isAdmin, changedLayout }: IPageProps) {
+
+    const file: IFileMetadata = {
         fileId: "ffd7e268-9b02-4b76-a473-6d4cda0b2520",
-        title: "heldens",
+        title: "heldens.flv",
         size: 700000000,
         dynlink: null
     }
+    const props: IFileProps = {
+        fileMetadata: file,
+        changedLayout: changedLayout
+    }
+
     return (
         <div>
-            <File {...file} />
-            <File {...file} />
-            <File {...file} />
-            <File {...file} />
-            <File {...file} />
-            <File {...file} />
+            <File {...props} />
+            <File {...props} />
+            <File {...props} />
+            <File {...props} />
+            <File {...props} />
+            <File {...props} />
         </div>
     );
 }

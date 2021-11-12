@@ -7,33 +7,13 @@ import {
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
 import './Header.scss';
-import { User, IUserProps } from '../../model/User';
+import { User } from '../../model/User';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { ROUTES } from '../../model/Routes';
 import { LogoutAction } from '../../model/RequestActions';
+import { IPageProps } from '../main/MainPage';
 
 
-function useWindowSize() {
-    const [windowSize, setWindowSize] = useState<{
-        width: number | null,
-        height: number | null
-    }>({
-        width: null,
-        height: null,
-    });
-    useEffect(() => {
-        function handleResize() {
-            setWindowSize({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
-        }
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-    return windowSize;
-}
 
 function sayHello() {
     const hellos = [
@@ -44,16 +24,14 @@ function sayHello() {
     return hellos[Math.floor(Math.random() * hellos.length)]
 }
 
-export default function Header({ user, isAdmin }: IUserProps) {
+export default function Header({ user, isAdmin, changedLayout }: IPageProps) {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
 
-    const windowSize = useWindowSize();
-    const [changeLayout, setChangeLayout] = useState(false);
-
-    const [hello] = useState(sayHello())
 
     const location = useLocation();
+
+    const [hello] = useState(sayHello())
 
     const emptyNavLinkMap = (): Map<string, string> => {
         const navLinkMap = new Map<string, string>();
@@ -64,6 +42,7 @@ export default function Header({ user, isAdmin }: IUserProps) {
 
     const [navlinkClasses, setNavlinkClasses] = useState(emptyNavLinkMap())
 
+
     useEffect(() => {
         const map = emptyNavLinkMap();
         if (map.has(location.pathname)) {
@@ -72,10 +51,6 @@ export default function Header({ user, isAdmin }: IUserProps) {
         }
     }, [location.pathname])
 
-    useEffect(() => {
-        if (windowSize.width && windowSize.width < 992) setChangeLayout(true)
-        else setChangeLayout(false)
-    }, [windowSize])
 
     return (
         <div className="header">
@@ -113,7 +88,7 @@ export default function Header({ user, isAdmin }: IUserProps) {
                                     </NavLink>
                                 </NavItem>
                             }
-                            {changeLayout &&
+                            {changedLayout &&
                                 <>
                                     <NavItem className="nav-link">
                                         <p className="text-color-toggler-static">My settings</p>
@@ -126,14 +101,11 @@ export default function Header({ user, isAdmin }: IUserProps) {
                         </Nav>
                     </Collapse>
                 </div>
-                {!changeLayout &&
+                {!changedLayout &&
                     <>
-                        {windowSize.width && windowSize.width > 1200 &&
-                            <div style={{ display: "inline-block" }}>
-                                <p style={{ whiteSpace: "pre" }}><b>{hello},&nbsp;</b></p>
-                            </div>
-
-                        }
+                        <div style={{ display: "inline-block" }}>
+                            <p style={{ whiteSpace: "pre" }}><b>{hello},&nbsp;</b></p>
+                        </div>
                         <div style={{ display: "inline-block" }}>
                             <p><i><b>{user.email}&nbsp;</b></i></p>
                         </div>

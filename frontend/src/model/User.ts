@@ -14,8 +14,3 @@ export namespace User {
         role: Role;
     }
 }
-
-export interface IUserProps {
-    user: User.FrontendUser,
-    isAdmin: Boolean
-}
