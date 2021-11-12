@@ -21,26 +21,32 @@ p {
     color: rgb(206, 206, 206);
 }
 
-.transparent-button {
-    background: none;
-    border-color: #87db41;
-    color: trans;
-    padding: 5px 5px;
-    width: 30%;
-    text-align: center;
-    outline: none;
-}
-.transparent-button:active {
-    border-style: outset;
-}
-
 .header {
     display: flex-start;
     justify-content: center;
     padding: 0rem 5rem;
     margin-bottom: 1rem;
     background-color: #95b3d4;
-    width: 110%;  
+    width: 110%;
     text-align: center;
     align-items: center;
-  }
+}
+
+@media (max-width: 992px) {
+    .container-fluid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .text-color-toggler {
+        margin-right: 0rem;
+    }
+}
+
+.center-vertically {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

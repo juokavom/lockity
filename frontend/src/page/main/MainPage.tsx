@@ -2,7 +2,7 @@ import Upload from '../upload/UploadPage';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import Login from '../login/LoginPage';
 import { ROUTES } from '../../model/Routes';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
@@ -37,7 +37,7 @@ export default function Main() {
         return (
             <div className="container center-main">
                 <div className="row justify-content-center">
-                    <div className="mainbox col-12">
+                    <div className="mainbox col-10 col-sm-12">
                         <Header />
                         <Switch>
                             <Route exact path={ROUTES.test} component={() => <Test />} />
@@ -52,3 +52,25 @@ export default function Main() {
         );
     }
 }
+
+export function useWindowSize() {
+    const [windowSize, setWindowSize] = useState<{
+        width: number | null,
+        height: number | null
+    }>({
+      width: null,
+      height: null,
+    });
+    useEffect(() => {
+      function handleResize() {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }
+      window.addEventListener("resize", handleResize);
+      handleResize();
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    return windowSize;
+  }
