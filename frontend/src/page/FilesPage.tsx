@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
     Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
@@ -14,17 +14,27 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { IconButton } from '@mui/material';
 import { IPageProps } from './main/MainPage';
+import { SUPPORTED_FILE_TYPES } from '../model/Server';
 
 interface IFileMetadata {
     fileId: string,
     title: string,
     size: number,
-    dynlink: string | null
+    dynlink: string | null,
 }
 
 interface IFileProps {
     fileMetadata: IFileMetadata,
-    changedLayout: Boolean
+    changedLayout: Boolean,
+    action: (action: FileAction) => void
+}
+
+enum FileAction {
+    Edit,
+    Preview,
+    Download,
+    Share,
+    Delete
 }
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -39,34 +49,37 @@ function formatBytes(bytes: number, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-function File({ fileMetadata, changedLayout }: IFileProps) {
+function File({ fileMetadata, changedLayout, action }: IFileProps) {
+    const format = fileMetadata.title.split('.').pop();
     const buttons = (
         <>
             <div className="col-auto">
-                <IconButton >
+                <IconButton onClick={() => action(FileAction.Edit)}>
                     <EditOutlinedIcon />
                 </IconButton>
             </div>
             <div className="col-auto">
-                <IconButton >
-                    <VisibilityOutlinedIcon />
-                </IconButton>
-                <IconButton disabled >
-                    <VisibilityOffOutlinedIcon />
-                </IconButton>
+                {format && SUPPORTED_FILE_TYPES.includes(format) ?
+                    <IconButton onClick={() => action(FileAction.Preview)}>
+                        <VisibilityOutlinedIcon />
+                    </IconButton> :
+                    <IconButton disabled >
+                        <VisibilityOffOutlinedIcon />
+                    </IconButton>
+                }
             </div>
             <div className="col-auto">
-                <IconButton >
+                <IconButton onClick={() => action(FileAction.Download)}>
                     <GetAppOutlinedIcon />
                 </IconButton>
             </div>
             <div className="col-auto">
-                <IconButton >
+                <IconButton onClick={() => action(FileAction.Share)}>
                     <ShareOutlinedIcon />
                 </IconButton>
             </div>
             <div className="col-auto">
-                <IconButton >
+                <IconButton onClick={() => action(FileAction.Delete)}>
                     <DeleteOutlineOutlinedIcon />
                 </IconButton>
             </div>
@@ -94,31 +107,96 @@ function File({ fileMetadata, changedLayout }: IFileProps) {
     );
 }
 
+function Edit(toggleModal: () => void) {
+    return (
+        <>
+            <ModalHeader toggle={() => { toggleModal() }}>Edit</ModalHeader>
+            <ModalBody>
+                Edit
+            </ModalBody>
+        </>
+    );
+}
+
+
+function Preview(toggleModal: () => void) {
+    return (
+        <>
+            <ModalHeader toggle={() => { toggleModal() }}>Preview</ModalHeader>
+            <ModalBody>
+                Preview
+            </ModalBody>
+        </>
+    );
+}
+
+function Share(toggleModal: () => void) {
+    return (
+        <>
+            <ModalHeader toggle={() => { toggleModal() }}>Share</ModalHeader>
+            <ModalBody>
+                Share
+            </ModalBody>
+        </>
+    );
+}
+
+function Delete(toggleModal: () => void) {
+    return (
+        <>
+            <ModalHeader toggle={() => { toggleModal() }}>Delete</ModalHeader>
+            <ModalBody>
+                Delete
+            </ModalBody>
+        </>
+    );
+}
+
 export default function MyFiles({ user, isAdmin, changedLayout }: IPageProps) {
     const [modalOpen, setModalOpen] = useState(false)
+    const [modalBody, setModalBody] = useState(<div></div>)
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
     }
 
+    const handleAction = (action: FileAction) => {
+        const jsxElement = selectActionJsw(action)
+        if (jsxElement) {
+            setModalBody(jsxElement)
+            toggleModal()
+        }
+    }
+
+    const selectActionJsw = (action: FileAction) => {
+        switch (action) {
+            case FileAction.Edit:
+                return Edit(toggleModal)
+            case FileAction.Preview:
+                return Preview(toggleModal)
+            case FileAction.Share:
+                return Share(toggleModal)
+            case FileAction.Delete:
+                return Delete(toggleModal)
+        }
+    }
+
     const file: IFileMetadata = {
         fileId: "ffd7e268-9b02-4b76-a473-6d4cda0b2520",
-        title: "heldeep",
+        title: "heldeep.mp4",
         size: 700000000,
         dynlink: null
     }
     const props: IFileProps = {
         fileMetadata: file,
-        changedLayout: changedLayout
+        changedLayout: changedLayout,
+        action: handleAction
     }
 
     return (
         <div>
-            <Modal isOpen={modalOpen}>
-                <ModalHeader toggle={toggleModal}>Login</ModalHeader>
-                <ModalBody>
-
-                </ModalBody>
+            <Modal isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                {modalBody}
             </Modal>
             <File {...props} />
             <File {...props} />

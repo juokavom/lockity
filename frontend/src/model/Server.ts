@@ -12,6 +12,7 @@ const prod: Server = {
 
 export const LANDING_URL = "https://lockity.akramas.com/"
 export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
+export const SUPPORTED_FILE_TYPES = ['mp4', 'mp3', 'jpg', 'jpeg', 'png']
 
 export const SERVER: Server = process.env.NODE_ENV === "production" ? prod : dev
 
