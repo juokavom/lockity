@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
 .dropzone {
   text-align: center;
   padding: 30px;
@@ -80,23 +82,41 @@ $color: #0cf;
 }
 
 @media (max-width: 600px) {
-  .center-main {
+  .upload-main {
       top: 5%;
   }
-  .mainbox {
+  .upload {
       margin-bottom: 5%;
   }
 }
 @media (min-width: 600px) {
-  .center-main {
+  .upload-main {
       top: 15%;
   }
-  .mainbox {
+  .upload {
       margin-bottom: 15%;
   }
 }
 
-.center-main {
+.upload-main {
+  min-width: 400px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.upload {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 0.5em;
+  overflow: hidden;
+}
+
+.mainbox-main {
+  top: 5%;
   min-width: 400px;
   position: absolute;
   left: 50%;
@@ -111,7 +131,9 @@ $color: #0cf;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 0.5em;
   overflow: hidden;
+  margin-bottom: 5%;
 }
+
 
 
 .jumbotron-top {
@@ -135,4 +157,36 @@ $color: #0cf;
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+
+.header {
+  display: flex-start;
+  justify-content: center;
+  padding: 0rem 5rem;
+  margin-bottom: 1rem;
+  background-color: #95b3d4;
+  width: 110%;
+  text-align: center;
+  align-items: center;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 5rem;
+  margin-top: 2rem;
+  background-color: #ebf0f5;
+  width: 110%;
+}
+
+.permanent-marker {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 24px;
+}
+
+@media (min-width: 992px) {
+  .min-height {
+    min-height: 400px;
+  }
 }

@@ -10,6 +10,9 @@ const prod: Server = {
     URL: 'https://api.lockity.akramas.com'
 }
 
+export const LANDING_URL = "https://lockity.akramas.com/"
+export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
+
 export const SERVER: Server = process.env.NODE_ENV === "production" ? prod : dev
 
 export namespace ENDPOINTS {

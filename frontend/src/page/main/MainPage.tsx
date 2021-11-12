@@ -12,6 +12,7 @@ import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
 import Users from '../UsersPage';
 import SharedFiles from '../SharedFilesPage';
+import Footer from '../FooterComponent';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -39,29 +40,32 @@ export default function Main() {
         );
     } else {
         return (
-            <div className="container center-main">
+            <div className="container mainbox-main">
                 <div className="row justify-content-center">
                     <div className="mainbox col-10 col-sm-12">
                         <Header {...{ user: user!, isAdmin: isAdmin }} />
-                        <Switch>
-                            <Route exact path={ROUTES.test} component={() => <Test />} />
+                        <div className="min-height">
+                            <Switch>
+                                <Route exact path={ROUTES.test} component={() => <Test />} />
 
-                            <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
-                            <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
-                            <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
+                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
+                                <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
+                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
 
-                            {isAdmin &&
-                                <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />
-                            }
-                            {isAdmin &&
-                                <Route exact path={ROUTES.users} component={() => <Users />} />
-                            }
+                                {isAdmin &&
+                                    <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />
+                                }
+                                {isAdmin &&
+                                    <Route exact path={ROUTES.users} component={() => <Users />} />
+                                }
 
-                            <Redirect to={ROUTES.myFiles} />
-                        </Switch>
+                                <Redirect to={ROUTES.myFiles} />
+                            </Switch>
+                        </div>
+                        <Footer />
                     </div>
                 </div>
-            </div>
+            </div >
         );
     }
 }

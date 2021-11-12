@@ -2,7 +2,7 @@ import { useState } from "react";
 import './Login.scss';
 import Button from '@mui/material/Button';
 import { DefaultToastOptions, RequestBuilder } from "../../model/RequestBuilder";
-import { ENDPOINTS } from "../../model/Server";
+import { ENDPOINTS, LANDING_URL } from "../../model/Server";
 import { User } from "../../model/User";
 import { toast } from "react-toastify";
 import { ROUTES } from "../../model/Routes";
@@ -14,12 +14,11 @@ import Link from '@mui/material/Link';
 export function Copyright(prop: any) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...prop}>
-            {'© '}
-            <Link color="inherit" href="https://lockity.akramas.com/">
-                Lockity
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
+            {'© '}{' '}
+            {new Date().getFullYear()}{' '}
+            <Link color="inherit" href={LANDING_URL}>
+                Lockity.com
+            </Link>
         </Typography>
     );
 }
@@ -75,7 +74,7 @@ function Login() {
                             variant="standard"
                             onChange={(e: any) => setEmail(e.target.value)}
                         />
-                        <TextField                           
+                        <TextField
                             key="password"
                             margin="normal"
                             required
@@ -118,7 +117,7 @@ function Login() {
                         >
                             Proceed to upload page
                         </Button>
-                        <Copyright sx={{ mt: 2 }} />
+                        {/* <Copyright sx={{ mt: 2 }} /> */}
                     </Box>
                 </div>
             </div >

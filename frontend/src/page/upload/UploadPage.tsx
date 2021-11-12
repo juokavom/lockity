@@ -41,9 +41,9 @@ function Upload() {
     };
 
     return (
-        <div className="container center-main">
+        <div className="container upload-main">
             <div className="row justify-content-center">
-                <div className="mainbox col-10 col-md-8 col-lg-6">
+                <div className="upload col-10 col-md-8 col-lg-6">
                     <div className="jumbotron-top">
                         <div>
                             <h1>Welcome to Lockity!</h1>
