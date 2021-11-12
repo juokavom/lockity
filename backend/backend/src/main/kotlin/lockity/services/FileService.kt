@@ -3,7 +3,6 @@ package lockity.services
 import lockity.repositories.FileRepository
 import lockity.utils.CONFIG
 import lockity.utils.DatabaseService
-import sun.rmi.runtime.Log
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream

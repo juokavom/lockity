@@ -91,10 +91,10 @@ export default function Header({ user, isAdmin, changedLayout }: IPageProps) {
                             {changedLayout &&
                                 <>
                                     <NavItem className="nav-link">
-                                        <p className="text-color-toggler-static">My settings</p>
+                                        <p className="text-color-toggler">My settings</p>
                                     </NavItem>
                                     <NavItem className="nav-link" onClick={async () => await LogoutAction()}>
-                                        <p className="text-color-toggler-static" >Logout</p>
+                                        <p className="text-color-toggler" >Logout</p>
                                     </NavItem>
                                 </>
                             }

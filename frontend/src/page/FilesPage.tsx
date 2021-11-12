@@ -11,6 +11,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { IconButton } from '@mui/material';
 import { IPageProps } from './main/MainPage';
 
@@ -50,6 +51,9 @@ function File({ fileMetadata, changedLayout }: IFileProps) {
                 <IconButton >
                     <VisibilityOutlinedIcon />
                 </IconButton>
+                <IconButton disabled >
+                    <VisibilityOffOutlinedIcon />
+                </IconButton>
             </div>
             <div className="col-auto">
                 <IconButton >
@@ -72,8 +76,8 @@ function File({ fileMetadata, changedLayout }: IFileProps) {
 
     return (
         <div className="file container" >
-            <div className="row align-items-center">
-                <div className="col ellipse-text d-flex justify-content-center">
+            <div className="row align-items-center d-flex justify-content-center">
+                <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
                     <p className="ellipse-text" style={{ maxWidth: "400px" }}>{fileMetadata.title}</p>
                 </div>
                 <div className="col-4 col-lg-2 d-flex justify-content-center">
@@ -91,10 +95,15 @@ function File({ fileMetadata, changedLayout }: IFileProps) {
 }
 
 export default function MyFiles({ user, isAdmin, changedLayout }: IPageProps) {
+    const [modalOpen, setModalOpen] = useState(false)
+
+    const toggleModal = () => {
+        setModalOpen(!modalOpen)
+    }
 
     const file: IFileMetadata = {
         fileId: "ffd7e268-9b02-4b76-a473-6d4cda0b2520",
-        title: "heldens.flv",
+        title: "heldeep",
         size: 700000000,
         dynlink: null
     }
@@ -105,6 +114,12 @@ export default function MyFiles({ user, isAdmin, changedLayout }: IPageProps) {
 
     return (
         <div>
+            <Modal isOpen={modalOpen}>
+                <ModalHeader toggle={toggleModal}>Login</ModalHeader>
+                <ModalBody>
+
+                </ModalBody>
+            </Modal>
             <File {...props} />
             <File {...props} />
             <File {...props} />

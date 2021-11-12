@@ -85,7 +85,7 @@ export default function Main() {
         return (
             <div className="container mainbox-main">
                 <div className="row justify-content-center">
-                    <div className="mainbox col-10 col-sm-12">
+                    <div className="mainbox col-10 col-sm-12 col-xl-10">
                         <Header {...props} />
                         <div className="min-height route-holder">
                             <Switch>
