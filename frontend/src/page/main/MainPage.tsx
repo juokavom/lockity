@@ -3,7 +3,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Login from '../login/LoginPage';
 import { ROUTES } from '../../model/Routes';
 import { useEffect, useState } from 'react';
-import { User } from '../../model/User';
+import { IUserProps, User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
 import MyFiles from '../FilesPage';
@@ -27,6 +27,8 @@ export default function Main() {
     const isAdmin = user != null ? User.isAdmin(user.role) : false
     const isAuthed = user != null ? User.isAuthed(user.role) : false
 
+    const props: IUserProps = { user: user!, isAdmin: isAdmin }
+
     if (!isAuthed) {
         return (
             <div>
@@ -43,12 +45,12 @@ export default function Main() {
             <div className="container mainbox-main">
                 <div className="row justify-content-center">
                     <div className="mainbox col-10 col-sm-12">
-                        <Header {...{ user: user!, isAdmin: isAdmin }} />
-                        <div className="min-height">
+                        <Header {...props} />
+                        <div className="min-height" style={{width: "100%"}}>
                             <Switch>
                                 <Route exact path={ROUTES.test} component={() => <Test />} />
 
-                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
+                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles {...props} />} />
                                 <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
                                 <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
 
@@ -68,26 +70,4 @@ export default function Main() {
             </div >
         );
     }
-}
-
-export function useWindowSize() {
-    const [windowSize, setWindowSize] = useState<{
-        width: number | null,
-        height: number | null
-    }>({
-        width: null,
-        height: null,
-    });
-    useEffect(() => {
-        function handleResize() {
-            setWindowSize({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
-        }
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-    return windowSize;
 }

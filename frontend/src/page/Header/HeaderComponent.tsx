@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom'
 import React, { Component, useEffect, useState } from 'react';
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
@@ -6,15 +7,32 @@ import {
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
 import './Header.scss';
-import { User } from '../../model/User';
+import { User, IUserProps } from '../../model/User';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import { useWindowSize } from '../main/MainPage';
 import { ROUTES } from '../../model/Routes';
 import { LogoutAction } from '../../model/RequestActions';
 
-interface IHeaderProps {
-    user: User.FrontendUser,
-    isAdmin: Boolean
+
+function useWindowSize() {
+    const [windowSize, setWindowSize] = useState<{
+        width: number | null,
+        height: number | null
+    }>({
+        width: null,
+        height: null,
+    });
+    useEffect(() => {
+        function handleResize() {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        }
+        window.addEventListener("resize", handleResize);
+        handleResize();
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    return windowSize;
 }
 
 function sayHello() {
@@ -26,7 +44,7 @@ function sayHello() {
     return hellos[Math.floor(Math.random() * hellos.length)]
 }
 
-export default function Header({ user, isAdmin }: IHeaderProps) {
+export default function Header({ user, isAdmin }: IUserProps) {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
 
@@ -34,6 +52,25 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
     const [changeLayout, setChangeLayout] = useState(false);
 
     const [hello] = useState(sayHello())
+
+    const location = useLocation();
+
+    const emptyNavLinkMap = (): Map<string, string> => {
+        const navLinkMap = new Map<string, string>();
+        [ROUTES.myFiles, ROUTES.receivedFiles, ROUTES.sharedFiles, ROUTES.sendNewsletter, ROUTES.users]
+            .forEach((route: string) => navLinkMap.set(route, "text-color-toggler"))
+        return navLinkMap;
+    }
+
+    const [navlinkClasses, setNavlinkClasses] = useState(emptyNavLinkMap())
+
+    useEffect(() => {
+        const map = emptyNavLinkMap();
+        if (map.has(location.pathname)) {
+            map.set(location.pathname, "text-color-toggler-selected")
+            setNavlinkClasses(map)
+        }
+    }, [location.pathname])
 
     useEffect(() => {
         if (windowSize.width && windowSize.width < 992) setChangeLayout(true)
@@ -49,44 +86,40 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
                         <Nav navbar className="center-vertically">
                             <NavItem>
                                 <NavLink className="nav-link" to={ROUTES.myFiles} >
-                                    <p className="text-color-toggler">My Files</p>
+                                    <p className={navlinkClasses.get(ROUTES.myFiles)}>My Files</p>
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink className="nav-link" to={ROUTES.receivedFiles} >
-                                    <p className="text-color-toggler">Received Files</p>
+                                    <p className={navlinkClasses.get(ROUTES.receivedFiles)}>Received Files</p>
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink className="nav-link" to={ROUTES.sharedFiles} >
-                                    <p className="text-color-toggler">Shared Files</p>
+                                    <p className={navlinkClasses.get(ROUTES.sharedFiles)}>Shared Files</p>
                                 </NavLink>
                             </NavItem>
                             {isAdmin &&
                                 <NavItem>
                                     <NavLink className="nav-link" to={ROUTES.sendNewsletter} >
-                                        <p className="text-color-toggler">Send Newsletter</p>
+                                        <p className={navlinkClasses.get(ROUTES.sendNewsletter)}>Send Newsletter</p>
                                     </NavLink>
                                 </NavItem>
                             }
                             {isAdmin &&
                                 <NavItem>
                                     <NavLink className="nav-link" to={ROUTES.users} >
-                                        <p className="text-color-toggler">Users</p>
+                                        <p className={navlinkClasses.get(ROUTES.users)}>Users</p>
                                     </NavLink>
                                 </NavItem>
                             }
                             {changeLayout &&
                                 <>
-                                    <NavItem>
-                                        <NavLink className="nav-link" to="/contactus" >
-                                            <p className="text-color-toggler">My settings</p>
-                                        </NavLink>
+                                    <NavItem className="nav-link">
+                                        <p className="text-color-toggler-static">My settings</p>
                                     </NavItem>
-                                    <NavItem onClick={async () => await LogoutAction()}>
-                                        <NavLink className="nav-link" to="" >
-                                            <p className="text-color-toggler" >Logout</p>
-                                        </NavLink>
+                                    <NavItem className="nav-link" onClick={async () => await LogoutAction()}>
+                                        <p className="text-color-toggler-static" >Logout</p>
                                     </NavItem>
                                 </>
                             }
@@ -112,7 +145,7 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
                             onMouseLeave={() => setDropdownOpen(false)}
                             toggle={() => { }}
                         >
-                            <DropdownToggle outline >
+                            <DropdownToggle outline>
                                 <PersonOutlineIcon />
                             </DropdownToggle>
                             <DropdownMenu >
