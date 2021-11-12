@@ -62,20 +62,17 @@ function Login() {
                     </Typography>
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
                         <TextField
-                            key="email"
                             margin="normal"
                             required
                             fullWidth
                             id="email"
                             label="Email"
                             name="email"
-                            autoComplete="email"
-                            autoFocus
+                            autoComplete="email"                
                             variant="standard"
                             onChange={(e: any) => setEmail(e.target.value)}
                         />
                         <TextField
-                            key="password"
                             margin="normal"
                             required
                             fullWidth

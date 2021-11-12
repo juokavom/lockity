@@ -77,7 +77,7 @@ export default function FileUploader(props: FileUploaderProps) {
             }
         }
 
-        xhr.open("POST", ENDPOINTS.FILE.fileAnonymous(true));
+        xhr.open("POST", ENDPOINTS.FILE.fileAnonymous);
         xhr.send(formData);
     }
 

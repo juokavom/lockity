@@ -6,13 +6,15 @@ import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
-import MyFiles from '../FilesPage';
+import MyFiles, { IFileMetadata } from '../FilesPage';
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
 import Users from '../UsersPage';
 import SharedFiles from '../SharedFilesPage';
 import Footer from '../FooterComponent';
+import { RequestBuilder } from '../../model/RequestBuilder';
+import { ENDPOINTS } from '../../model/Server';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -46,7 +48,8 @@ function useWindowSize() {
 export interface IPageProps {
     user: User.FrontendUser,
     isAdmin: Boolean,
-    changedLayout: Boolean
+    changedLayout: Boolean,
+    fileMetadata: IFileMetadata[] | null
 }
 
 export default function Main() {
@@ -59,16 +62,44 @@ export default function Main() {
 
     const windowSize = useWindowSize();
 
+    const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
+
+    const fetchFiles = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.fileMetadata)
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                if (response.length && response.length != 0) {
+                    const files: IFileMetadata[] = response
+                    setFileMetadata(files)
+                } else {
+                    setFileMetadata(null)
+                }
+            })
+    }
+
+    useEffect(() => {
+        if (isAuthed) {
+            fetchFiles()
+        }
+    }, [])
+
     useEffect(() => {
         if (windowSize.width && windowSize.width < 992) {
-            if(!changedLayout) setChangedLayout(true)
+            if (!changedLayout) setChangedLayout(true)
         }
         else {
-            if(changedLayout) setChangedLayout(false)
-        } 
+            if (changedLayout) setChangedLayout(false)
+        }
     }, [windowSize])
 
-    const props: IPageProps = { user: user!, isAdmin: isAdmin, changedLayout: changedLayout }
+    const props: IPageProps = { 
+        user: user!, 
+        isAdmin: isAdmin, 
+        changedLayout: changedLayout,
+        fileMetadata: fileMetadata
+    }
 
     if (!isAuthed) {
         return (
@@ -112,3 +143,7 @@ export default function Main() {
         );
     }
 }
+function setFileMetadata(arg0: [any]) {
+    throw new Error('Function not implemented.');
+}
+

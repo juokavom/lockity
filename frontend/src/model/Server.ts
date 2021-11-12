@@ -25,7 +25,8 @@ export namespace ENDPOINTS {
     }
     export namespace FILE {
         export const file = endpoint + '/file'
-        export const fileAnonymous = (isAnonymous: Boolean) => file + '/anonymous/' + isAnonymous
+        export const fileAnonymous = file + '/anonymous'
+        export const fileMetadata = file + '/metadata'
     }
     export namespace DYNLINK {
         export const dynlink = endpoint + '/dynlink'

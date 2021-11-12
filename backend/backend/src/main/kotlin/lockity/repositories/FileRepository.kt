@@ -57,17 +57,18 @@ class FileRepository(
         .where(FileTable.User.eq(userBinId))
         .fetchOne()?.value1()
 
-    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
-        .select()
-        .from(SharedAccessTable)
-        .join(FileTable).onKey()
-        .where(SharedAccessTable.OwnerId.eq(userBin))
-        .fetchArray()
-        .toList()
-        .map {
-            FileMetadata(
-                title = it[FileTable.Title]!!,
-                size = it[FileTable.Size]!!
-            )
-        }
+//    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
+//        .select()
+//        .from(SharedAccessTable)
+//        .join(FileTable).onKey()
+//        .where(SharedAccessTable.OwnerId.eq(userBin))
+//        .fetchArray()
+//        .toList()
+//        .map {
+//            FileMetadata(
+//                id = i
+//                title = it[FileTable.Title]!!,
+//                size = it[FileTable.Size]!!
+//            )
+//        }
 }

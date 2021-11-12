@@ -9,10 +9,10 @@ export const LogoutAction = async () => {
         .withUrl(ENDPOINTS.AUTH.logout)
         .withMethod('POST')
         .withDefaults()
-        .send((response: any) => {            
+        .send((response: any) => {
             // toast.success(response.message, DefaultToastOptions)
             localStorage.removeItem(User.storagename)
-            window.location.replace(ROUTES.login) 
+            window.location.replace(ROUTES.login)
         })
 };
 

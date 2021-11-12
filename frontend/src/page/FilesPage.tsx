@@ -14,13 +14,14 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { IconButton } from '@mui/material';
 import { IPageProps } from './main/MainPage';
-import { SUPPORTED_FILE_TYPES } from '../model/Server';
+import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { RequestBuilder } from '../model/RequestBuilder';
 
-interface IFileMetadata {
-    fileId: string,
+export interface IFileMetadata {
+    id: string,
     title: string,
     size: number,
-    dynlink: string | null,
+    link: string | null,
 }
 
 interface IFileProps {
@@ -51,6 +52,7 @@ function formatBytes(bytes: number, decimals = 2) {
 
 function File({ fileMetadata, changedLayout, action }: IFileProps) {
     const format = fileMetadata.title.split('.').pop();
+
     const buttons = (
         <>
             <div className="col-auto">
@@ -107,103 +109,114 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
     );
 }
 
-function Edit(toggleModal: () => void) {
-    return (
-        <>
-            <ModalHeader toggle={() => { toggleModal() }}>Edit</ModalHeader>
-            <ModalBody>
-                Edit
-            </ModalBody>
-        </>
-    );
-}
 
-
-function Preview(toggleModal: () => void) {
-    return (
-        <>
-            <ModalHeader toggle={() => { toggleModal() }}>Preview</ModalHeader>
-            <ModalBody>
-                Preview
-            </ModalBody>
-        </>
-    );
-}
-
-function Share(toggleModal: () => void) {
-    return (
-        <>
-            <ModalHeader toggle={() => { toggleModal() }}>Share</ModalHeader>
-            <ModalBody>
-                Share
-            </ModalBody>
-        </>
-    );
-}
-
-function Delete(toggleModal: () => void) {
-    return (
-        <>
-            <ModalHeader toggle={() => { toggleModal() }}>Delete</ModalHeader>
-            <ModalBody>
-                Delete
-            </ModalBody>
-        </>
-    );
-}
-
-export default function MyFiles({ user, isAdmin, changedLayout }: IPageProps) {
+export default function MyFiles({ user, isAdmin, changedLayout, fileMetadata }: IPageProps) {
     const [modalOpen, setModalOpen] = useState(false)
-    const [modalBody, setModalBody] = useState(<div></div>)
+    const [modal, setModal] = useState<{
+        title: string,
+        body: JSX.Element
+    } | null>(null)
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
     }
 
-    const handleAction = (action: FileAction) => {
-        const jsxElement = selectActionJsw(action)
-        if (jsxElement) {
-            setModalBody(jsxElement)
-            toggleModal()
-        }
+    function Edit() {
+        return (
+            <div>Edit</div>
+        );
     }
 
-    const selectActionJsw = (action: FileAction) => {
+
+    function Preview() {
+        return (
+            <div>Preview</div>
+        );
+    }
+
+
+    function Share() {
+        return (
+            <div>Share</div>
+        );
+    }
+
+
+    function Delete() {
+        return (
+            <div>Delete</div>
+        );
+    }
+
+    const selectActionJsx = (action: FileAction) => {
         switch (action) {
             case FileAction.Edit:
-                return Edit(toggleModal)
+                setModal({
+                    title: "Edit File",
+                    body: Edit()
+                });
+                toggleModal();
+                break;
             case FileAction.Preview:
-                return Preview(toggleModal)
+                setModal({
+                    title: "Preview File",
+                    body: Preview()
+                });
+                toggleModal();
+                break;
             case FileAction.Share:
-                return Share(toggleModal)
+                setModal({
+                    title: "Share File",
+                    body: Share()
+                });
+                toggleModal();
+                break;
             case FileAction.Delete:
-                return Delete(toggleModal)
+                setModal({
+                    title: "Delete File",
+                    body: Delete()
+                });
+                toggleModal();
+                break;
         }
     }
 
-    const file: IFileMetadata = {
-        fileId: "ffd7e268-9b02-4b76-a473-6d4cda0b2520",
-        title: "heldeep.mp4",
-        size: 700000000,
-        dynlink: null
-    }
-    const props: IFileProps = {
-        fileMetadata: file,
-        changedLayout: changedLayout,
-        action: handleAction
-    }
 
+    const props = (fileMetadata: IFileMetadata): IFileProps => {
+        return {
+            fileMetadata: fileMetadata,
+            changedLayout: changedLayout,
+            action: selectActionJsx
+        }
+    }
     return (
         <div>
             <Modal isOpen={modalOpen} toggle={() => { toggleModal() }}>
-                {modalBody}
+                <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                    <div className="d-flex justify-content-center">
+                        <p>{modal?.title}</p>
+                    </div>
+                </ModalHeader>
+                <ModalBody>
+                    {modal?.body}
+                </ModalBody>
             </Modal>
-            <File {...props} />
-            <File {...props} />
-            <File {...props} />
-            <File {...props} />
-            <File {...props} />
-            <File {...props} />
+            {
+                fileMetadata ?
+                    fileMetadata.map((fileMeta: IFileMetadata) => {
+                        return (
+                            <File key={fileMeta.id} {...props(fileMeta)}></File>
+                        );
+                    })
+                    :
+                    <div className="container">
+                        <div className="row align-items-center d-flex justify-content-center" style={{ height: "400px" }}>
+                            <div className="col-auto">
+                                <h5><i>You don't have any uploaded files</i></h5>
+                            </div>
+                        </div>
+                    </div>
+            }
         </div>
     );
 }
