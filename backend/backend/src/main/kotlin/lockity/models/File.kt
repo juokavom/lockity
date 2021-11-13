@@ -15,6 +15,11 @@ data class StorageData(
 )
 
 @Serializable
+data class FileCount(
+    val fileCount: Int
+)
+
+@Serializable
 data class FileMetadata(
     val id: String,
     val title: String,

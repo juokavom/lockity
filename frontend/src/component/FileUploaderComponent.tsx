@@ -4,9 +4,13 @@ import { ENDPOINTS } from '../model/Server';
 import { toast } from "react-toastify";
 import { DefaultToastOptions } from '../model/RequestBuilder';
 import { Progress, Spinner } from 'reactstrap';
+import { User } from '../model/User';
+import { ROUTES } from '../model/Routes';
 
 interface FileUploaderProps {
-    onUpload: (uploadMetadata: FileUploadedMetadata) => void
+    isAuthed: Boolean,
+    onUpload: (uploadMetadata?: FileUploadedMetadata) => void,
+    onError: () => void
 }
 
 export interface FileUploadedMetadata {
@@ -64,30 +68,49 @@ export default function FileUploader(props: FileUploaderProps) {
                 var status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
                     toast.success('Your file was uploaded successfully', DefaultToastOptions)
-                    const response = JSON.parse(xhr.response)
-                    props.onUpload({
-                        fileId: response.fileId,
-                        fileKey: response.fileKey,
-                        fileName: file[0].name
-                    })
-                } else {
-                    toast.error('Upload failed!', DefaultToastOptions)
+                    if (props.isAuthed) {
+                        props.onUpload()
+                    } else {
+                        const response = JSON.parse(xhr.response)
+                        props.onUpload({
+                            fileId: response.fileId,
+                            fileKey: response.fileKey,
+                            fileName: file[0].name
+                        })
+                    }
+                } else {                    
+                    props.onError()
+                    if (status === 401) {
+                        localStorage.removeItem(User.storagename)
+                        window.location.replace(ROUTES.login)
+                    } else {                        
+                        const response = JSON.parse(xhr.response)
+                        toast.error('Upload failed! ' + response.message, DefaultToastOptions)
+                    }
                 }
                 clearStateHooks()
             }
         }
 
-        xhr.open("POST", ENDPOINTS.FILE.fileAnonymous);
+        xhr.open("POST", props.isAuthed ? ENDPOINTS.FILE.file : ENDPOINTS.FILE.fileAnonymous);
+        xhr.withCredentials = true;
         xhr.send(formData);
     }
 
     return (
         <div className="border-box">
             {
-                state === UploaderState.Initial &&
+                !props.isAuthed && state === UploaderState.Initial &&
                 <>
                     <h1 className="ellipse-text">Upload your file here</h1>
                     <h5 className="ellipse-text"><i>(up to 1Gb)</i></h5>
+                </>
+            }
+            {
+                props.isAuthed && state === UploaderState.Initial &&
+                <>
+                    <h3 className="ellipse-text">Upload your file here</h3>
+                    <p><i>Be sure your file size does not exceed your storage space</i></p>
                 </>
             }
             <div className="col-12 col-md-10 col-xl-10">

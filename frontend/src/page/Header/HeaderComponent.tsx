@@ -11,7 +11,7 @@ import { User } from '../../model/User';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { ROUTES } from '../../model/Routes';
 import { LogoutAction } from '../../model/RequestActions';
-import { IPageProps } from '../main/MainPage';
+import { IHeaderProps } from '../main/MainPage';
 
 
 
@@ -24,7 +24,7 @@ function sayHello() {
     return hellos[Math.floor(Math.random() * hellos.length)]
 }
 
-export default function Header({ user, isAdmin, changedLayout }: IPageProps) {
+export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
 

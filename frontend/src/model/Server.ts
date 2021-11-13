@@ -25,8 +25,12 @@ export namespace ENDPOINTS {
     }
     export namespace FILE {
         export const file = endpoint + '/file'
+        export const metadata = file + '/metadata' 
+
         export const fileAnonymous = file + '/anonymous'
-        export const fileMetadata = file + '/metadata'
+        export const getFileMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
+            metadata + '/offset/' + offset + '/limit/' + limit
+        export const getFileMetadataCount = metadata + '/count'
     }
     export namespace DYNLINK {
         export const dynlink = endpoint + '/dynlink'

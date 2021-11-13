@@ -38,8 +38,24 @@ class FileRepository(
     fun fetchUserFiles(userUuid: UUID): List<FileRecord> = databaseService.dsl
         .selectFrom(FileTable)
         .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .orderBy(FileTable.Uploaded.desc())
         .fetchArray()
         .toList()
+
+    fun fetchUserFilesWithOffsetAndLimit(userUuid: UUID, offset: Int, limit: Int): List<FileRecord> = databaseService.dsl
+        .selectFrom(FileTable)
+        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .orderBy(FileTable.Uploaded.desc())
+        .offset(offset)
+        .limit(limit)
+        .fetchArray()
+        .toList()
+
+    fun fetchUserFilesCount(userUuid: UUID): Int? = databaseService.dsl
+        .selectCount()
+        .from(FileTable)
+        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .fetchOne()?.value1()
 
     fun deleteUserFiles(userUuid: UUID) = databaseService.dsl
         .deleteFrom(FileTable)

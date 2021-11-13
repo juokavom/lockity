@@ -17,10 +17,12 @@ function Upload() {
     const [fileMeta, setFileMeta] = useState<FileUploadedMetadata | null>(null)
     const [fileLink, setFileLink] = useState<string | null>(null)
 
-    const onFileUploaded = async (uploadMetadata: FileUploadedMetadata) => {
-        setFileMeta(uploadMetadata)
-        setState(UploadPageState.Uploaded)
-        await GenerateLinkAction(uploadMetadata)
+    const onFileUploaded = async (uploadMetadata?: FileUploadedMetadata) => {
+        if (uploadMetadata) {
+            setFileMeta(uploadMetadata)
+            setState(UploadPageState.Uploaded)
+            await GenerateLinkAction(uploadMetadata)
+        }
     }
 
     const copyFileUrl = async () => {
@@ -64,7 +66,7 @@ function Upload() {
                     </div>
                     {
                         state === UploadPageState.Initial &&
-                        <FileUploader {...{ onUpload: onFileUploaded }} />
+                        <FileUploader {...{ isAuthed: false, onUpload: onFileUploaded, onError: () => {} }} />
                     }
                     {
                         state === UploadPageState.Uploaded &&

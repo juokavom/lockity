@@ -10,6 +10,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.AnonymousFileMetadata
+import lockity.models.FileCount
 import lockity.models.FileMetadata
 import lockity.repositories.*
 import lockity.services.*
@@ -227,11 +228,21 @@ fun Application.fileRoutes() {
                  * Gets list of user's files metadata whose titles start with
                  * SCOPE = Registered
                  */
-                get("/metadata") {
+                get("/metadata/offset/{offset}/limit/{limit}") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this file metadata")
-                        val userFiles = fileRepository.fetchUserFiles(databaseService.binToUuid(currentUser.id!!))
+                        val offset = call.parameters["offset"]?.toIntOrNull()
+                            ?: throw BadRequestException("Offset is not present in the parameters or in bad format.")
+                        val limit = call.parameters["limit"]?.toIntOrNull()
+                            ?: throw BadRequestException("Limit is not present in the parameters or in bad format.")
+                        if (limit > 20) throw BadRequestException("Maximum limit(20) is exceeded.")
+
+                        val userFiles = fileRepository.fetchUserFilesWithOffsetAndLimit(
+                            userUuid = databaseService.binToUuid(currentUser.id!!),
+                            offset = offset,
+                            limit = limit
+                        )
 
                         call.respond(
                             userFiles.map {
@@ -243,6 +254,21 @@ fun Application.fileRoutes() {
                                 )
                             }
                         )
+                    }
+                }
+
+                get("/metadata/count") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+
+                            call.respond(
+                                FileCount(
+                                    fileRepository.fetchUserFilesCount(
+                                        userUuid = databaseService.binToUuid(currentUser.id!!)
+                                    ) ?: 0
+                                )
+                            )
                     }
                 }
                 /**

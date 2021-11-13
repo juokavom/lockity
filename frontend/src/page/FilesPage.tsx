@@ -12,10 +12,12 @@ import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { IconButton } from '@mui/material';
-import { IPageProps } from './main/MainPage';
+import { Box, IconButton, Pagination } from '@mui/material';
+import { IMyFilesProps } from './main/MainPage';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { RequestBuilder } from '../model/RequestBuilder';
+import FileUploader from '../component/FileUploaderComponent';
+import CustomPagination from '../component/PaginationComponent';
 
 export interface IFileMetadata {
     id: string,
@@ -30,7 +32,14 @@ interface IFileProps {
     action: (action: FileAction) => void
 }
 
+export interface IFileState {    
+    fileMetadata: IFileMetadata[] | null,
+    fileCount: number| null,
+    selected: number
+}
+
 enum FileAction {
+    Upload,
     Edit,
     Preview,
     Download,
@@ -52,6 +61,7 @@ function formatBytes(bytes: number, decimals = 2) {
 
 function File({ fileMetadata, changedLayout, action }: IFileProps) {
     const format = fileMetadata.title.split('.').pop();
+    const [tooltipVisible, setTooltipVisible] = useState(true)
 
     const buttons = (
         <>
@@ -65,7 +75,7 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
                     <IconButton onClick={() => action(FileAction.Preview)}>
                         <VisibilityOutlinedIcon />
                     </IconButton> :
-                    <IconButton disabled >
+                    <IconButton disabled  >
                         <VisibilityOffOutlinedIcon />
                     </IconButton>
                 }
@@ -109,16 +119,30 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
     );
 }
 
+export const FILE_CHUNK_SIZE = 5
 
-export default function MyFiles({ user, isAdmin, changedLayout, fileMetadata }: IPageProps) {
+export default function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
     const [modalOpen, setModalOpen] = useState(false)
     const [modal, setModal] = useState<{
         title: string,
         body: JSX.Element
     } | null>(null)
 
+
     const toggleModal = () => {
         setModalOpen(!modalOpen)
+    }
+
+    function Upload() {
+        return (
+            <FileUploader {...{
+                isAuthed: true, onUpload: () => {
+                    setModalOpen(false)
+                    fetchFileCount()
+                    fetchFiles(0, FILE_CHUNK_SIZE, 1)
+                }, onError: () => { setModalOpen(false) }
+            }} />
+        );
     }
 
     function Edit() {
@@ -150,6 +174,13 @@ export default function MyFiles({ user, isAdmin, changedLayout, fileMetadata }: 
 
     const selectActionJsx = (action: FileAction) => {
         switch (action) {
+            case FileAction.Upload:
+                setModal({
+                    title: "Upload File",
+                    body: Upload()
+                });
+                toggleModal();
+                break;
             case FileAction.Edit:
                 setModal({
                     title: "Edit File",
@@ -190,33 +221,52 @@ export default function MyFiles({ user, isAdmin, changedLayout, fileMetadata }: 
         }
     }
     return (
-        <div>
-            <Modal isOpen={modalOpen} toggle={() => { toggleModal() }}>
-                <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                    <div className="d-flex justify-content-center">
-                        <p>{modal?.title}</p>
-                    </div>
-                </ModalHeader>
-                <ModalBody>
-                    {modal?.body}
-                </ModalBody>
-            </Modal>
-            {
-                fileMetadata ?
+        <div className="container">
+            <div className="row align-items-center d-flex justify-content-center">
+                <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
+                    <Button outline
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        style={{ color: "#ebf0f", width: "100%" }}
+                        onClick={() => selectActionJsx(FileAction.Upload)}>
+                        Upload File
+                    </Button>
+                </Box>
+                <Modal isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                    <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                        <div className="d-flex justify-content-center">
+                            <p>{modal?.title}</p>
+                        </div>
+                    </ModalHeader>
+                    <ModalBody>
+                        {modal?.body}
+                    </ModalBody>
+                </Modal>
+                {
+                    fileMetadata ?
                     fileMetadata.map((fileMeta: IFileMetadata) => {
-                        return (
-                            <File key={fileMeta.id} {...props(fileMeta)}></File>
-                        );
-                    })
-                    :
-                    <div className="container">
-                        <div className="row align-items-center d-flex justify-content-center" style={{ height: "400px" }}>
-                            <div className="col-auto">
-                                <h5><i>You don't have any uploaded files</i></h5>
+                            return (
+                                <File key={fileMeta.id} {...props(fileMeta)}></File>
+                            );
+                        })
+                        :
+                        <div className="container">
+                            <div className="row align-items-center d-flex justify-content-center" style={{ height: "400px" }}>
+                                <div className="col-auto">
+                                    <h5><i>You don't have any uploaded files</i></h5>
+                                </div>
                             </div>
                         </div>
-                    </div>
-            }
+                }
+                {
+                    fileCount && fileCount > 0 && <CustomPagination {...{ 
+                        total: fileCount, 
+                        chunkSize: FILE_CHUNK_SIZE,
+                        selected: selected,
+                        fetchItems: fetchFiles
+                     }} />
+                }
+            </div>
         </div>
     );
 }

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
-import MyFiles, { IFileMetadata } from '../FilesPage';
+import MyFiles, { FILE_CHUNK_SIZE, IFileMetadata, IFileState } from '../FilesPage';
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
@@ -45,11 +45,19 @@ function useWindowSize() {
     return windowSize;
 }
 
-export interface IPageProps {
+export interface IHeaderProps {
     user: User.FrontendUser,
     isAdmin: Boolean,
+    changedLayout: Boolean
+}
+
+export interface IMyFilesProps {
     changedLayout: Boolean,
-    fileMetadata: IFileMetadata[] | null
+    fileMetadata: IFileMetadata[] | null,
+    fileCount: number | null,
+    selected: number,
+    fetchFiles: (offset: number, limit: number, selected: number) => void,
+    fetchFileCount: () => void
 }
 
 export default function Main() {
@@ -62,29 +70,6 @@ export default function Main() {
 
     const windowSize = useWindowSize();
 
-    const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
-
-    const fetchFiles = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.fileMetadata)
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                if (response.length && response.length != 0) {
-                    const files: IFileMetadata[] = response
-                    setFileMetadata(files)
-                } else {
-                    setFileMetadata(null)
-                }
-            })
-    }
-
-    useEffect(() => {
-        if (isAuthed) {
-            fetchFiles()
-        }
-    }, [])
-
     useEffect(() => {
         if (windowSize.width && windowSize.width < 992) {
             if (!changedLayout) setChangedLayout(true)
@@ -94,11 +79,62 @@ export default function Main() {
         }
     }, [windowSize])
 
-    const props: IPageProps = { 
-        user: user!, 
-        isAdmin: isAdmin, 
+
+    const [fileCount, setFileCount] = useState<number | null>(null)
+    const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
+    const [selected, setFileSelected] = useState<number>(1)
+
+    const fetchFiles = async (offset: number, limit: number, selected: number) =>
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                setFileSelected(selected)
+                if (response) {
+                    const files: IFileMetadata[] = response
+                    setFileMetadata(files)
+                } else {
+                    setFileMetadata(null)
+                }
+            })
+
+
+    const fetchFileCount = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.getFileMetadataCount)
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                if (response) {
+                    const fileCount: { fileCount: number } = response
+                    setFileCount(fileCount.fileCount)
+                } else {
+                    setFileCount(null)
+                }
+            })
+    }
+
+    useEffect(() => {
+        if (isAuthed) {
+            fetchFileCount()
+            fetchFiles(0, FILE_CHUNK_SIZE, 1)
+        }
+    }, [])
+
+    const headerProps: IHeaderProps = {
+        user: user!,
+        isAdmin: isAdmin,
+        changedLayout: changedLayout
+    }
+
+    const myFilesProps: IMyFilesProps = {
         changedLayout: changedLayout,
-        fileMetadata: fileMetadata
+        fileMetadata: fileMetadata,
+        fileCount: fileCount,
+        selected: selected,
+        fetchFiles: fetchFiles,
+        fetchFileCount: fetchFileCount
     }
 
     if (!isAuthed) {
@@ -117,12 +153,12 @@ export default function Main() {
             <div className="container mainbox-main">
                 <div className="row justify-content-center">
                     <div className="mainbox col-10 col-sm-12 col-xl-10">
-                        <Header {...props} />
+                        <Header {...headerProps} />
                         <div className="min-height route-holder">
                             <Switch>
                                 <Route exact path={ROUTES.test} component={() => <Test />} />
 
-                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles {...props} />} />
+                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles {...myFilesProps} />} />
                                 <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
                                 <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
 
@@ -142,8 +178,5 @@ export default function Main() {
             </div >
         );
     }
-}
-function setFileMetadata(arg0: [any]) {
-    throw new Error('Function not implemented.');
 }
 
