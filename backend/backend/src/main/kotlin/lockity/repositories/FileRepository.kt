@@ -65,6 +65,7 @@ class FileRepository(
     fun update(fileRecord: FileRecord) = databaseService.dsl
         .update(FileTable)
         .set(fileRecord)
+        .where(FileTable.Id.eq(fileRecord.id))
         .execute()
 
     fun userFileSizeSum(userBinId: ByteArray): BigDecimal? = databaseService.dsl

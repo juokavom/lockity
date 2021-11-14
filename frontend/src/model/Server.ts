@@ -28,6 +28,8 @@ export namespace ENDPOINTS {
         export const metadata = file + '/metadata' 
 
         export const fileId = (id: string) => file + '/file-id/' + id
+        export const streamWithFileId = (id: string) => fileId(id) + '/stream'
+        export const downloadWithFileId = (id: string) => fileId(id) + '/download'
         export const fileAnonymous = file + '/anonymous'
         export const getFileMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             metadata + '/offset/' + offset + '/limit/' + limit

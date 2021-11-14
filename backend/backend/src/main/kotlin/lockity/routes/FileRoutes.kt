@@ -157,6 +157,48 @@ fun Application.fileRoutes() {
 //                        call.respondFile(File(fileRecord.location!!))
 //                    }
 //                }
+
+                get("/file-id/{fileId}/stream") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("No permission to stream the file")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file")
+
+                        call.respondFile(
+                            File(fileRecord.location!! + "/" + fileRecord.title!!)
+                        )
+                    }
+                }
+
+                get("/file-id/{fileId}/download") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("No permission to download the file")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file")
+
+                        call.response.header(
+                            HttpHeaders.ContentDisposition,
+                            ContentDisposition.Attachment.withParameter(
+                                ContentDisposition.Parameters.FileName, fileRecord.title!!
+                            ).toString()
+                        )
+
+                        call.respondFile(
+                            File(fileRecord.location!! + "/" + fileRecord.title!!)
+                        )
+                    }
+                }
+
 //                /**
 //                 * Get shared physical file by providing file id
 //                 * SCOPE = Registered (gets shared access file with him)
@@ -311,7 +353,7 @@ fun Application.fileRoutes() {
                         val newTitle = editedFile.title + "." + sourceFile.extension
                         val destinationFile = File(fileRecord.location, newTitle)
 
-                        if(!sourceFile.renameTo(destinationFile))
+                        if (!sourceFile.renameTo(destinationFile))
                             throw BadRequestException("File renaming failed, check title")
 
                         fileRecord.title = newTitle

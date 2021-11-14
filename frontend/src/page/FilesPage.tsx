@@ -30,7 +30,7 @@ export interface IFileMetadata {
 interface IFileProps {
     fileMetadata: IFileMetadata,
     changedLayout: Boolean,
-    action: (action: FileAction) => void
+    action: (action: string) => void
 }
 
 export interface IFileState {
@@ -44,13 +44,12 @@ interface IModalProps {
     callback: (success: boolean) => void
 }
 
-enum FileAction {
-    Upload,
-    Edit,
-    Preview,
-    Download,
-    Share,
-    Delete
+const FileAction = {
+    Upload: "Upload file",
+    Edit: "Edit file",
+    Preview: "Preview file",
+    Share: "Share file",
+    Delete: "Delete file"
 }
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -86,7 +85,7 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
                 }
             </div>
             <div className="col-auto">
-                <IconButton onClick={() => action(FileAction.Download)}>
+                <IconButton href={ENDPOINTS.FILE.downloadWithFileId(fileMetadata.id)}>
                     <GetAppOutlinedIcon />
                 </IconButton>
             </div>
@@ -153,9 +152,6 @@ function Edit({ fileMetadata, callback }: IModalProps): JSX.Element {
 
     return (
         <div className="container">
-            <Typography align="center" component="h1" variant="h5">
-                Edit File
-            </Typography>
             <Box className="row align-items-center d-flex justify-content-center"
                 component="form" noValidate onSubmit={handleSubmit}>
                 <div className="row align-items-end d-flex justify-content-center">
@@ -192,12 +188,71 @@ function Edit({ fileMetadata, callback }: IModalProps): JSX.Element {
     );
 }
 
+function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
+    const [format] = useState(fileMetadata.title.split('.').pop());
+
+    const fileNameJsx = () => (
+        <Typography sx={{ mb: 2 }} className="ellipse-text" align="center" component="h1" variant="h5">
+            {fileMetadata.title}
+        </Typography>
+    );
+
+    const src = ENDPOINTS.FILE.streamWithFileId(fileMetadata.id)
+
+    const videoJsx = () => (
+        <video style={{ maxWidth: "100%" }} controls controlsList="nodownload nofullscreen">
+            <source src={src} type="video/mp4" />
+        </video>
+    );
+
+    const audioJsx = () => (
+        <audio style={{ maxWidth: "100%" }} controls controlsList="nodownload nofullscreen">
+            <source src={src} type="audio/mpeg" />
+        </audio>
+    );
+
+    const pictureJsx = () => (
+        <img style={{ maxWidth: "100%" }} src={src} />
+    );
+
+    let selected = null
+
+    if (format) {
+        if (format == "mp4") {
+            selected = videoJsx()
+        } else if (format == "mp3") {
+            selected = audioJsx()
+        } else if (["png", "jpg", "jpeg"].includes(format)) {
+            selected = pictureJsx()
+        }
+    }
+
+    if (selected != null) {
+        return (
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="row align-items-end d-flex justify-content-center">
+                    <div className="col-auto">
+                        {fileNameJsx()}
+                    </div>
+                </div>
+                <div className="row align-items-end d-flex justify-content-center">
+                    <div className="col-auto">
+                        {selected}
+                    </div>
+                </div>
+            </div>
+        );
+    } else {
+        return (<div></div>);
+    }
+}
+
 export const FILE_CHUNK_SIZE = 5
 
 export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
-        action: FileAction,
+        action: string,
         fileMetadata: IFileMetadata | null
     } | null>(null)
 
@@ -221,13 +276,6 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
             }} />
         );
     }
-
-    function Preview() {
-        return (
-            <div>Preview</div>
-        );
-    }
-
 
     function Share() {
         return (
@@ -254,7 +302,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
                     case FileAction.Edit:
                         return (<Edit {...modalProps} />);
                     case FileAction.Preview:
-                        return (<Preview />);
+                        return (<Preview {...modalProps} />);
                     case FileAction.Share:
                         return (<Share />);
                     case FileAction.Delete:
@@ -269,12 +317,12 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
         return {
             fileMetadata: fileMetadata,
             changedLayout: changedLayout,
-            action: (action: FileAction) => {
+            action: (action: string) => {
                 setModalData({
                     action: action,
                     fileMetadata: fileMetadata
                 })
-                if (action != FileAction.Download) toggleModal()
+                toggleModal()
             }
         }
     }
@@ -297,12 +345,14 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
                         Upload File
                     </Button>
                 </Box>
-                <Modal className="container" isOpen={modalOpen} toggle={() => { toggleModal() }}>
-                    {/* <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                <Modal className="container" size={
+                    modalData?.action == FileAction.Preview ? "lg" : ""
+                } isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                    <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
-                            <p>{modal?.title}</p>
+                            <p>{modalData?.action}</p>
                         </div>
-                    </ModalHeader> */}
+                    </ModalHeader>
                     <ModalBody className="row align-items-center d-flex justify-content-center m-2">
                         <div className="col">
                             {selectActionJsx()}
