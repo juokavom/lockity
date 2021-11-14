@@ -10,23 +10,23 @@ import lockity.plugins.JsonLocalDateTimeSerializer
 @Serializable
 data class UploadableSharedAccess(
     val fileId: String,
-    val recipientId: String
+    val userId: String
 )
 
 fun UploadableSharedAccess.isValuesValid() {
-    if (fileId == "" || recipientId == "") throw BadRequestException("Email and password cannot be empty.")
+    if (fileId == "" || userId == "") throw BadRequestException("File and user cannot be empty.")
 }
+
+@Serializable
+data class SharedAccessCount(
+    val sharedAccessCount: Int
+)
 
 @Serializable
 data class SharedAccess(
     val id: String,
-    val fileId: String,
-    val ownerId: String,
-    val recipientId: String
+    val file: FileMetadataForSharing,
+    val user: UserForSharing
 )
-
-fun SharedAccess.isValuesValid() {
-    if (fileId == "" || recipientId == "") throw BadRequestException("Email and password cannot be empty.")
-}
 
 

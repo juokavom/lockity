@@ -6,15 +6,15 @@ import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
-import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileState, IFileMetadataInfo } from '../FilesPage';
+import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileMetadataInfo } from '../FilesPage';
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
 import Users from '../UsersPage';
-import SharedFiles from '../SharedFilesPage';
 import Footer from '../FooterComponent';
 import { RequestBuilder } from '../../model/RequestBuilder';
 import { ENDPOINTS } from '../../model/Server';
+import { IShareMetadata, SharedFiles, SHARE_CHUNK_SIZE } from '../SharedFilesPage';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -58,6 +58,14 @@ export interface IMyFilesProps {
     selected: number,
     fetchFileMetadata: (offset: number, limit: number, selected: number) => void,
     fetchFileMetadataInfo: () => void
+}
+
+export interface ISharedProps {
+    sharedMetadata: IShareMetadata[] | null,
+    sharedCount: number | null,
+    selected: number,
+    fetchSharedMetadata: (offset: number, limit: number, selected: number) => void,
+    fetchSharedMetadataCount: () => void
 }
 
 export default function Main() {
@@ -115,13 +123,6 @@ export default function Main() {
             }, () => setFileMetadataInfo(null))
     }
 
-    useEffect(() => {
-        if (isAuthed) {
-            fetchFileMetadataInfo()
-            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
-        }
-    }, [])
-
     const headerProps: IHeaderProps = {
         user: user!,
         isAdmin: isAdmin,
@@ -135,6 +136,58 @@ export default function Main() {
         selected: fileSelected,
         fetchFileMetadata: fetchFileMetadata,
         fetchFileMetadataInfo: fetchFileMetadataInfo
+    }
+
+    const [sharedCount, setSharedCount] = useState<number | null>(null)
+    const [sharedMetadata, setSharedMetadata] = useState<IShareMetadata[] | null>(null)
+    const [sharedSelected, setSharedSelected] = useState<number>(1)
+
+    const fetchSharedMetadata = async (offset: number, limit: number, selected: number) =>
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.SHARED.getSharedMetadataWithOffsetAndLimit(offset, limit))
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                setSharedSelected(selected)
+                if (response) {
+                    const shareMetadata: IShareMetadata[] = response
+                    setSharedMetadata(shareMetadata)
+                } else {
+                    setSharedMetadata(null)
+                }
+            }, () => setSharedMetadata(null))
+
+
+    const fetchSharedMetadataCount = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.SHARED.getSharedMetadataInfo)
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                if (response) {
+                    const sharedAccessCount: { sharedAccessCount: number } = response
+                    setSharedCount(sharedAccessCount.sharedAccessCount)
+                } else {
+                    setSharedCount(null)
+                }
+            }, () => setSharedCount(null))
+    }
+
+    useEffect(() => {
+        if (isAuthed) {
+            fetchFileMetadataInfo()
+            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
+            fetchSharedMetadataCount()
+            fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
+        }
+    }, [])
+
+    const sharedProps: ISharedProps = {
+        sharedMetadata: sharedMetadata,
+        sharedCount: sharedCount,
+        selected: sharedSelected,
+        fetchSharedMetadata: fetchSharedMetadata,
+        fetchSharedMetadataCount: fetchSharedMetadataCount
     }
 
     if (!isAuthed) {
@@ -160,7 +213,7 @@ export default function Main() {
 
                                 <Route exact path={ROUTES.myFiles} component={() => <MyFiles {...myFilesProps} />} />
                                 <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles />} />
-                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
+                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles  {...sharedProps} />} />
 
                                 {isAdmin &&
                                     <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />

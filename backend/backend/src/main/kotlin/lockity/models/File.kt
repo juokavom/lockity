@@ -23,6 +23,12 @@ data class FileMetadata(
 )
 
 @Serializable
+data class FileMetadataForSharing(
+    val id: String,
+    val title: String
+)
+
+@Serializable
 data class FileMetadataInfo(
     val storageData: StorageData,
     val fileCount: Int

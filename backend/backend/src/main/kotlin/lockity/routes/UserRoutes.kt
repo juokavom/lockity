@@ -247,29 +247,26 @@ fun Application.userRoutes() {
                     }
                 }
 
-                /**
-                 * Description: Get user list with %like% parameter
-                 * Params: { emailLike }
-                 * Body: null
-                 * Validation: Email like
-                 * OK Response: FrontEndUser { name, surname, email, password, subscribed, role }
-                 * Scope: Authenticated
-                 */
-                get("/email-like/{emailLike}") {
-//                    call.withErrorHandler {
-//                        var emailLike = call.parameters["emailLike"] ?: ""
-//                        emailLike = if (emailLike == "*") "%" else "%$emailLike%"
-//                        val fetchedUserRecords = userRepository.fetchWithEmailLike(emailLike)
-//                        call.respond(
-//                            fetchedUserRecords.map {
-//                                frontendUserFromUserRecordAndRole(
-//                                    userId = databaseService.binToUuid(it.id!!).toString(),
-//                                    userRecord = it,
-//                                    role = roleRepository.fetch(it.role!!)!!.name!!
-//                                )
-//                            }
-//                        )
-//                    }
+                get("/email-starts-with/{email}") {
+                    call.withErrorHandler {
+                        val email = call.parameters["email"]
+                            ?: throw BadRequestException("Email is not present in the parameters.")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to modify this file metadata")
+
+                        val fetchedUserRecords = userRepository.fetchWithEmailLike(
+                            emailLike = "$email%"
+                        ).filter { it.email != currentUser.email }
+
+                        call.respond(
+                            fetchedUserRecords.map {
+                                UserForSharing(
+                                    id = databaseService.binToUuid(it.id!!).toString(),
+                                    email = it.email!!
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

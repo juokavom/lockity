@@ -46,13 +46,7 @@ interface IFileProps {
     action: (action: string) => void
 }
 
-export interface IFileState {
-    fileMetadata: IFileMetadata[] | null,
-    fileCount: number | null,
-    selected: number
-}
-
-interface IModalProps {
+interface IFileModalProps {
     fileMetadata: IFileMetadata,
     callback: (success: boolean) => void
 }
@@ -136,7 +130,7 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
     );
 }
 
-function Edit({ fileMetadata, callback }: IModalProps): JSX.Element {
+function Edit({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const [format] = useState("." + fileMetadata.title.split('.').pop());
     const [newTitle, setTitle] = useState(fileMetadata.title.replace(format, ''));
 
@@ -207,7 +201,7 @@ const fileNameJsx = (title: string) => (
     </Typography>
 );
 
-function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
+function Preview({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const [format] = useState(fileMetadata.title.split('.').pop());
 
     const src = ENDPOINTS.FILE.streamWithFileId(fileMetadata.id)
@@ -260,7 +254,7 @@ function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
     }
 }
 
-function Share({ fileMetadata, callback }: IModalProps): JSX.Element {
+function Share({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const [link] = useState(fileMetadata.link);
 
     const copyFileUrl = async () => {
@@ -348,7 +342,7 @@ function Share({ fileMetadata, callback }: IModalProps): JSX.Element {
 
 }
 
-function Delete({ fileMetadata, callback }: IModalProps): JSX.Element {
+function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const DeleteFileAction = async () => {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.fileId(fileMetadata.id))
@@ -447,7 +441,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
         if (modalData) {
             if (modalData.action == FileAction.Upload) return (<Upload />);
             else if (modalData.fileMetadata) {
-                const modalProps: IModalProps = {
+                const modalProps: IFileModalProps = {
                     fileMetadata: modalData.fileMetadata,
                     callback: modalCallback
                 }
@@ -482,13 +476,6 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
     
     return (
         <div className="container">
-            {
-                fileMetadataInfo?.storageData &&
-                <div className="row align-items-center d-flex justify-content-center">
-                    <div className="col-auto">
-                    </div>
-                </div>
-            }
             <div className="row align-items-center d-flex justify-content-center">
                 <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
                     {

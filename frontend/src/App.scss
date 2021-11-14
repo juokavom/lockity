@@ -37,6 +37,19 @@
   white-space: nowrap;
 }
 
+.table.table-ellipsis tbody td {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.table.table-ellipsis tbody td:hover {
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-all;
+}
+
 $color: #0cf;
 
 .upload-button {

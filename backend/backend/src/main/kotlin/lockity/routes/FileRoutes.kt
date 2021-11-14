@@ -9,10 +9,7 @@ import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.models.EditableFile
-import lockity.models.FileMetadata
-import lockity.models.FileMetadataInfo
-import lockity.models.StorageData
+import lockity.models.*
 import lockity.repositories.*
 import lockity.services.*
 import lockity.utils.AUTHENTICATED
@@ -300,6 +297,29 @@ fun Application.fileRoutes() {
                                     title = it.title!!,
                                     size = it.size!!,
                                     link = it.link
+                                )
+                            }
+                        )
+                    }
+                }
+
+                get("/metadata/title-starts-with/{title}") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        val title = call.parameters["title"]
+                            ?: throw BadRequestException("Title is not present in the parameters.")
+
+                        val userFiles = fileRepository.fetchUserFilesWithTitleLike(
+                            userBinId = currentUser.id!!,
+                            titleLike = "$title%"
+                        )
+
+                        call.respond(
+                            userFiles.map {
+                                FileMetadataForSharing(
+                                    id = databaseService.binToUuid(it.id!!).toString(),
+                                    title = it.title!!
                                 )
                             }
                         )

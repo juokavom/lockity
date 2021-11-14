@@ -1,6 +1,7 @@
 package lockity.repositories
 
 import database.schema.tables.records.FileRecord
+import database.schema.tables.records.UserRecord
 import database.schema.tables.references.FileTable
 import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
@@ -78,6 +79,12 @@ class FileRepository(
         .from(FileTable)
         .where(FileTable.User.eq(userBinId))
         .fetchOne()?.value1()?.toLong() ?: 0L
+
+    fun fetchUserFilesWithTitleLike(userBinId: ByteArray, titleLike: String): List<FileRecord> = databaseService.dsl
+        .selectFrom(FileTable)
+        .where(FileTable.User.eq(userBinId).and(FileTable.Title.like(titleLike)))
+        .fetchArray()
+        .toList()
 
 //    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
 //        .select()

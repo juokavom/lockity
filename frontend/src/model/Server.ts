@@ -39,10 +39,17 @@ export namespace ENDPOINTS {
         export const getFileMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             metadata + '/offset/' + offset + '/limit/' + limit
         export const getFileMetadataInfo = metadata + '/info'
+        export const getFileMetadataWithTitleLike = (title: string) =>
+            metadata + '/title-starts-with/' + title
     }
-    export namespace DYNLINK {
-        export const dynlink = endpoint + '/dynlink'
-        export const generateLink = (fileId: string, key: string | null) =>
-            dynlink + '/file-id/' + fileId + (key != null ? "?key=" + key : "")
+    export namespace USER {
+        export const user = endpoint + '/user'
+        export const getUserWithEmailLike = (email: string) => user + '/email-starts-with/' + email
+    }
+    export namespace SHARED {
+        export const sharedAccess = endpoint + '/shared-access'
+        export const getSharedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
+            sharedAccess + '/offset/' + offset + '/limit/' + limit
+        export const getSharedMetadataInfo = sharedAccess + '/info'
     }
 }

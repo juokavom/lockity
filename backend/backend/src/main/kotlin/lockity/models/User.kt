@@ -37,6 +37,12 @@ data class FrontendUser(
 )
 
 @Serializable
+data class UserForSharing(
+    val id: String,
+    val email: String
+)
+
+@Serializable
 data class CreatableUser(
     var name: String?,
     var surname: String?,
