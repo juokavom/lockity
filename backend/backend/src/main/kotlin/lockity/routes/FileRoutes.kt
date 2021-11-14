@@ -362,6 +362,39 @@ fun Application.fileRoutes() {
                         call.respondJSON("File updated successfully", HttpStatusCode.OK)
                     }
                 }
+
+                put("/file-id/{fileId}/share/{shareCondition}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val shareCondition = call.parameters["shareCondition"]?.toBooleanStrictOrNull()
+                            ?: throw BadRequestException("Share condition is not present in the parameters or in wrong format.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to modify this file metadata")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to modify this file metadata")
+
+                        if (shareCondition) {
+                            if(fileRecord.link == null) {
+                                fileRecord.link = UUID.randomUUID().toString()
+                                fileRepository.update(fileRecord)
+                                call.respondJSON("File shared successfully", HttpStatusCode.OK)
+                            } else {
+                                throw BadRequestException("File already has dynamic link")
+                            }
+                        } else {
+                            if(fileRecord.link == null) {
+                                throw BadRequestException("File is not shared")
+                            } else {
+                                fileRecord.link = null
+                                fileRepository.update(fileRecord)
+                                call.respondJSON("File unshared successfully", HttpStatusCode.OK)
+                            }
+                        }
+                    }
+                }
 //                /**
 //                 * Deletes file (and shared access)
 //                 * SCOPE = Registered (deletes his own file)

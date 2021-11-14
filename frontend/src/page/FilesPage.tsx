@@ -2,7 +2,7 @@ import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
     Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip
+    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
 import { User } from '../model/User';
@@ -19,6 +19,7 @@ import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
 import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
+import { ROUTES } from '../model/Routes';
 
 export interface IFileMetadata {
     id: string,
@@ -188,14 +189,14 @@ function Edit({ fileMetadata, callback }: IModalProps): JSX.Element {
     );
 }
 
+const fileNameJsx = (title: string) => (
+    <Typography sx={{ mb: 2 }} className="ellipse-text" align="center" component="h1" variant="h5">
+        {title}
+    </Typography>
+);
+
 function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
     const [format] = useState(fileMetadata.title.split('.').pop());
-
-    const fileNameJsx = () => (
-        <Typography sx={{ mb: 2 }} className="ellipse-text" align="center" component="h1" variant="h5">
-            {fileMetadata.title}
-        </Typography>
-    );
 
     const src = ENDPOINTS.FILE.streamWithFileId(fileMetadata.id)
 
@@ -232,7 +233,7 @@ function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="row align-items-end d-flex justify-content-center">
                     <div className="col-auto">
-                        {fileNameJsx()}
+                        {fileNameJsx(fileMetadata.title)}
                     </div>
                 </div>
                 <div className="row align-items-end d-flex justify-content-center">
@@ -245,6 +246,94 @@ function Preview({ fileMetadata, callback }: IModalProps): JSX.Element {
     } else {
         return (<div></div>);
     }
+}
+
+function Share({ fileMetadata, callback }: IModalProps): JSX.Element {
+    const [link] = useState(fileMetadata.link);
+
+    const copyFileUrl = async () => {
+        if (link) {
+            await navigator.clipboard.writeText(ROUTES.getAnonymousFile(link));
+            toast.info("Link copied to clipboard!", DefaultToastOptions)
+        }
+    }
+
+    const ShareFileAction = async (condition: boolean) => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.shareConditionWithFileId(fileMetadata.id, condition))
+            .withMethod('PUT')
+            .withDefaults()
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
+
+    if (link) {
+        return (
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="row align-items-end d-flex justify-content-center">
+                    <div className="col-auto">
+                        {fileNameJsx(fileMetadata.title)}
+                    </div>
+                </div>
+                <div className="col-auto">
+                    <p style={{ textAlign: "center" }}><i>File is being shared. Proceed to the link
+                        in the box to download your file anonymously. Press 'Unshare' to
+                        disable this feature.</i></p>
+                </div>
+                <div className="col-auto">
+                    <div id="fileLink" className="dropzone selected-file" style={{
+                        marginTop: "20px",
+                        cursor: "default"
+                    }} onClick={copyFileUrl}>
+                        {ROUTES.getAnonymousFile(link)}
+                    </div>
+                    <UncontrolledTooltip
+                        placement="auto"
+                        target="fileLink"
+                    >
+                        Copy to clipboard
+                    </UncontrolledTooltip>
+                </div>
+                <div className="selected-file-wrapper">
+                    <Button
+                        variant="contained"
+                        className="upload-button"
+                        sx={{ mt: 1, mb: 2 }}
+                        onClick={() => ShareFileAction(false)}
+                    >
+                        Unshare
+                    </Button>
+                </div>
+            </div>
+        );
+    } else {
+        return (
+            <div className="row align-items-center d-flex justify-content-center">
+                <div className="row align-items-center d-flex justify-content-center">
+                    <div className="col-auto">
+                        {fileNameJsx(fileMetadata.title)}
+                    </div>
+                </div>
+                <div className="col-auto">
+                    <p style={{ textAlign: "center" }}><i>File is not shared. Press 'Share' to generate dynamic
+                        link and share your file with the world!</i></p>
+                </div>
+                <div className="selected-file-wrapper">
+                    <Button
+                        variant="contained"
+                        className="upload-button"
+                        sx={{ mt: 1, mb: 2 }}
+                        onClick={() => ShareFileAction(true)}
+                    >
+                        Share
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
 }
 
 export const FILE_CHUNK_SIZE = 5
@@ -277,13 +366,6 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
         );
     }
 
-    function Share() {
-        return (
-            <div>Share</div>
-        );
-    }
-
-
     function Delete() {
         return (
             <div>Delete</div>
@@ -304,7 +386,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
                     case FileAction.Preview:
                         return (<Preview {...modalProps} />);
                     case FileAction.Share:
-                        return (<Share />);
+                        return (<Share {...modalProps} />);
                     case FileAction.Delete:
                         return (<Delete />);
                 }

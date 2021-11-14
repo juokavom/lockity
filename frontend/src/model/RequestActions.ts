@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify';
 import { DefaultToastOptions, RequestBuilder } from './RequestBuilder';
 import { ROUTES } from './Routes';
-import { ENDPOINTS, SERVER } from './Server';
+import { ENDPOINTS, URL } from './Server';
 import { User } from './User';
 
 export const LogoutAction = async () => {
@@ -22,7 +22,7 @@ export const LogoutAction = async () => {
 
 export const SimpleAction = async () => {
     await new RequestBuilder()
-        .withUrl(SERVER.URL + '/auth/simple')
+        .withUrl(URL.Backend + '/auth/simple')
         .withMethod('GET')
         .withDefaults()
         .send((response: any) => {
@@ -32,7 +32,7 @@ export const SimpleAction = async () => {
 
 export const RegisteredAction = async () => {
     await new RequestBuilder()
-        .withUrl(SERVER.URL + '/auth/authenticated')
+        .withUrl(URL.Backend + '/auth/authenticated')
         .withMethod('GET')
         .withDefaults()
         .send((response: any) => {
@@ -42,7 +42,7 @@ export const RegisteredAction = async () => {
 
 export const AdminAction = async () => {
     await new RequestBuilder()
-        .withUrl(SERVER.URL + '/auth/admin')
+        .withUrl(URL.Backend + '/auth/admin')
         .withMethod('GET')
         .withDefaults()
         .send((response: any) => {

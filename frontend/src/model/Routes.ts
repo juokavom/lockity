@@ -1,3 +1,5 @@
+import { URL } from "./Server"
+
 export namespace ROUTES {
     export const login = '/login'
     export const upload = '/upload'
@@ -9,4 +11,6 @@ export namespace ROUTES {
     
     export const sendNewsletter = '/send-newsletter'
     export const users = '/users'
+
+    export const getAnonymousFile = (dynlink: string) => URL.Frontend + '/file/' + dynlink
 }
