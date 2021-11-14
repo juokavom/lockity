@@ -9,12 +9,15 @@ import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.models.AnonymousFileMetadata
+import lockity.models.EditableFile
 import lockity.models.FileCount
 import lockity.models.FileMetadata
 import lockity.repositories.*
 import lockity.services.*
-import lockity.utils.*
+import lockity.utils.AUTHENTICATED
+import lockity.utils.DatabaseService
+import lockity.utils.respondJSON
+import lockity.utils.withErrorHandler
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.time.LocalDateTime
@@ -44,43 +47,45 @@ fun Application.fileRoutes() {
              * OK Response: AnonymousFileMetadata { fileId, fileKey }
              * Scope: all
              */
-            post("/anonymous") {
-                call.withErrorHandler {
-                    val fileSize = call.request.headers["Content-Length"]!!.toLong()
-                    if (fileSize > DEFAULT_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
-
-                    val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
-                    val fileId = databaseService.uuidToBin()
-                    val fileIdStringed = databaseService.binToUuid(fileId).toString()
-                    if (part is PartData.FileItem) {
-                        val fileName = part.originalFileName!!
-                        File(fileService.uploadsLocation(fileIdStringed)).mkdir()
-                        val fileLocation = fileService.uploadsLocation("$fileIdStringed/$fileName")
-                        part.streamProvider().use { inputStream ->
-                            File(fileLocation).outputStream().buffered().use { outputStream ->
-                                fileService.copyTo(inputStream, outputStream)
-                            }
-                        }
-                        part.dispose
-
-                        val fileKey = UUID.randomUUID().toString()
-                        fileRepository.insert(
-                            FileRecord(
-                                id = fileId,
-                                title = fileName,
-                                location = fileLocation,
-                                user = null,
-                                key = fileKey,
-                                link = null,
-                                uploaded = LocalDateTime.now(),
-                                lastAccessed = null,
-                                size = fileSize
-                            )
-                        )
-                        call.respond(AnonymousFileMetadata(fileIdStringed, fileKey))
-                    } else throw BadRequestException("Multipart data is not file type")
-                }
-            }
+//            post("/anonymous") {
+//                call.withErrorHandler {
+//                    val fileSize = call.request.headers["Content-Length"]!!.toLong()
+//                    if (fileSize > DEFAULT_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
+//
+//                    val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
+//
+//                    val fileId = databaseService.uuidToBin()
+//                    val fileIdStringed = databaseService.binToUuid(fileId).toString()
+//                    if (part is PartData.FileItem) {
+//                        val fileName = part.originalFileName!!
+//                        val fileFolderLocation = fileService.uploadsLocation(fileIdStringed)
+//                        File(fileFolderLocation).mkdir()
+//                        val fileLocation = "$fileFolderLocation/$fileName"
+//                        part.streamProvider().use { inputStream ->
+//                            File(fileLocation).outputStream().buffered().use { outputStream ->
+//                                fileService.copyTo(inputStream, outputStream)
+//                            }
+//                        }
+//                        part.dispose
+//
+//                        val fileKey = UUID.randomUUID().toString()
+//                        fileRepository.insert(
+//                            FileRecord(
+//                                id = fileId,
+//                                title = fileName,
+//                                location = fileFolderLocation,
+//                                user = null,
+//                                key = fileKey,
+//                                link = null,
+//                                uploaded = LocalDateTime.now(),
+//                                lastAccessed = null,
+//                                size = fileSize
+//                            )
+//                        )
+//                        call.respond(AnonymousFileMetadata(fileIdStringed, fileKey))
+//                    } else throw BadRequestException("Multipart data is not file type")
+//                }
+//            }
 
             /**
              * Description: Upload physical file, save metadata to database
@@ -94,7 +99,6 @@ fun Application.fileRoutes() {
                 post {
                     call.withErrorHandler {
                         val fileSize = call.request.headers["Content-Length"]!!.toLong()
-                        if (fileSize > DEFAULT_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
                         val currentUser = call.jwtUser()
                             ?: throw BadRequestException("User not found")
 
@@ -107,8 +111,9 @@ fun Application.fileRoutes() {
                         val fileIdStringed = databaseService.binToUuid(fileId).toString()
                         if (part is PartData.FileItem) {
                             val fileName = part.originalFileName!!
-                            File(fileService.uploadsLocation(fileIdStringed)).mkdir()
-                            val fileLocation = fileService.uploadsLocation("$fileIdStringed/$fileName")
+                            val fileFolderLocation = fileService.uploadsLocation(fileIdStringed)
+                            File(fileFolderLocation).mkdir()
+                            val fileLocation = "$fileFolderLocation/$fileName"
                             part.streamProvider().use { inputStream ->
                                 File(fileLocation).outputStream().buffered().use { outputStream ->
                                     fileService.copyTo(inputStream, outputStream)
@@ -120,7 +125,7 @@ fun Application.fileRoutes() {
                                 FileRecord(
                                     id = fileId,
                                     title = fileName,
-                                    location = fileLocation,
+                                    location = fileFolderLocation,
                                     user = currentUser.id,
                                     key = null,
                                     link = null,
@@ -129,51 +134,51 @@ fun Application.fileRoutes() {
                                     size = fileSize
                                 )
                             )
-                            call.respond(AnonymousFileMetadata(fileIdStringed, null))
+                            call.respondJSON("User file uploaded successfully", HttpStatusCode.OK)
                         } else throw BadRequestException("Multipart data is not file type")
                     }
                 }
 
                 /**
-                 * Get physical file by providing file id
-                 * SCOPE = Registered (gets his own file)
-                 */
-                get("/file-id/{fileId}") {
-                    call.withErrorHandler {
-                        val fileId = call.parameters["fileId"]
-                            ?: throw BadRequestException("File id is not present in the parameters.")
-                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
-                            ?: throw NotFoundException("File was not found")
-                        val currentUser = call.jwtUser()
-                            ?: throw NoPermissionException("User do not have permission to get this file")
-                        if (!fileRecord.user.contentEquals(currentUser.id))
-                            throw NoPermissionException("User do not have permission to get this file")
-
-                        call.respondFile(File(fileRecord.location!!))
-                    }
-                }
-                /**
-                 * Get shared physical file by providing file id
-                 * SCOPE = Registered (gets shared access file with him)
-                 */
-                get("/share-id/{shareId}") {
-                    call.withErrorHandler {
-
-                        val shareId = call.parameters["shareId"]
-                            ?: throw BadRequestException("Share id is not present in the parameters.")
-                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-                            ?: throw NotFoundException("Shared access was not found")
-                        val currentUser = call.jwtUser()
-                            ?: throw NoPermissionException("User do not have permission to get this file")
-                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
-                            throw NoPermissionException("User do not have permission to get this file")
-
-                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
-                            ?: throw NotFoundException("File was not found")
-
-                        call.respondFile(File(fileRecord.location!!))
-                    }
-                }
+                //                 * Get physical file by providing file id
+                //                 * SCOPE = Registered (gets his own file)
+                //                 */
+//                get("/file-id/{fileId}") {
+//                    call.withErrorHandler {
+//                        val fileId = call.parameters["fileId"]
+//                            ?: throw BadRequestException("File id is not present in the parameters.")
+//                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+//                            ?: throw NotFoundException("File was not found")
+//                        val currentUser = call.jwtUser()
+//                            ?: throw NoPermissionException("User do not have permission to get this file")
+//                        if (!fileRecord.user.contentEquals(currentUser.id))
+//                            throw NoPermissionException("User do not have permission to get this file")
+//
+//                        call.respondFile(File(fileRecord.location!!))
+//                    }
+//                }
+//                /**
+//                 * Get shared physical file by providing file id
+//                 * SCOPE = Registered (gets shared access file with him)
+//                 */
+//                get("/share-id/{shareId}") {
+//                    call.withErrorHandler {
+//
+//                        val shareId = call.parameters["shareId"]
+//                            ?: throw BadRequestException("Share id is not present in the parameters.")
+//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
+//                            ?: throw NotFoundException("Shared access was not found")
+//                        val currentUser = call.jwtUser()
+//                            ?: throw NoPermissionException("User do not have permission to get this file")
+//                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
+//                            throw NoPermissionException("User do not have permission to get this file")
+//
+//                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+//                            ?: throw NotFoundException("File was not found")
+//
+//                        call.respondFile(File(fileRecord.location!!))
+//                    }
+//                }
                 /**
                  * Get physical file by providing file id
                  * SCOPE = Registered (gets his own file or file is shared access with him)
@@ -262,13 +267,13 @@ fun Application.fileRoutes() {
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this file metadata")
 
-                            call.respond(
-                                FileCount(
-                                    fileRepository.fetchUserFilesCount(
-                                        userUuid = databaseService.binToUuid(currentUser.id!!)
-                                    ) ?: 0
-                                )
+                        call.respond(
+                            FileCount(
+                                fileRepository.fetchUserFilesCount(
+                                    userUuid = databaseService.binToUuid(currentUser.id!!)
+                                ) ?: 0
                             )
+                        )
                     }
                 }
                 /**
@@ -285,8 +290,8 @@ fun Application.fileRoutes() {
 //                }
                 /**
                  * Edits file data (title)
-                 * SCOPE = Registered (edits his own file)
-                 */
+                //                 * SCOPE = Registered (edits his own file)
+                //                 */
                 put("/file-id/{fileId}") {
                     call.withErrorHandler {
                         val fileId = call.parameters["fileId"]
@@ -298,57 +303,73 @@ fun Application.fileRoutes() {
                         if (!fileRecord.user.contentEquals(currentUser.id))
                             throw NoPermissionException("User do not have permission to get this file metadata")
 
+                        val editedFile = call.receive<EditableFile>()
+                        if (editedFile.title == "")
+                            throw BadRequestException("File title cannot be empty")
+
+                        val sourceFile = File(fileRecord.location, fileRecord.title!!)
+                        val newTitle = editedFile.title + "." + sourceFile.extension
+                        val destinationFile = File(fileRecord.location, newTitle)
+
+                        if(!sourceFile.renameTo(destinationFile))
+                            throw BadRequestException("File renaming failed, check title")
+
+                        fileRecord.title = newTitle
+                        fileRepository.update(fileRecord)
+
+                        call.respondJSON("File updated successfully", HttpStatusCode.OK)
                     }
                 }
-                /**
-                 * Deletes file (and shared access)
-                 * SCOPE = Registered (deletes his own file)
-                 */
-                delete("/file-id/{fileId}") {
-                    call.withErrorHandler {
-                    }
-                }
+//                /**
+//                 * Deletes file (and shared access)
+//                 * SCOPE = Registered (deletes his own file)
+//                 */
+//                delete("/file-id/{fileId}") {
+//                    call.withErrorHandler {
+//                    }
+//                }
+//            }
             }
-        }
-        /**
-         * Generate dynamic link for file access
-         * SCOPE = ALL: (guest (with key), registered (his file))
-         */
-        post("/dynlink/file-id/{fileId}") {
-            call.withErrorHandler {
-                val fileId = call.parameters["fileId"]
-                    ?: throw BadRequestException("File id is not present in the parameters.")
-                val key = call.request.queryParameters["fileKey"]
-                val user = call.jwtUser()
-                val file = fileRepository.fetch(UUID.fromString(fileId))
-                    ?: throw NotFoundException("File was not found")
-
-                if (file.link != null) throw BadRequestException("File has link already")
-                if (file.user != null) {
-                    if (user == null || !file.user.contentEquals(user.id)) {
-                        throw NoPermissionException("User do not own the file.")
-                    }
-                } else {
-                    if (key == null) throw BadRequestException("File key is not provided.")
-                    else if (file.key != key) {
-                        throw BadRequestException("File key is not correct.")
-                    }
-                }
-
-                file.link = UUID.randomUUID().toString()
-                file.key = null
-                fileRepository.update(file)
-
-                call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
-            }
-        }
-        /**
-         * Get physical file by providing dynamic link id
-         * SCOPE = Guest
-         */
-        get("/dynlink-id/{dynlinkId}") {
-            call.withErrorHandler {
-            }
+//        /**
+//         * Generate dynamic link for file access
+//         * SCOPE = ALL: (guest (with key), registered (his file))
+//         */
+//        post("/dynlink/file-id/{fileId}") {
+//            call.withErrorHandler {
+//                val fileId = call.parameters["fileId"]
+//                    ?: throw BadRequestException("File id is not present in the parameters.")
+//                val key = call.request.queryParameters["fileKey"]
+//                val user = call.jwtUser()
+//                val file = fileRepository.fetch(UUID.fromString(fileId))
+//                    ?: throw NotFoundException("File was not found")
+//
+//                if (file.link != null) throw BadRequestException("File has link already")
+//                if (file.user != null) {
+//                    if (user == null || !file.user.contentEquals(user.id)) {
+//                        throw NoPermissionException("User do not own the file.")
+//                    }
+//                } else {
+//                    if (key == null) throw BadRequestException("File key is not provided.")
+//                    else if (file.key != key) {
+//                        throw BadRequestException("File key is not correct.")
+//                    }
+//                }
+//
+//                file.link = UUID.randomUUID().toString()
+//                file.key = null
+//                fileRepository.update(file)
+//
+//                call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
+//            }
+//        }
+//        /**
+//         * Get physical file by providing dynamic link id
+//         * SCOPE = Guest
+//         */
+//        get("/dynlink-id/{dynlinkId}") {
+//            call.withErrorHandler {
+//            }
+//        }
         }
     }
 }

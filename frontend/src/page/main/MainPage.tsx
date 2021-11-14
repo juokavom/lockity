@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
-import MyFiles, { FILE_CHUNK_SIZE, IFileMetadata, IFileState } from '../FilesPage';
+import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileState } from '../FilesPage';
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
@@ -82,7 +82,7 @@ export default function Main() {
 
     const [fileCount, setFileCount] = useState<number | null>(null)
     const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
-    const [selected, setFileSelected] = useState<number>(1)
+    const [fileSelected, setFileSelected] = useState<number>(1)
 
     const fetchFiles = async (offset: number, limit: number, selected: number) =>
         await new RequestBuilder()
@@ -97,7 +97,7 @@ export default function Main() {
                 } else {
                     setFileMetadata(null)
                 }
-            })
+            }, () => setFileMetadata(null))
 
 
     const fetchFileCount = async () => {
@@ -112,7 +112,7 @@ export default function Main() {
                 } else {
                     setFileCount(null)
                 }
-            })
+            }, () => setFileCount(null))
     }
 
     useEffect(() => {
@@ -132,7 +132,7 @@ export default function Main() {
         changedLayout: changedLayout,
         fileMetadata: fileMetadata,
         fileCount: fileCount,
-        selected: selected,
+        selected: fileSelected,
         fetchFiles: fetchFiles,
         fetchFileCount: fetchFileCount
     }

@@ -36,19 +36,14 @@ function getLowerIndex(selected: number, total: number) {
 }
 
 export default function CustomPagination(props: IPaginationProps) {
-    console.log('selected = ', props.selected)
     const [totalPages] = useState<number>(Math.ceil(props.total / props.chunkSize))
 
     const [paginations, setPaginations] = useState<JSX.Element[] | null>(null)
 
     useEffect(() => {
-        console.log('remder effect, selected = ', props.selected, ', total = ', props.total)
-        // console.log('selected = ', selected, ', fetch = [', (selected - 1) * props.chunkSize, ', ', props.chunkSize, ']')
-
         const pages = totalPages > 5 ? 5 : totalPages
-
         const lower = getLowerIndex(props.selected, totalPages)
-        console.log(Array.from(Array(pages).keys()))
+
         const paginations = Array.from(Array(pages).keys()).map((page: number) => {
             const current = lower + page
             return (

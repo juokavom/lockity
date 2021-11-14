@@ -49,7 +49,7 @@ function Login() {
                 // toast.success('Login successful', DefaultToastOptions)
                 localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
                 window.location.replace(ROUTES.myFiles)
-            })
+            }, () => {})
     };
 
     return (

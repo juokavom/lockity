@@ -21,7 +21,7 @@ function Upload() {
         if (uploadMetadata) {
             setFileMeta(uploadMetadata)
             setState(UploadPageState.Uploaded)
-            await GenerateLinkAction(uploadMetadata)
+            // await GenerateLinkAction(uploadMetadata)
         }
     }
 
@@ -32,15 +32,15 @@ function Upload() {
         }
     }
 
-    const GenerateLinkAction = async (fileMetaData: FileUploadedMetadata) => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.DYNLINK.generateLink(fileMetaData.fileId, fileMetaData.fileKey))
-            .withMethod('POST')
-            .withDefaults()
-            .send((response: any) => {
-                setFileLink(response.fileLink)
-            })
-    };
+    // const GenerateLinkAction = async (fileMetaData: FileUploadedMetadata) => {
+    //     await new RequestBuilder()
+    //         .withUrl(ENDPOINTS.DYNLINK.generateLink(fileMetaData.fileId, fileMetaData.fileKey))
+    //         .withMethod('POST')
+    //         .withDefaults()
+    //         .send((response: any) => {
+    //             setFileLink(response.fileLink)
+    //         })
+    // };
 
     return (
         <div className="container upload-main">

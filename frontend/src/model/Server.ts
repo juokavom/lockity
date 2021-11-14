@@ -27,6 +27,7 @@ export namespace ENDPOINTS {
         export const file = endpoint + '/file'
         export const metadata = file + '/metadata' 
 
+        export const fileId = (id: string) => file + '/file-id/' + id
         export const fileAnonymous = file + '/anonymous'
         export const getFileMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             metadata + '/offset/' + offset + '/limit/' + limit

@@ -12,12 +12,13 @@ import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Box, IconButton, Pagination } from '@mui/material';
+import { Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
 import { IMyFilesProps } from './main/MainPage';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
-import { RequestBuilder } from '../model/RequestBuilder';
-import FileUploader from '../component/FileUploaderComponent';
+import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
+import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
+import { toast } from 'react-toastify';
 
 export interface IFileMetadata {
     id: string,
@@ -32,10 +33,15 @@ interface IFileProps {
     action: (action: FileAction) => void
 }
 
-export interface IFileState {    
+export interface IFileState {
     fileMetadata: IFileMetadata[] | null,
-    fileCount: number| null,
+    fileCount: number | null,
     selected: number
+}
+
+interface IModalProps {
+    fileMetadata: IFileMetadata,
+    callback: (success: boolean) => void
 }
 
 enum FileAction {
@@ -61,7 +67,6 @@ function formatBytes(bytes: number, decimals = 2) {
 
 function File({ fileMetadata, changedLayout, action }: IFileProps) {
     const format = fileMetadata.title.split('.').pop();
-    const [tooltipVisible, setTooltipVisible] = useState(true)
 
     const buttons = (
         <>
@@ -119,15 +124,90 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
     );
 }
 
+function Edit({ fileMetadata, callback }: IModalProps): JSX.Element {
+    const [format] = useState("." + fileMetadata.title.split('.').pop());
+    const [newTitle, setTitle] = useState(fileMetadata.title.replace(format, ''));
+
+    const validateForm = () => {
+        return newTitle.length > 0 && newTitle + format != fileMetadata.title;
+    }
+
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
+        event.preventDefault();
+        await EditFileAction(newTitle, fileMetadata.id);
+    }
+
+    const EditFileAction = async (title: string, fileId: string) => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.fileId(fileId))
+            .withMethod('PUT')
+            .withDefaults()
+            .withBody({
+                title: title
+            })
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
+
+    return (
+        <div className="container">
+            <Typography align="center" component="h1" variant="h5">
+                Edit File
+            </Typography>
+            <Box className="row align-items-center d-flex justify-content-center"
+                component="form" noValidate onSubmit={handleSubmit}>
+                <div className="row align-items-end d-flex justify-content-center">
+                    <TextField
+                        className="col-10"
+                        required
+                        defaultValue={newTitle}
+                        id="title"
+                        label="Title"
+                        name="title"
+                        variant="standard"
+                        onChange={(e: any) => setTitle(e.target.value)}
+                    />
+                    <TextField
+                        className="col-2"
+                        disabled={true}
+                        value={format}
+                        variant="filled"
+                    />
+                </div>
+                <div className="selected-file-wrapper">
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        className="upload-button"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={!validateForm()}
+                    >
+                        Save
+                    </Button>
+                </div>
+            </Box>
+        </div>
+    );
+}
+
 export const FILE_CHUNK_SIZE = 5
 
-export default function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
+export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
     const [modalOpen, setModalOpen] = useState(false)
-    const [modal, setModal] = useState<{
-        title: string,
-        body: JSX.Element
+    const [modalData, setModalData] = useState<{
+        action: FileAction,
+        fileMetadata: IFileMetadata | null
     } | null>(null)
 
+    const modalCallback = (success: boolean) => {
+        setModalOpen(false)
+        if (success) {
+            fetchFileCount()
+            fetchFiles(0, FILE_CHUNK_SIZE, 1)
+        }
+    }
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
@@ -136,21 +216,11 @@ export default function MyFiles({ changedLayout, fileMetadata, fileCount, select
     function Upload() {
         return (
             <FileUploader {...{
-                isAuthed: true, onUpload: () => {
-                    setModalOpen(false)
-                    fetchFileCount()
-                    fetchFiles(0, FILE_CHUNK_SIZE, 1)
-                }, onError: () => { setModalOpen(false) }
+                isAuthed: true, onUpload: () => modalCallback(true),
+                onError: () => modalCallback(false)
             }} />
         );
     }
-
-    function Edit() {
-        return (
-            <div>Edit</div>
-        );
-    }
-
 
     function Preview() {
         return (
@@ -172,52 +242,40 @@ export default function MyFiles({ changedLayout, fileMetadata, fileCount, select
         );
     }
 
-    const selectActionJsx = (action: FileAction) => {
-        switch (action) {
-            case FileAction.Upload:
-                setModal({
-                    title: "Upload File",
-                    body: Upload()
-                });
-                toggleModal();
-                break;
-            case FileAction.Edit:
-                setModal({
-                    title: "Edit File",
-                    body: Edit()
-                });
-                toggleModal();
-                break;
-            case FileAction.Preview:
-                setModal({
-                    title: "Preview File",
-                    body: Preview()
-                });
-                toggleModal();
-                break;
-            case FileAction.Share:
-                setModal({
-                    title: "Share File",
-                    body: Share()
-                });
-                toggleModal();
-                break;
-            case FileAction.Delete:
-                setModal({
-                    title: "Delete File",
-                    body: Delete()
-                });
-                toggleModal();
-                break;
+    const selectActionJsx = (): JSX.Element => {
+        if (modalData) {
+            if (modalData.action == FileAction.Upload) return (<Upload />);
+            else if (modalData.fileMetadata) {
+                const modalProps: IModalProps = {
+                    fileMetadata: modalData.fileMetadata,
+                    callback: modalCallback
+                }
+                switch (modalData.action) {
+                    case FileAction.Edit:
+                        return (<Edit {...modalProps} />);
+                    case FileAction.Preview:
+                        return (<Preview />);
+                    case FileAction.Share:
+                        return (<Share />);
+                    case FileAction.Delete:
+                        return (<Delete />);
+                }
+            }
         }
+        return (<div></div>);
     }
-
 
     const props = (fileMetadata: IFileMetadata): IFileProps => {
         return {
             fileMetadata: fileMetadata,
             changedLayout: changedLayout,
-            action: selectActionJsx
+            action: (action: FileAction) => {
+                setModalData({
+                    action: action,
+                    fileMetadata: fileMetadata
+                })
+                if (action != FileAction.Download) toggleModal()
+            }
         }
     }
     return (
@@ -228,23 +286,32 @@ export default function MyFiles({ changedLayout, fileMetadata, fileCount, select
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                         style={{ color: "#ebf0f", width: "100%" }}
-                        onClick={() => selectActionJsx(FileAction.Upload)}>
+                        onClick={() => {
+                            setModalData({
+                                action: FileAction.Upload,
+                                fileMetadata: null
+                            })
+                            selectActionJsx()
+                            toggleModal()
+                        }}>
                         Upload File
                     </Button>
                 </Box>
-                <Modal isOpen={modalOpen} toggle={() => { toggleModal() }}>
-                    <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                <Modal className="container" isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                    {/* <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
                             <p>{modal?.title}</p>
                         </div>
-                    </ModalHeader>
-                    <ModalBody>
-                        {modal?.body}
+                    </ModalHeader> */}
+                    <ModalBody className="row align-items-center d-flex justify-content-center m-2">
+                        <div className="col">
+                            {selectActionJsx()}
+                        </div>
                     </ModalBody>
                 </Modal>
                 {
-                    fileMetadata ?
-                    fileMetadata.map((fileMeta: IFileMetadata) => {
+                    fileMetadata && fileMetadata.length != 0 ?
+                        fileMetadata.map((fileMeta: IFileMetadata) => {
                             return (
                                 <File key={fileMeta.id} {...props(fileMeta)}></File>
                             );
@@ -259,12 +326,12 @@ export default function MyFiles({ changedLayout, fileMetadata, fileCount, select
                         </div>
                 }
                 {
-                    fileCount && fileCount > 0 && <CustomPagination {...{ 
-                        total: fileCount, 
+                    fileCount && fileCount > 0 ? <CustomPagination {...{
+                        total: fileCount,
                         chunkSize: FILE_CHUNK_SIZE,
                         selected: selected,
                         fetchItems: fetchFiles
-                     }} />
+                    }} /> : <div></div>
                 }
             </div>
         </div>

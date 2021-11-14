@@ -20,6 +20,11 @@ data class FileCount(
 )
 
 @Serializable
+data class EditableFile(
+    val title: String
+)
+
+@Serializable
 data class FileMetadata(
     val id: String,
     val title: String,

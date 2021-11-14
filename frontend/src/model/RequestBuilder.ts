@@ -24,14 +24,19 @@ export class RequestBuilder {
         this.errorHandling = undefined
     }
 
-    public send = async (success: (response: any) => void) => {
+    public send = async (success: (response: any) => void, error: () => void) => {
         if (this.input && this.init) {
             const response = await fetch(this.input, this.init)
             if (response.status >= 400 && this.errorHandling) {
                 this.errorHandling(response)
+                error()
             } else if (response.ok) {
                 success(await response.json())
+            } else {
+                error()
             }
+        } else {
+            error()
         }
     }
 

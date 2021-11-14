@@ -13,6 +13,10 @@ export const LogoutAction = async () => {
             // toast.success(response.message, DefaultToastOptions)
             localStorage.removeItem(User.storagename)
             window.location.replace(ROUTES.login)
+        }, () => {
+            // toast.success(response.message, DefaultToastOptions)
+            localStorage.removeItem(User.storagename)
+            window.location.replace(ROUTES.login)
         })
 };
 
@@ -23,7 +27,7 @@ export const SimpleAction = async () => {
         .withDefaults()
         .send((response: any) => {
             console.log('success simple!, reps = ', response)
-        })
+        }, () => console.log('error'))
 };
 
 export const RegisteredAction = async () => {
@@ -33,7 +37,7 @@ export const RegisteredAction = async () => {
         .withDefaults()
         .send((response: any) => {
             console.log('success authed!, reps = ', response)
-        })
+        }, () => console.log('error'))
 };
 
 export const AdminAction = async () => {
@@ -43,5 +47,5 @@ export const AdminAction = async () => {
         .withDefaults()
         .send((response: any) => {
             console.log('success admin!, reps = ', response)
-        })
+        }, () => console.log('error'))
 };
