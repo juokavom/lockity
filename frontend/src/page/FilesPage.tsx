@@ -336,6 +336,52 @@ function Share({ fileMetadata, callback }: IModalProps): JSX.Element {
 
 }
 
+function Delete({ fileMetadata, callback }: IModalProps): JSX.Element {
+    const DeleteFileAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.FILE.fileId(fileMetadata.id))
+            .withMethod('Delete')
+            .withDefaults()
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
+
+    return (
+        <div className="container">
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="col-auto">
+                    <h3 style={{textAlign: "center"}}>Are you sure you want to delete this file?</h3>
+                </div>
+            </div>
+            <div className="row align-items-center d-flex justify-content-center" 
+                        style={{marginTop: "20px"}}>
+                <div className="col-4">
+                    <Button
+                        className="btn btn-danger"
+                        style={{width: "100%"}}
+                        sx={{ m: 3 }}
+                        onClick={() => DeleteFileAction()}
+                    >
+                        Yes
+                    </Button>
+                </div>
+                <div className="col-4">
+                    <Button
+                        className="btn btn-secondary"
+                        style={{width: "100%"}}
+                        sx={{ m: 3 }}
+                        onClick={() => callback(false)}
+                    >
+                        No
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export const FILE_CHUNK_SIZE = 5
 
 export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
@@ -366,12 +412,6 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
         );
     }
 
-    function Delete() {
-        return (
-            <div>Delete</div>
-        );
-    }
-
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
             if (modalData.action == FileAction.Upload) return (<Upload />);
@@ -388,7 +428,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
                     case FileAction.Share:
                         return (<Share {...modalProps} />);
                     case FileAction.Delete:
-                        return (<Delete />);
+                        return (<Delete {...modalProps} />);
                 }
             }
         }

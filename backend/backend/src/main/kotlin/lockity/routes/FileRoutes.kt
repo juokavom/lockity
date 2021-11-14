@@ -23,6 +23,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
+import javax.security.auth.login.AccountLockedException
 
 fun Application.fileRoutes() {
     val emailService: EmailService by inject()
@@ -395,15 +396,25 @@ fun Application.fileRoutes() {
                         }
                     }
                 }
-//                /**
-//                 * Deletes file (and shared access)
-//                 * SCOPE = Registered (deletes his own file)
-//                 */
-//                delete("/file-id/{fileId}") {
-//                    call.withErrorHandler {
-//                    }
-//                }
-//            }
+
+                delete("/file-id/{fileId}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
+                            ?: throw NotFoundException("File was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        if (!fileRecord.user.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this file metadata")
+
+                        val successfulDeletion = fileService.deletePhysicalFile(fileRecord.id!!)
+                        if (!successfulDeletion) throw AccountLockedException("Unable to delete physical file")
+
+                        fileRepository.delete(fileRecord.id!!)
+                        call.respondJSON("File deleted successfully", HttpStatusCode.OK)
+                    }
+                }
             }
 //        /**
 //         * Generate dynamic link for file access

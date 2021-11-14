@@ -68,6 +68,11 @@ class FileRepository(
         .where(FileTable.Id.eq(fileRecord.id))
         .execute()
 
+    fun delete(fileId: ByteArray) = databaseService.dsl
+        .deleteFrom(FileTable)
+        .where(FileTable.Id.eq(fileId))
+        .execute()
+
     fun userFileSizeSum(userBinId: ByteArray): BigDecimal? = databaseService.dsl
         .select(DSL.sum(FileTable.Size))
         .from(FileTable)
