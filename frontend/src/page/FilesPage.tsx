@@ -2,7 +2,7 @@ import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
     Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip
+    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
 import { User } from '../model/User';
@@ -20,12 +20,24 @@ import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderCom
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
+import { ProgressBar } from 'react-toastify/dist/components';
+import { ColorizeOutlined } from '@mui/icons-material';
 
 export interface IFileMetadata {
     id: string,
     title: string,
     size: number,
     link: string | null,
+}
+
+export interface StorageData {
+    totalSize: number,
+    usedSize: number
+}
+
+export interface IFileMetadataInfo {
+    storageData: StorageData,
+    fileCount: number
 }
 
 interface IFileProps {
@@ -352,15 +364,15 @@ function Delete({ fileMetadata, callback }: IModalProps): JSX.Element {
         <div className="container">
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="col-auto">
-                    <h3 style={{textAlign: "center"}}>Are you sure you want to delete this file?</h3>
+                    <h3 style={{ textAlign: "center" }}>Are you sure you want to delete this file?</h3>
                 </div>
             </div>
-            <div className="row align-items-center d-flex justify-content-center" 
-                        style={{marginTop: "20px"}}>
+            <div className="row align-items-center d-flex justify-content-center"
+                style={{ marginTop: "20px" }}>
                 <div className="col-4">
                     <Button
                         className="btn btn-danger"
-                        style={{width: "100%"}}
+                        style={{ width: "100%" }}
                         sx={{ m: 3 }}
                         onClick={() => DeleteFileAction()}
                     >
@@ -370,7 +382,7 @@ function Delete({ fileMetadata, callback }: IModalProps): JSX.Element {
                 <div className="col-4">
                     <Button
                         className="btn btn-secondary"
-                        style={{width: "100%"}}
+                        style={{ width: "100%" }}
                         sx={{ m: 3 }}
                         onClick={() => callback(false)}
                     >
@@ -384,7 +396,26 @@ function Delete({ fileMetadata, callback }: IModalProps): JSX.Element {
 
 export const FILE_CHUNK_SIZE = 5
 
-export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetchFiles, fetchFileCount }: IMyFilesProps) {
+function StorageStatusBar({ totalSize, usedSize }: StorageData): JSX.Element {
+    const percentage = usedSize * 100 / totalSize
+    let color = "info"
+
+    if (percentage > 80) color = "danger"
+    else if (percentage > 50) color = "warning"
+    else if (percentage > 20) color = "success"
+
+    return (
+        <div className="text-center">
+        {formatBytes(usedSize)} / {formatBytes(totalSize)}
+            <Progress animated color={color} value={percentage}>
+                {Math.trunc(percentage)}%
+            </Progress>
+        </div>
+    );
+}
+
+export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
+    selected, fetchFileMetadata, fetchFileMetadataInfo }: IMyFilesProps) {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
@@ -394,8 +425,8 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
         if (success) {
-            fetchFileCount()
-            fetchFiles(0, FILE_CHUNK_SIZE, 1)
+            fetchFileMetadataInfo()
+            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
         }
     }
 
@@ -448,10 +479,25 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
             }
         }
     }
+    
     return (
         <div className="container">
+            {
+                fileMetadataInfo?.storageData &&
+                <div className="row align-items-center d-flex justify-content-center">
+                    <div className="col-auto">
+                    </div>
+                </div>
+            }
             <div className="row align-items-center d-flex justify-content-center">
                 <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
+                    {
+                        fileMetadataInfo?.storageData &&
+                        <div>
+                            <StorageStatusBar {...fileMetadataInfo?.storageData} />
+                            <br />
+                        </div>
+                    }
                     <Button outline
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
@@ -498,11 +544,11 @@ export function MyFiles({ changedLayout, fileMetadata, fileCount, selected, fetc
                         </div>
                 }
                 {
-                    fileCount && fileCount > 0 ? <CustomPagination {...{
-                        total: fileCount,
+                    fileMetadataInfo && fileMetadataInfo.fileCount > 0 ? <CustomPagination {...{
+                        total: fileMetadataInfo.fileCount,
                         chunkSize: FILE_CHUNK_SIZE,
                         selected: selected,
-                        fetchItems: fetchFiles
+                        fetchItems: fetchFileMetadata
                     }} /> : <div></div>
                 }
             </div>

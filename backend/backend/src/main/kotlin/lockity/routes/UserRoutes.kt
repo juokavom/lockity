@@ -132,7 +132,7 @@ fun Application.userRoutes() {
                         call.respond(
                             StorageData(
                                 totalSize = userRecord.storageSize!!,
-                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!)?.toLong() ?: 0L
+                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!)
                             )
                         )
                     }

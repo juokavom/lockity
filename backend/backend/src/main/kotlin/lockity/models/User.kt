@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import lockity.plugins.JsonLocalDateTimeSerializer
 import lockity.utils.ROLE
+import org.jooq.User
 import java.time.LocalDateTime
 
 @Serializable

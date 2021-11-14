@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { User } from '../../model/User';
 import Test from '../TestPage';
 import './Main.scss';
-import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileState } from '../FilesPage';
+import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileState, IFileMetadataInfo } from '../FilesPage';
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
@@ -54,10 +54,10 @@ export interface IHeaderProps {
 export interface IMyFilesProps {
     changedLayout: Boolean,
     fileMetadata: IFileMetadata[] | null,
-    fileCount: number | null,
+    fileMetadataInfo: IFileMetadataInfo | null,
     selected: number,
-    fetchFiles: (offset: number, limit: number, selected: number) => void,
-    fetchFileCount: () => void
+    fetchFileMetadata: (offset: number, limit: number, selected: number) => void,
+    fetchFileMetadataInfo: () => void
 }
 
 export default function Main() {
@@ -80,11 +80,11 @@ export default function Main() {
     }, [windowSize])
 
 
-    const [fileCount, setFileCount] = useState<number | null>(null)
+    const [fileMetadataInfo, setFileMetadataInfo] = useState<IFileMetadataInfo | null>(null)
     const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
     const [fileSelected, setFileSelected] = useState<number>(1)
 
-    const fetchFiles = async (offset: number, limit: number, selected: number) =>
+    const fetchFileMetadata = async (offset: number, limit: number, selected: number) =>
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
             .withMethod('GET')
@@ -92,33 +92,33 @@ export default function Main() {
             .send((response: any) => {
                 setFileSelected(selected)
                 if (response) {
-                    const files: IFileMetadata[] = response
-                    setFileMetadata(files)
+                    const fileMetadata: IFileMetadata[] = response
+                    setFileMetadata(fileMetadata)
                 } else {
                     setFileMetadata(null)
                 }
             }, () => setFileMetadata(null))
 
 
-    const fetchFileCount = async () => {
+    const fetchFileMetadataInfo = async () => {
         await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.getFileMetadataCount)
+            .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
             .withMethod('GET')
             .withDefaults()
             .send((response: any) => {
                 if (response) {
-                    const fileCount: { fileCount: number } = response
-                    setFileCount(fileCount.fileCount)
+                    const fileMetadataInfo: IFileMetadataInfo = response
+                    setFileMetadataInfo(fileMetadataInfo)
                 } else {
-                    setFileCount(null)
+                    setFileMetadataInfo(null)
                 }
-            }, () => setFileCount(null))
+            }, () => setFileMetadataInfo(null))
     }
 
     useEffect(() => {
         if (isAuthed) {
-            fetchFileCount()
-            fetchFiles(0, FILE_CHUNK_SIZE, 1)
+            fetchFileMetadataInfo()
+            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
         }
     }, [])
 
@@ -131,10 +131,10 @@ export default function Main() {
     const myFilesProps: IMyFilesProps = {
         changedLayout: changedLayout,
         fileMetadata: fileMetadata,
-        fileCount: fileCount,
+        fileMetadataInfo: fileMetadataInfo,
         selected: fileSelected,
-        fetchFiles: fetchFiles,
-        fetchFileCount: fetchFileCount
+        fetchFileMetadata: fetchFileMetadata,
+        fetchFileMetadataInfo: fetchFileMetadataInfo
     }
 
     if (!isAuthed) {
@@ -154,7 +154,7 @@ export default function Main() {
                 <div className="row justify-content-center">
                     <div className="mainbox col-10 col-sm-12 col-xl-10">
                         <Header {...headerProps} />
-                        <div className="min-height route-holder">
+                        <div className="route-holder">
                             <Switch>
                                 <Route exact path={ROUTES.test} component={() => <Test />} />
 

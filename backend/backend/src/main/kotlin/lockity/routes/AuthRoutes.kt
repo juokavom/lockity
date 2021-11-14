@@ -10,6 +10,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.*
 import lockity.repositories.ConfirmationLinkRepository
+import lockity.repositories.FileRepository
 import lockity.repositories.RoleRepository
 import lockity.repositories.UserRepository
 import lockity.services.ConfigurationService
@@ -24,6 +25,7 @@ import java.util.*
 fun Application.authRoutes() {
     val emailService: EmailService by inject()
     val userRepository: UserRepository by inject()
+    val fileRepository: FileRepository by inject()
     val roleRepository: RoleRepository by inject()
     val databaseService: DatabaseService by inject()
     val confirmationLinkRepository: ConfirmationLinkRepository by inject()

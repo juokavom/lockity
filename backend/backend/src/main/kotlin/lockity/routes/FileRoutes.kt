@@ -10,8 +10,9 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.EditableFile
-import lockity.models.FileCount
 import lockity.models.FileMetadata
+import lockity.models.FileMetadataInfo
+import lockity.models.StorageData
 import lockity.repositories.*
 import lockity.services.*
 import lockity.utils.AUTHENTICATED
@@ -104,7 +105,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("User not found")
 
                         val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
-                        val userFileSizeSum = fileRepository.userFileSizeSum(currentUser.id!!)?.toLong() ?: 0L
+                        val userFileSizeSum = fileRepository.userFileSizeSum(currentUser.id!!)
                         if (userFileSizeSum + fileSize > currentUser.storageSize!!)
                             throw NoPermissionException("User storage size is exceeded")
 
@@ -305,14 +306,17 @@ fun Application.fileRoutes() {
                     }
                 }
 
-                get("/metadata/count") {
+                get("/metadata/info") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this file metadata")
-
                         call.respond(
-                            FileCount(
-                                fileRepository.fetchUserFilesCount(
+                            FileMetadataInfo(
+                                storageData = StorageData(
+                                    totalSize = currentUser.storageSize!!,
+                                    usedSize = fileRepository.userFileSizeSum(currentUser.id!!)
+                                ),
+                                fileCount = fileRepository.fetchUserFilesCount(
                                     userUuid = databaseService.binToUuid(currentUser.id!!)
                                 ) ?: 0
                             )
@@ -378,7 +382,7 @@ fun Application.fileRoutes() {
                             throw NoPermissionException("User do not have permission to modify this file metadata")
 
                         if (shareCondition) {
-                            if(fileRecord.link == null) {
+                            if (fileRecord.link == null) {
                                 fileRecord.link = UUID.randomUUID().toString()
                                 fileRepository.update(fileRecord)
                                 call.respondJSON("File shared successfully", HttpStatusCode.OK)
@@ -386,7 +390,7 @@ fun Application.fileRoutes() {
                                 throw BadRequestException("File already has dynamic link")
                             }
                         } else {
-                            if(fileRecord.link == null) {
+                            if (fileRecord.link == null) {
                                 throw BadRequestException("File is not shared")
                             } else {
                                 fileRecord.link = null

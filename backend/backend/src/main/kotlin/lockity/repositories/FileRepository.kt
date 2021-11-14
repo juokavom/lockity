@@ -73,11 +73,11 @@ class FileRepository(
         .where(FileTable.Id.eq(fileId))
         .execute()
 
-    fun userFileSizeSum(userBinId: ByteArray): BigDecimal? = databaseService.dsl
+    fun userFileSizeSum(userBinId: ByteArray): Long = databaseService.dsl
         .select(DSL.sum(FileTable.Size))
         .from(FileTable)
         .where(FileTable.User.eq(userBinId))
-        .fetchOne()?.value1()
+        .fetchOne()?.value1()?.toLong() ?: 0L
 
 //    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
 //        .select()
