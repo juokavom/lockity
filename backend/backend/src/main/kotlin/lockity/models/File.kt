@@ -33,3 +33,16 @@ data class FileMetadataInfo(
     val storageData: StorageData,
     val fileCount: Int
 )
+
+@Serializable
+data class ReceivedFileMetadata(
+    val id: String,
+    val title: String,
+    val size: Long,
+    val ownerEmail: String
+)
+
+@Serializable
+data class ReceivedFileMetadataCount(
+    val receivedCount: Int
+)

@@ -34,6 +34,10 @@ export namespace ENDPOINTS {
         export const fileId = (id: string) => file + '/file-id/' + id
         export const streamWithFileId = (id: string) => fileId(id) + '/stream'
         export const downloadWithFileId = (id: string) => fileId(id) + '/download'
+        export const streamReceivedWithFileId = (id: string) =>
+            file + '/received/receive-id/' + id + '/stream'
+        export const downloadReceivedWithFileId = (id: string) =>
+            file + '/received/receive-id/' + id + '/download'
         export const shareConditionWithFileId = (id: string, condition: boolean) =>
             fileId(id) + '/share/' + condition
         export const fileAnonymous = file + '/anonymous'
@@ -42,6 +46,10 @@ export namespace ENDPOINTS {
         export const getFileMetadataInfo = metadata + '/info'
         export const getFileMetadataWithTitleLike = (title: string) =>
             metadata + '/title-starts-with/' + title
+
+        export const getReceivedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
+            file + '/received/metadata/offset/' + offset + '/limit/' + limit
+        export const getReceivedMetadataCount = file + '/received/metadata/count'
     }
     export namespace USER {
         export const user = endpoint + '/user'

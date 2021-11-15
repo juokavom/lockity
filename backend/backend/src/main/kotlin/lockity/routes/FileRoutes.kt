@@ -37,15 +37,7 @@ fun Application.fileRoutes() {
 
     routing {
         route("/file") {
-            /**
-             * Description: Upload physical file, save metadata to database and generate fileKey
-             * which is returned to client to later generate file link
-             * Params: null
-             * Body: multipart file
-             * Validation: Check if file do not exceed limit, is attached and in correct format
-             * OK Response: AnonymousFileMetadata { fileId, fileKey }
-             * Scope: all
-             */
+
 //            post("/anonymous") {
 //                call.withErrorHandler {
 //                    val fileSize = call.request.headers["Content-Length"]!!.toLong()
@@ -86,14 +78,6 @@ fun Application.fileRoutes() {
 //                }
 //            }
 
-            /**
-             * Description: Upload physical file, save metadata to database
-             * Params: null
-             * Body: multipart file
-             * Validation: Check if file do not exceed limit, is attached and in correct format
-             * OK Response: AnonymousFileMetadata { fileId, fileKey }
-             * Scope: registered
-             */
             authenticate(AUTHENTICATED) {
                 post {
                     call.withErrorHandler {
@@ -138,25 +122,6 @@ fun Application.fileRoutes() {
                     }
                 }
 
-                /**
-                //                 * Get physical file by providing file id
-                //                 * SCOPE = Registered (gets his own file)
-                //                 */
-//                get("/file-id/{fileId}") {
-//                    call.withErrorHandler {
-//                        val fileId = call.parameters["fileId"]
-//                            ?: throw BadRequestException("File id is not present in the parameters.")
-//                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
-//                            ?: throw NotFoundException("File was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this file")
-//                        if (!fileRecord.user.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to get this file")
-//
-//                        call.respondFile(File(fileRecord.location!!))
-//                    }
-//                }
-
                 get("/file-id/{fileId}/stream") {
                     call.withErrorHandler {
                         val fileId = call.parameters["fileId"]
@@ -198,82 +163,55 @@ fun Application.fileRoutes() {
                     }
                 }
 
-//                /**
-//                 * Get shared physical file by providing file id
-//                 * SCOPE = Registered (gets shared access file with him)
-//                 */
-//                get("/share-id/{shareId}") {
-//                    call.withErrorHandler {
-//
-//                        val shareId = call.parameters["shareId"]
-//                            ?: throw BadRequestException("Share id is not present in the parameters.")
-//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-//                            ?: throw NotFoundException("Shared access was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this file")
-//                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to get this file")
-//
-//                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
-//                            ?: throw NotFoundException("File was not found")
-//
-//                        call.respondFile(File(fileRecord.location!!))
-//                    }
-//                }
-                /**
-                 * Get physical file by providing file id
-                 * SCOPE = Registered (gets his own file or file is shared access with him)
-                 */
-//                get("/metadata/file-id/{fileId}") {
-//                    call.withErrorHandler {
-//                        val fileId = call.parameters["fileId"]
-//                            ?: throw BadRequestException("File id is not present in the parameters.")
-//                        val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
-//                            ?: throw NotFoundException("File was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
-//                        if (!fileRecord.user.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to get this file metadata")
-//
-//                        call.respond(
-//                            FileMetadata(
-//                                title = fileRecord.title!!,
-//                                size = fileRecord.size!!
-//                            )
-//                        )
-//                    }
-//                }
+                get("/received/receive-id/{receiveId}/stream") {
+                    call.withErrorHandler {
+                        val receiveId = call.parameters["receiveId"]
+                            ?: throw BadRequestException("Receive id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(receiveId))
+                            ?: throw NotFoundException("Shared access record was not found")
 
-                /**
-                 * Get physical file by providing file id
-                 * SCOPE = Registered (gets his own file or file is shared access with him)
-                 */
-//                get("/metadata/shared-id/{shareId}") {
-//                    call.withErrorHandler {
-//                        val shareId = call.parameters["shareId"]
-//                            ?: throw BadRequestException("Share id is not present in the parameters.")
-//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-//                            ?: throw NotFoundException("Shared access was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
-//                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to get this file metadata")
-//
-//                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
-//                            ?: throw NotFoundException("File was not found")
-//
-//                        call.respond(
-//                            FileMetadata(
-//                                title = fileRecord.title!!,
-//                                size = fileRecord.size!!
-//                            )
-//                        )
-//                    }
-//                }
-                /**
-                 * Gets list of user's files metadata whose titles start with
-                 * SCOPE = Registered
-                 */
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("No permission to stream the file")
+                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to stream this file")
+
+                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+                            ?: throw NotFoundException("File was not found")
+
+                        call.respondFile(
+                            File(fileRecord.location!! + "/" + fileRecord.title!!)
+                        )
+                    }
+                }
+
+                get("/received/receive-id/{receiveId}/download") {
+                    call.withErrorHandler {
+                        val receiveId = call.parameters["receiveId"]
+                            ?: throw BadRequestException("Receive id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(receiveId))
+                            ?: throw NotFoundException("Shared access record was not found")
+
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("No permission to stream the file")
+                        if (!sharedAccessRecord.recipientId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to stream this file")
+
+                        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+                            ?: throw NotFoundException("File was not found")
+
+                        call.response.header(
+                            HttpHeaders.ContentDisposition,
+                            ContentDisposition.Attachment.withParameter(
+                                ContentDisposition.Parameters.FileName, fileRecord.title!!
+                            ).toString()
+                        )
+
+                        call.respondFile(
+                            File(fileRecord.location!! + "/" + fileRecord.title!!)
+                        )
+                    }
+                }
+
                 get("/metadata/offset/{offset}/limit/{limit}") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()
@@ -303,6 +241,56 @@ fun Application.fileRoutes() {
                     }
                 }
 
+                get("/metadata/info") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        call.respond(
+                            FileMetadataInfo(
+                                storageData = StorageData(
+                                    totalSize = currentUser.storageSize!!,
+                                    usedSize = fileRepository.userFileSizeSum(currentUser.id!!)
+                                ),
+                                fileCount = fileRepository.fetchUserFilesCount(
+                                    userUuid = databaseService.binToUuid(currentUser.id!!)
+                                ) ?: 0
+                            )
+                        )
+                    }
+                }
+
+                get("/received/metadata/offset/{offset}/limit/{limit}") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        val offset = call.parameters["offset"]?.toIntOrNull()
+                            ?: throw BadRequestException("Offset is not present in the parameters or in bad format.")
+                        val limit = call.parameters["limit"]?.toIntOrNull()
+                            ?: throw BadRequestException("Limit is not present in the parameters or in bad format.")
+                        if (limit > 20) throw BadRequestException("Maximum limit(20) is exceeded.")
+
+                        call.respond(
+                            sharedAccessRepository.fetchRecipientFilesWithOffsetAndLimit(
+                                userBinId = currentUser.id!!,
+                                offset = offset,
+                                limit = limit
+                            )
+                        )
+                    }
+                }
+
+                get("/received/metadata/count") {
+                    call.withErrorHandler {
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        call.respond(
+                            ReceivedFileMetadataCount(
+                                receivedCount = sharedAccessRepository.fetchRecipientSharedAccessCount(currentUser.id!!)
+                            )
+                        )
+                    }
+                }
+
                 get("/metadata/title-starts-with/{title}") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()
@@ -326,39 +314,6 @@ fun Application.fileRoutes() {
                     }
                 }
 
-                get("/metadata/info") {
-                    call.withErrorHandler {
-                        val currentUser = call.jwtUser()
-                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
-                        call.respond(
-                            FileMetadataInfo(
-                                storageData = StorageData(
-                                    totalSize = currentUser.storageSize!!,
-                                    usedSize = fileRepository.userFileSizeSum(currentUser.id!!)
-                                ),
-                                fileCount = fileRepository.fetchUserFilesCount(
-                                    userUuid = databaseService.binToUuid(currentUser.id!!)
-                                ) ?: 0
-                            )
-                        )
-                    }
-                }
-                /**
-                 * Gets list of user's files metadata whose titles start with
-                 * SCOPE = Registered
-                 */
-//                get("/metadata/shared") {
-//                    call.withErrorHandler {
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
-//                        val userSharedFiles = fileRepository.fetchUserReceivedSharedFiles(currentUser.id!!)
-//                        call.respond(userSharedFiles)
-//                    }
-//                }
-                /**
-                 * Edits file data (title)
-                //                 * SCOPE = Registered (edits his own file)
-                //                 */
                 put("/file-id/{fileId}") {
                     call.withErrorHandler {
                         val fileId = call.parameters["fileId"]
@@ -440,10 +395,7 @@ fun Application.fileRoutes() {
                     }
                 }
             }
-//        /**
-//         * Generate dynamic link for file access
-//         * SCOPE = ALL: (guest (with key), registered (his file))
-//         */
+
 //        post("/dynlink/file-id/{fileId}") {
 //            call.withErrorHandler {
 //                val fileId = call.parameters["fileId"]
@@ -472,10 +424,7 @@ fun Application.fileRoutes() {
 //                call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
 //            }
 //        }
-//        /**
-//         * Get physical file by providing dynamic link id
-//         * SCOPE = Guest
-//         */
+
 //        get("/dynlink-id/{dynlinkId}") {
 //            call.withErrorHandler {
 //            }

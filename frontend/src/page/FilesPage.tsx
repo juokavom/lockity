@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
-    Button, Modal, ModalHeader, ModalBody, UncontrolledTooltip, Progress
+    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
+    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
+    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress
 } from 'reactstrap';
+import { NavLink } from 'react-router-dom';
+import { User } from '../model/User';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Box, IconButton, TextField, Typography } from '@mui/material';
+import { Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
 import { IMyFilesProps } from './main/MainPage';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import FileUploader from '../component/FileUploaderComponent';
+import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
+import { ProgressBar } from 'react-toastify/dist/components';
+import { ColorizeOutlined } from '@mui/icons-material';
 
 export interface IFileMetadata {
     id: string,
@@ -53,7 +59,7 @@ const FileAction = {
     Delete: "Delete file"
 }
 
-function formatBytes(bytes: number, decimals = 2) {
+export function formatBytes(bytes: number, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
 
     const k = 1024;
@@ -129,7 +135,7 @@ function Edit({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const [newTitle, setTitle] = useState(fileMetadata.title.replace(format, ''));
 
     const validateForm = () => {
-        return newTitle.length > 0 && newTitle + format !== fileMetadata.title;
+        return newTitle.length > 0 && newTitle + format != fileMetadata.title;
     }
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
@@ -213,15 +219,15 @@ function Preview({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     );
 
     const pictureJsx = () => (
-        <img alt={"pictureContainer"} style={{ maxWidth: "100%" }} src={src} />
+        <img style={{ maxWidth: "100%" }} src={src} />
     );
 
     let selected = null
 
     if (format) {
-        if (format === "mp4") {
+        if (format == "mp4") {
             selected = videoJsx()
-        } else if (format === "mp3") {
+        } else if (format == "mp3") {
             selected = audioJsx()
         } else if (["png", "jpg", "jpeg"].includes(format)) {
             selected = pictureJsx()
@@ -340,7 +346,7 @@ function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const DeleteFileAction = async () => {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.fileId(fileMetadata.id))
-            .withMethod('DELETE')
+            .withMethod('Delete')
             .withDefaults()
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
@@ -353,11 +359,6 @@ function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="col-auto">
                     <h3 style={{ textAlign: "center" }}>Are you sure you want to delete this file?</h3>
-                </div>
-            </div>
-            <div className="row align-items-end d-flex justify-content-center">
-                <div className="col-auto">
-                    <p style={{ textAlign: "center" }}><i>{fileMetadata.title}</i></p>
                 </div>
             </div>
             <div className="row align-items-center d-flex justify-content-center"
@@ -419,7 +420,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
         setModalOpen(false)
         if (success) {
             // fetchFileMetadataInfo()
-            // fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)       
+            // fetchFileMetadata(0, SHARE_CHUNK_SIZE, 1)            
             window.location.replace(ROUTES.myFiles)
         }
     }
@@ -439,7 +440,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
 
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
-            if (modalData.action === FileAction.Upload) return (<Upload />);
+            if (modalData.action == FileAction.Upload) return (<Upload />);
             else if (modalData.fileMetadata) {
                 const modalProps: IFileModalProps = {
                     fileMetadata: modalData.fileMetadata,
@@ -501,7 +502,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                     </Button>
                 </Box>
                 <Modal className="container" size={
-                    modalData?.action === FileAction.Preview ? "lg" : ""
+                    modalData?.action == FileAction.Preview ? "lg" : ""
                 } isOpen={modalOpen} toggle={() => { toggleModal() }}>
                     <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
@@ -515,7 +516,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                     </ModalBody>
                 </Modal>
                 {
-                    fileMetadata && fileMetadata.length !== 0 ?
+                    fileMetadata && fileMetadata.length != 0 ?
                         fileMetadata.map((fileMeta: IFileMetadata) => {
                             return (
                                 <File key={fileMeta.id} {...props(fileMeta)}></File>

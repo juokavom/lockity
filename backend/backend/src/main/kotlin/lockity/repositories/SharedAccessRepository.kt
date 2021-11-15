@@ -2,14 +2,10 @@ package lockity.repositories
 
 import database.schema.tables.records.SharedAccessRecord
 import database.schema.tables.references.FileTable
-import database.schema.tables.references.RoleTable
 import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
-import lockity.models.FileMetadataForSharing
-import lockity.models.SharedAccess
-import lockity.models.UserForSharing
+import lockity.models.*
 import lockity.utils.DatabaseService
-import lockity.utils.USER
 import java.util.*
 
 class SharedAccessRepository(
@@ -79,12 +75,32 @@ class SharedAccessRepository(
         .where(SharedAccessTable.OwnerId.eq(userBinId))
         .fetchOne()?.value1() ?: 0
 
-//    fun fetchUserSharedSharedAccesses(userBinId: ByteArray): List<SharedAccess> = databaseService.dsl
-//        .selectFrom(SharedAccessTable)
-//        .where(SharedAccessTable.RecipientId.eq(userBinId))
-//        .fetchArray()
-//        .toList()
-//        .map { fromRecord(it) }
+    fun fetchRecipientFilesWithOffsetAndLimit(userBinId: ByteArray, offset: Int, limit: Int): List<ReceivedFileMetadata> =
+        databaseService.dsl
+            .select()
+            .from(SharedAccessTable)
+            .join(FileTable).on(SharedAccessTable.FileId.eq(FileTable.Id))
+            .join(UserTable).on(SharedAccessTable.OwnerId.eq(UserTable.Id))
+            .where(SharedAccessTable.RecipientId.eq(userBinId))
+            .orderBy(SharedAccessTable.Created.desc())
+            .offset(offset)
+            .limit(limit)
+            .fetchArray()
+            .map {
+                ReceivedFileMetadata(
+                    id = databaseService.binToUuid(it[SharedAccessTable.Id]!!).toString(),
+                    title = it[FileTable.Title]!!,
+                    size = it[FileTable.Size]!!,
+                    ownerEmail = it[UserTable.Email]!!
+                )
+            }
+            .toList()
+
+    fun fetchRecipientSharedAccessCount(userBinId: ByteArray): Int = databaseService.dsl
+        .selectCount()
+        .from(SharedAccessTable)
+        .where(SharedAccessTable.RecipientId.eq(userBinId))
+        .fetchOne()?.value1() ?: 0
 
     fun isUniqueFileAndRecipientEntry(fileUuid: UUID, recipientUuid: UUID): Boolean = databaseService.dsl
         .selectCount()

@@ -275,6 +275,7 @@ function Edit({ userData, callback }: IUserModalProps): JSX.Element {
             user.role != null && user.role !== "" &&
             user.registered != null && (
                 user.email !== userData.email ||
+                user.name !== userData.name ||
                 user.surname !== userData.surname ||
                 user.role !== userData.role ||
                 user.registered !== userData.registered ||
