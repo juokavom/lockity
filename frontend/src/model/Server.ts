@@ -16,6 +16,7 @@ const prod: URL = {
 export const LANDING_URL = "https://lockity.akramas.com/"
 export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
 export const SUPPORTED_FILE_TYPES = ['mp4', 'mp3', 'jpg', 'jpeg', 'png']
+export const MAX_STORAGE_SIZE = 15000000000
 
 export const URL: URL = process.env.NODE_ENV === "production" ? prod : dev
 

@@ -1,7 +1,7 @@
 import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
     Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
+    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form,
     Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress, Table
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
@@ -12,16 +12,16 @@ import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Autocomplete, Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, FormControl, IconButton, InputAdornment, InputLabel, Input, MenuItem, OutlinedInput, Pagination, Select, TextField, Typography, Switch, FormControlLabel } from '@mui/material';
 import { IMyFilesProps, ISharedProps, IUserProps } from './main/MainPage';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { ENDPOINTS, MAX_STORAGE_SIZE, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
 import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
 import { ProgressBar } from 'react-toastify/dist/components';
-import { ColorizeOutlined } from '@mui/icons-material';
+import { ColorizeOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
 
 const UserAction = {
     Create: "Create user",
@@ -48,95 +48,208 @@ export interface IUserData {
     storageSize: number
 }
 
-// function Create({ callback }: any): JSX.Element {
-//     const [files, setFiles] = useState<IFileMetadataForSharing[]>([]);
-//     const [users, setUsers] = useState<IUserForSharing[]>([]);
-//     const [selectedFile, setSelectedFile] = useState<IFileMetadataForSharing | null>(null);
-//     const [selectedUser, setSelectedUser] = useState<IUserForSharing | null>(null);
+function Create({ callback }: any): JSX.Element {
+    const [showPassword, setShowPassword] = useState(false)
 
-//     const validateForm = () => {
-//         return selectedFile != null && selectedUser != null;
-//     }
+    const [user, setUser] = useState<{
+        name: string | null,
+        surname: string | null,
+        email: string | null,
+        password: string | null,
+        role: string | null,
+        registered: Date | null,
+        lastActive: Date | null,
+        confirmed: boolean,
+        subscribed: boolean,
+        storageSize: number | null
+    }>({
+        name: null,
+        surname: null,
+        email: null,
+        password: null,
+        role: "",
+        registered: null,
+        lastActive: null,
+        confirmed: false,
+        subscribed: false,
+        storageSize: 0
+    });
 
-//     const handleSubmit = async (event: { preventDefault: () => void; }) => {
-//         event.preventDefault();
-//         await CreateSharedFileAction();
-//     }
+    const validateForm = () => {
+        return user != null &&
+            user.email != null && user.email != "" &&
+            user.password != null &&  user.password != "" &&
+            user.role != null && user.role != "" &&
+            user.registered != null
+    }
 
-//     const CreateSharedFileAction = async () => {
-//         await new RequestBuilder()
-//             .withUrl(ENDPOINTS.SHARED.sharedAccess)
-//             .withMethod('POST')
-//             .withDefaults()
-//             .withBody({
-//                 fileId: selectedFile?.id,
-//                 userId: selectedUser?.id
-//             })
-//             .send((response: any) => {
-//                 toast.success(response.message, DefaultToastOptions)
-//                 callback(true)
-//             }, () => callback(false))
-//     }
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
+        event.preventDefault();
+        console.log(user);
+        await CreateUserAction();
+    }
 
-//     return (
-//         <div className="container">
-//             <Box className="row align-items-center d-flex justify-content-center"
-//                 component="form" noValidate onSubmit={handleSubmit}
-//             >
-//                 <div className="row align-items-end d-flex justify-content-center">
-//                     <Autocomplete
-//                         disablePortal
-//                         className="col-10"
-//                         onChange={(event, value) => setSelectedFile(value)}
-//                         id="file"
-//                         getOptionLabel={(option: IFileMetadataForSharing) => option.title}
-//                         options={files}
-//                         sx={{ width: 300 }}
-//                         renderInput={(params) =>
-//                             <TextField {...params}
-//                                 placeholder="Start typing for files to load"
-//                                 label="File"
-//                                 variant="standard"
-//                                 onChange={(e: any) => FetchWithTitlesLike(e.target.value, (files) => {
-//                                     setFiles(files)
-//                                 })}
-//                             />
-//                         }
-//                     />
-//                     <Autocomplete
-//                         disablePortal
-//                         onChange={(event, value) => setSelectedUser(value)}
-//                         id="user"
-//                         getOptionLabel={(option: IUserForSharing) => option.email}
-//                         options={users}
-//                         sx={{ mt: 3, width: 300 }}
-//                         renderInput={(params) =>
-//                             <TextField {...params}
-//                                 placeholder="Start typing for users to load"
-//                                 label="User"
-//                                 variant="standard"
-//                                 onChange={(e: any) => FetchUsersWithEmailsLike(e.target.value, (users) => {
-//                                     setUsers(users)
-//                                 })}
-//                             />
-//                         }
-//                     />
-//                 </div>
-//                 <div className="selected-file-wrapper">
-//                     <Button
-//                         type="submit"
-//                         variant="contained"
-//                         className="upload-button"
-//                         sx={{ mt: 3, mb: 2 }}
-//                         disabled={!validateForm()}
-//                     >
-//                         Save
-//                     </Button>
-//                 </div>
-//             </Box>
-//         </div>
-//     );
-// }
+    const CreateUserAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.USER.user)
+            .withMethod('POST')
+            .withDefaults()
+            .withBody(user)
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
+
+    return (
+        <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Email"
+                label="Email"
+                type="email"
+                name="Email"
+                autoComplete="Email"
+                variant="standard"
+                onChange={(e: any) => setUser({ ...user, email: e.target.value })}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                id="Name"
+                label="Name"
+                name="Name"
+                autoComplete="Name"
+                variant="standard"
+                onChange={(e: any) => setUser({ ...user, name: e.target.value })}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                id="Surname"
+                label="Surname"
+                name="Surname"
+                autoComplete="Surname"
+                variant="standard"
+                onChange={(e: any) => setUser({ ...user, surname: e.target.value })}
+            />
+            <FormControl
+                margin="normal"
+                required
+                fullWidth
+                variant="standard"
+            >
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    onChange={(e: any) => setUser({ ...user, password: e.target.value })}
+                    endAdornment={
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                    }
+                />
+            </FormControl>
+            <FormControl
+                margin="normal"
+                fullWidth
+                variant="standard"
+                required
+            >
+                <InputLabel id="Role">Role</InputLabel>
+                <Select
+                    id="Role"
+                    label="Role"
+                    value={user.role}
+                    onChange={(e: any) => setUser({ ...user, role: e.target.value })}
+                >
+                    <MenuItem value={User.Role.Registered}>{User.Role.Registered}</MenuItem>
+                    <MenuItem value={User.Role.Admin}>{User.Role.Admin}</MenuItem>
+                </Select>
+            </FormControl>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                variant="standard"
+                id="registered"
+                label="Registered"
+                type="datetime-local"
+                inputProps={{step: 1}}
+                onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                variant="standard"
+                id="lastActive"
+                label="Last active"
+                type="datetime-local"
+                inputProps={{step: 1}}
+                onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                variant="standard"
+                id="storageSize"
+                label="Storage size (bytes)"
+                type="number"
+                value={user.storageSize}
+                onChange={(e: any) => {
+                    let number = parseInt(e.target.value)
+                    if (number < 0) number = 0
+                    else if (number > MAX_STORAGE_SIZE) number = MAX_STORAGE_SIZE
+                    setUser({ ...user, storageSize: number })
+                }}
+            />
+            <FormControlLabel
+                control={
+                    <Switch
+                        checked={user.confirmed}
+                        onChange={(e: any) => { setUser({ ...user, confirmed: !user.confirmed }) }}
+                        name="confirmed"
+                    />
+                }
+                label="Confirmed"
+            />
+            <FormControlLabel
+                control={
+                    <Switch
+                        checked={user.subscribed}
+                        onChange={(e: any) => { setUser({ ...user, subscribed: !user.subscribed }) }}
+                        name="subscribed"
+                    />
+                }
+                label="Subscribed"
+            />
+            <div className="selected-file-wrapper">
+                <Button
+                    type="submit"
+                    variant="contained"
+                    className="upload-button"
+                    sx={{ mt: 3, mb: 2 }}
+                    disabled={!validateForm()}
+                >
+                    Save
+                </Button>
+            </div>
+        </Box>
+        </div>
+    );
+}
 
 
 // const FetchWithTitlesLike = async (title: string, setFiles: (files: IFileMetadataForSharing[]) => void) => {
@@ -320,7 +433,6 @@ export function Users({ userData, userCount, selected,
     }
 
     const selectActionJsx = (): JSX.Element => {
-        /*
         if (modalData) {
             if (modalData.action == UserAction.Create) return (<Create {...{ callback: modalCallback }} />);
             else if (modalData.userData) {
@@ -330,13 +442,12 @@ export function Users({ userData, userCount, selected,
                 }
                 switch (modalData.action) {
                     case UserAction.Edit:
-                        return (<Edit {...modalProps} />);
+                    // return (<Edit {...modalProps} />);
                     case UserAction.Delete:
-                        // return (<Delete {...modalProps} />);
+                    // return (<Delete {...modalProps} />);
                 }
             }
         }
-            */
         return (<div></div>);
     }
 
@@ -430,8 +541,8 @@ export function Users({ userData, userCount, selected,
                         <table className="table table-hover table-ellipsis">
                             <thead>
                                 <tr>
-                                    <th scope="col">File</th>
-                                    <th scope="col">User</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Role</th>
                                     <th style={{ width: "10%" }}></th>
                                     <th style={{ width: "10%" }}></th>
                                 </tr>

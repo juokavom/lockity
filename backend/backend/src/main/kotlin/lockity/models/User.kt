@@ -7,6 +7,7 @@ import io.ktor.features.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import lockity.plugins.JsonLocalDateTimeSerializer
+import lockity.utils.MAX_STORAGE_BYTES
 import lockity.utils.ROLE
 import org.jooq.User
 import java.time.LocalDateTime
@@ -68,7 +69,7 @@ data class CreatableUser(
     var email: String,
     var password: String,
     var role: String,
-    var registered: LocalDateTime?,
+    var registered: LocalDateTime,
     var lastActive: LocalDateTime?,
     var confirmed: Boolean,
     var subscribed: Boolean,
@@ -77,8 +78,8 @@ data class CreatableUser(
 
 
 fun CreatableUser.isValuesValid() {
-    if (email == "" || password == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN))
-        throw BadRequestException("Email, password and role failed validation.")
+    if (email == "" || password == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN) || storageSize > MAX_STORAGE_BYTES)
+        throw BadRequestException("Email, password, role or storage size failed validation.")
 }
 
 @Serializable

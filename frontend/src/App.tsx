@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
       <BrowserRouter>
-        <div>
+        <div>    
           <ToastContainer />
           <Main />
         </div>

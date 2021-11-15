@@ -41,3 +41,4 @@ object USER {
 }
 
 const val DEFAULT_STORAGE_BYTES = 1_073_741_824L // 1GB
+const val MAX_STORAGE_BYTES = 16_106_127_360 // 15GB
