@@ -346,7 +346,7 @@ function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const DeleteFileAction = async () => {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.fileId(fileMetadata.id))
-            .withMethod('Delete')
+            .withMethod('DELETE')
             .withDefaults()
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
@@ -359,6 +359,11 @@ function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="col-auto">
                     <h3 style={{ textAlign: "center" }}>Are you sure you want to delete this file?</h3>
+                </div>
+            </div>
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="col-auto">
+                    <p style={{ textAlign: "center" }}><i>{fileMetadata.title}</i></p>
                 </div>
             </div>
             <div className="row align-items-center d-flex justify-content-center"

@@ -42,9 +42,9 @@ class SharedAccessRepository(
         .where(SharedAccessTable.Id.eq(sharedId))
         .execute()
 
-    fun delete(uuid: UUID) = databaseService.dsl
+    fun delete(sharedId: ByteArray) = databaseService.dsl
         .deleteFrom(SharedAccessTable)
-        .where(SharedAccessTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(SharedAccessTable.Id.eq(sharedId))
         .execute()
 
     fun fetchOwnerFilesWithOffsetAndLimit(userBinId: ByteArray, offset: Int, limit: Int): List<SharedAccess> =

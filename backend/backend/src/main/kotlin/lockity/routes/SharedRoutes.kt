@@ -13,11 +13,8 @@ import lockity.models.SharedAccessCount
 import lockity.models.UploadableSharedAccess
 import lockity.models.isValuesValid
 import lockity.repositories.FileRepository
-import lockity.repositories.RoleRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.repositories.UserRepository
-import lockity.services.EmailService
-import lockity.services.FileService
 import lockity.services.jwtUser
 import lockity.utils.AUTHENTICATED
 import lockity.utils.DatabaseService
@@ -29,14 +26,10 @@ import java.util.*
 import javax.naming.NoPermissionException
 
 fun Application.sharedRoutes() {
-    val emailService: EmailService by inject()
     val userRepository: UserRepository by inject()
     val databaseService: DatabaseService by inject()
-    val roleRepository: RoleRepository by inject()
-    val fileService: FileService by inject()
     val fileRepository: FileRepository by inject()
     val sharedAccessRepository: SharedAccessRepository by inject()
-
 
     routing {
         route("/shared-access") {
@@ -114,24 +107,7 @@ fun Application.sharedRoutes() {
                         )
                     }
                 }
-//
-//                get("/{shareId}") {
-//                    call.withErrorHandler {
-//                        val shareId = call.parameters["shareId"]
-//                            ?: throw BadRequestException("Share id is not present in the parameters.")
-//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-//                            ?: throw NotFoundException("Shared access was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this users shared access")
-//                        val fileOwner = fileRepository.fileOwner(
-//                            UUID.fromString(databaseService.binToUuid(sharedAccessRecord.fileId!!).toString())
-//                        )
-//                        if (fileOwner == null || !fileOwner.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User is not the owner of the file")
-//                        call.respond(sharedAccessRepository.fromRecord(sharedAccessRecord))
-//                    }
-//                }
-//
+
                 put("/{shareId}") {
                     call.withErrorHandler {
                         val shareId = call.parameters["shareId"]
@@ -148,14 +124,6 @@ fun Application.sharedRoutes() {
                         val recipientUUID = UUID.fromString(editedAccess.userId)
                         if (!userRepository.userExist(recipientUUID))
                             throw BadRequestException("Receiver doesn't exist")
-//                        if (!fileRepository.fileExist(UUID.fromString(newAccess.fileId)))
-//                            throw BadRequestException("File doesn't exist")
-//                        val fileOwner = fileRepository.fileOwner(
-//                            UUID.fromString(newAccess.fileId)
-//                        )
-//                        if (fileOwner == null || !fileOwner.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User is not the owner of the file")
-
                         if (sharedAccessRecord.ownerId.contentEquals(
                                 databaseService.uuidToBin(UUID.fromString(editedAccess.userId))
                             )
@@ -169,12 +137,6 @@ fun Application.sharedRoutes() {
                             )
                         ) throw BadRequestException("Shared access with the same file and recipient already exists")
 
-//                        val updatedSharedAccessRecord = SharedAccessRecord(
-//                            id = sharedAccessRecord.id,
-//                            fileId = databaseService.uuidToBin(UUID.fromString(newAccess.fileId)),
-//                            ownerId = currentUser.id,
-//                            recipientId = databaseService.uuidToBin(UUID.fromString(newAccess.recipientId))
-//                        )
                         sharedAccessRepository.updateRecipient(
                             sharedId = sharedAccessRecord.id!!,
                             userId = databaseService.uuidToBin(recipientUUID)
@@ -186,25 +148,25 @@ fun Application.sharedRoutes() {
                         )
                     }
                 }
-//
-//                delete("/{shareId}") {
-//                    call.withErrorHandler {
-//                        val shareId = call.parameters["shareId"]
-//                            ?: throw BadRequestException("Share id is not present in the parameters.")
-//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-//                            ?: throw NotFoundException("Shared access was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to delete this access")
-//                        if (!sharedAccessRecord.ownerId.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to delete this access")
-//
-//                        sharedAccessRepository.delete(databaseService.binToUuid(sharedAccessRecord.id!!))
-//                        call.respondJSON(
-//                            "Shared access deletion successful.",
-//                            HttpStatusCode.OK
-//                        )
-//                    }
-//                }
+
+                delete("/{shareId}") {
+                    call.withErrorHandler {
+                        val shareId = call.parameters["shareId"]
+                            ?: throw BadRequestException("Share id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
+                            ?: throw NotFoundException("Shared access was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to delete this access")
+                        if (!sharedAccessRecord.ownerId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to delete this access")
+
+                        sharedAccessRepository.delete(sharedAccessRecord.id!!)
+                        call.respondJSON(
+                            "Shared access deleted successfully.",
+                            HttpStatusCode.OK
+                        )
+                    }
+                }
             }
         }
     }
