@@ -54,7 +54,7 @@ fun Application.sharedRoutes() {
                     }
                 }
 
-                get("/info") {
+                get("/count") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this file metadata")

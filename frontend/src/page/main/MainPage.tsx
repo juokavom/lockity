@@ -10,7 +10,7 @@ import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileMetadataInfo } from '../F
 import ReceivedFiles from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
 import Newsletter from '../NewsletterPage';
-import Users from '../UsersPage';
+import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
 import Footer from '../FooterComponent';
 import { RequestBuilder } from '../../model/RequestBuilder';
 import { ENDPOINTS } from '../../model/Server';
@@ -66,6 +66,14 @@ export interface ISharedProps {
     selected: number,
     fetchSharedMetadata: (offset: number, limit: number, selected: number) => void,
     fetchSharedMetadataCount: () => void
+}
+
+export interface IUserProps {
+    userData: IUserData[] | null,
+    userCount: number | null,
+    selected: number,
+    fetchUserData: (offset: number, limit: number, selected: number) => void,
+    fetchUserCount: () => void
 }
 
 export default function Main() {
@@ -160,7 +168,7 @@ export default function Main() {
 
     const fetchSharedMetadataCount = async () => {
         await new RequestBuilder()
-            .withUrl(ENDPOINTS.SHARED.getSharedMetadataInfo)
+            .withUrl(ENDPOINTS.SHARED.getSharedMetadataCount)
             .withMethod('GET')
             .withDefaults()
             .send((response: any) => {
@@ -173,15 +181,6 @@ export default function Main() {
             }, () => setSharedCount(null))
     }
 
-    useEffect(() => {
-        if (isAuthed) {
-            fetchFileMetadataInfo()
-            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
-            fetchSharedMetadataCount()
-            fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
-        }
-    }, [])
-
     const sharedProps: ISharedProps = {
         sharedMetadata: sharedMetadata,
         sharedCount: sharedCount,
@@ -189,6 +188,62 @@ export default function Main() {
         fetchSharedMetadata: fetchSharedMetadata,
         fetchSharedMetadataCount: fetchSharedMetadataCount
     }
+
+    const [userCount, setUserCount] = useState<number | null>(null)
+    const [userData, setUserData] = useState<IUserData[] | null>(null)
+    const [userSelected, setUserSelected] = useState<number>(1)
+
+    const fetchUserData = async (offset: number, limit: number, selected: number) =>
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.USER.getUserDataWithOffsetAndLimit(offset, limit))
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                setUserSelected(selected)
+                if (response) {
+                    const userData: IUserData[] = response
+                    setUserData(userData)
+                } else {
+                    setUserData(null)
+                }
+            }, () => setUserData(null))
+
+
+    const fetchUserCount = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.USER.getUserCount)
+            .withMethod('GET')
+            .withDefaults()
+            .send((response: any) => {
+                if (response) {
+                    const userCount: { userCount: number } = response
+                    setUserCount(userCount.userCount)
+                } else {
+                    setUserCount(null)
+                }
+            }, () => setUserCount(null))
+    }
+
+    const userProps: IUserProps = {
+        userData: userData,
+        userCount: userCount,
+        selected: userSelected,
+        fetchUserData: fetchUserData,
+        fetchUserCount: fetchUserCount
+    }
+
+    useEffect(() => {
+        if (isAuthed) {
+            fetchFileMetadataInfo()
+            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
+            fetchSharedMetadataCount()
+            fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
+            if (isAdmin) {
+                fetchUserCount()
+                fetchUserData(0, USER_CHUNK_SIZE, 1)
+            }
+        }
+    }, [])
 
     if (!isAuthed) {
         return (
@@ -219,7 +274,7 @@ export default function Main() {
                                     <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />
                                 }
                                 {isAdmin &&
-                                    <Route exact path={ROUTES.users} component={() => <Users />} />
+                                    <Route exact path={ROUTES.users} component={() => <Users {...userProps} />} />
                                 }
 
                                 <Redirect to={ROUTES.myFiles} />

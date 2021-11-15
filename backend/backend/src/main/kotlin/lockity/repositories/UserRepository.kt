@@ -1,8 +1,14 @@
 package lockity.repositories
 
 import database.schema.tables.records.UserRecord
+import database.schema.tables.references.FileTable
 import database.schema.tables.references.RoleTable
+import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
+import lockity.models.FileMetadataForSharing
+import lockity.models.SharedAccess
+import lockity.models.UserData
+import lockity.models.UserForSharing
 import lockity.utils.DatabaseService
 import lockity.utils.USER
 import java.time.LocalDateTime
@@ -83,4 +89,35 @@ class UserRepository(
                 USER.CONFIRMED to it[UserTable.Confirmed].toString(),
             )
         }
+
+
+    fun fetchUsersWithOffsetAndLimit(offset: Int, limit: Int): List<UserData> =
+        databaseService.dsl
+            .select()
+            .from(UserTable)
+            .join(RoleTable).onKey()
+            .orderBy(UserTable.Registered.desc())
+            .offset(offset)
+            .limit(limit)
+            .fetch()
+            .map {
+                UserData(
+                    id = databaseService.binToUuid(it[UserTable.Id]!!).toString(),
+                    name = it[UserTable.Name],
+                    surname = it[UserTable.Surname],
+                    email = it[UserTable.Email]!!,
+                    role = it[RoleTable.Name]!!,
+                    registered =  it[UserTable.Registered]!!,
+                    lastActive =  it[UserTable.LastActive],
+                    confirmed =  it[UserTable.Confirmed]!! == "1".toByte(),
+                    subscribed =  it[UserTable.Subscribed]!! == "1".toByte(),
+                    storageSize =  it[UserTable.StorageSize]!!
+                )
+            }
+            .toList()
+
+    fun fetchUsersCount(): Int = databaseService.dsl
+        .selectCount()
+        .from(UserTable)
+        .fetchOne()?.value1() ?: 0
 }

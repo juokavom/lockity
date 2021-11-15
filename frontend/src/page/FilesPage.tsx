@@ -424,8 +424,9 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
         if (success) {
-            fetchFileMetadataInfo()
-            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
+            // fetchFileMetadataInfo()
+            // fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)       
+            window.location.replace(ROUTES.myFiles)
         }
     }
 

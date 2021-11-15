@@ -43,6 +43,25 @@ data class UserForSharing(
 )
 
 @Serializable
+data class UserCount(
+    val userCount: Int
+)
+
+@Serializable
+data class UserData(
+    val id: String,
+    val name: String?,
+    val surname: String?,
+    val email: String,
+    val role: String,
+    val registered: LocalDateTime,
+    val lastActive: LocalDateTime?,
+    val confirmed: Boolean,
+    val subscribed: Boolean,
+    val storageSize: Long
+)
+
+@Serializable
 data class CreatableUser(
     var name: String?,
     var surname: String?,

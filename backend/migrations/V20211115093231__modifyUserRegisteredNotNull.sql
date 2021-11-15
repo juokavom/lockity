@@ -1,0 +1,1 @@
+ALTER TABLE `User` MODIFY registered DATETIME NOT NULL;

@@ -315,8 +315,9 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
         if (success) {
-            fetchSharedMetadataCount()
-            fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
+            // fetchSharedMetadataCount()
+            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)            
+            window.location.replace(ROUTES.sharedFiles)
         }
     }
 

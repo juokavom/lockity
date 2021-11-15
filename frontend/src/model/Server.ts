@@ -44,7 +44,12 @@ export namespace ENDPOINTS {
     }
     export namespace USER {
         export const user = endpoint + '/user'
+
+        export const userId = (id: string) => user + '/' + id
         export const getUserWithEmailLike = (email: string) => user + '/email-starts-with/' + email
+        export const getUserDataWithOffsetAndLimit = (offset: number, limit: number) =>
+            user + '/offset/' + offset + '/limit/' + limit
+        export const getUserCount = user + '/count'
     }
     export namespace SHARED {
         export const sharedAccess = endpoint + '/shared-access'
@@ -52,6 +57,6 @@ export namespace ENDPOINTS {
         export const sharedId = (id: string) => sharedAccess + '/' + id
         export const getSharedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             sharedAccess + '/offset/' + offset + '/limit/' + limit
-        export const getSharedMetadataInfo = sharedAccess + '/info'
+        export const getSharedMetadataCount = sharedAccess + '/count'
     }
 }
