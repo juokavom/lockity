@@ -30,7 +30,7 @@ const UserAction = {
 }
 
 interface IUserModalProps {
-    user: IUserData,
+    userData: IUserData,
     callback: (success: boolean) => void
 }
 
@@ -85,7 +85,6 @@ function Create({ callback }: any): JSX.Element {
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
-        console.log(user);
         await CreateUserAction();
     }
 
@@ -251,162 +250,273 @@ function Create({ callback }: any): JSX.Element {
     );
 }
 
+function Edit({ userData, callback }: IUserModalProps): JSX.Element {
+    const [showPassword, setShowPassword] = useState(false)
 
-// const FetchWithTitlesLike = async (title: string, setFiles: (files: IFileMetadataForSharing[]) => void) => {
-//     if (title != "") {
-//         await new RequestBuilder()
-//             .withUrl(ENDPOINTS.FILE.getFileMetadataWithTitleLike(title))
-//             .withMethod('GET')
-//             .withDefaults()
-//             .send((response: any) => {
-//                 const files: IFileMetadataForSharing[] = response
-//                 setFiles(files)
-//             }, () => { })
-//     }
-// }
+    const [user, setUser] = useState<{
+        name: string | null,
+        surname: string | null,
+        email: string | null,
+        password: string | null,
+        role: string | null,
+        registered: Date | null,
+        lastActive: Date | null,
+        confirmed: boolean,
+        subscribed: boolean,
+        storageSize: number | null
+    }>({
+        name: userData.name,
+        surname: userData.surname,
+        email: userData.email,
+        password: "",
+        role: userData.role,
+        registered: userData.registered,
+        lastActive: userData.lastActive,
+        confirmed: userData.confirmed,
+        subscribed: userData.subscribed,
+        storageSize: userData.storageSize
+    });
 
-// const FetchUsersWithEmailsLike = async (email: string, setUsers: (users: IUserForSharing[]) => void) => {
-//     if (email != "") {
-//         await new RequestBuilder()
-//             .withUrl(ENDPOINTS.USER.getUserWithEmailLike(email))
-//             .withMethod('GET')
-//             .withDefaults()
-//             .send((response: any) => {
-//                 const users: IUserForSharing[] = response
-//                 setUsers(users)
-//             }, () => { })
-//     }
-// }
+    const validateForm = () => {
+        return user != null &&
+            user.email != null && user.email != "" &&
+            user.role != null && user.role != "" &&
+            user.registered != null && (
+                user.email != userData.email ||
+                user.surname != userData.surname ||
+                user.role != userData.role ||
+                user.registered != userData.registered ||
+                user.lastActive != userData.lastActive ||
+                user.confirmed != userData.confirmed ||
+                user.subscribed != userData.subscribed ||
+                user.storageSize != userData.storageSize ||
+                user.password != ""
+            )
+    }
 
-// function Edit({ shareMetadata, callback }: IShareModalProps): JSX.Element {
-//     const [users, setUsers] = useState<IUserForSharing[]>([]);
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
+        event.preventDefault();
+        await EditUserAction();
+    }
 
-//     const [selectedUser, setSelectedUser] = useState<IUserForSharing | null>(shareMetadata.user);
+    const EditUserAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.USER.userId(userData.id))
+            .withMethod('PUT')
+            .withDefaults()
+            .withBody(user)
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
 
-//     const validateForm = () => {
-//         return selectedUser != null && shareMetadata.user != selectedUser;
-//     }
+    return (
+        <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Email"
+                label="Email"
+                type="email"
+                name="Email"
+                autoComplete="Email"
+                variant="standard"
+                defaultValue={userData.email}
+                onChange={(e: any) => setUser({ ...user, email: e.target.value })}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                id="Name"
+                label="Name"
+                name="Name"
+                autoComplete="Name"
+                variant="standard"
+                defaultValue={userData.name}
+                onChange={(e: any) => setUser({ ...user, name: e.target.value })}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                id="Surname"
+                label="Surname"
+                name="Surname"
+                autoComplete="Surname"
+                variant="standard"
+                defaultValue={userData.surname}
+                onChange={(e: any) => setUser({ ...user, surname: e.target.value })}
+            />
+            <FormControl
+                margin="normal"
+                fullWidth
+                variant="standard"
+            >
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    onChange={(e: any) => setUser({ ...user, password: e.target.value })}
+                    endAdornment={
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                    }
+                />
+            </FormControl>
+            <FormControl
+                margin="normal"
+                fullWidth
+                variant="standard"
+                required
+            >
+                <InputLabel id="Role">Role</InputLabel>
+                <Select
+                    id="Role"
+                    label="Role"
+                    value={user.role}
+                    defaultValue={userData.role}
+                    onChange={(e: any) => setUser({ ...user, role: e.target.value })}
+                >
+                    <MenuItem value={User.Role.Registered}>{User.Role.Registered}</MenuItem>
+                    <MenuItem value={User.Role.Admin}>{User.Role.Admin}</MenuItem>
+                </Select>
+            </FormControl>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                variant="standard"
+                id="registered"
+                label="Registered"
+                type="datetime-local"
+                inputProps={{step: 1}}
+                defaultValue={userData.registered}
+                onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                variant="standard"
+                id="lastActive"
+                label="Last active"
+                type="datetime-local"
+                inputProps={{step: 1}}
+                defaultValue={userData.lastActive}
+                onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                variant="standard"
+                id="storageSize"
+                label="Storage size (bytes)"
+                type="number"
+                value={user.storageSize}
+                defaultValue={userData.storageSize}
+                onChange={(e: any) => {
+                    let number = parseInt(e.target.value)
+                    if (number < 0) number = 0
+                    else if (number > MAX_STORAGE_SIZE) number = MAX_STORAGE_SIZE
+                    setUser({ ...user, storageSize: number })
+                }}
+            />
+            <FormControlLabel
+                control={
+                    <Switch
+                        checked={user.confirmed}
+                        onChange={(e: any) => { setUser({ ...user, confirmed: !user.confirmed }) }}
+                        name="confirmed"
+                    />
+                }
+                label="Confirmed"
+            />
+            <FormControlLabel
+                control={
+                    <Switch
+                        checked={user.subscribed}
+                        onChange={(e: any) => { setUser({ ...user, subscribed: !user.subscribed }) }}
+                        name="subscribed"
+                    />
+                }
+                label="Subscribed"
+            />
+            <div className="selected-file-wrapper">
+                <Button
+                    type="submit"
+                    variant="contained"
+                    className="upload-button"
+                    sx={{ mt: 3, mb: 2 }}
+                    disabled={!validateForm()}
+                >
+                    Update
+                </Button>
+            </div>
+        </Box>
+        </div>
+    );
+}
 
-//     const handleSubmit = async (event: { preventDefault: () => void; }) => {
-//         event.preventDefault();
-//         await EditSharedFileAction();
-//     }
+function Delete({ userData, callback }: IUserModalProps): JSX.Element {
+    const DeleteUserAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.USER.userId(userData.id))
+            .withMethod('DELETE')
+            .withDefaults()
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                callback(true)
+            }, () => callback(false))
+    }
 
-//     const EditSharedFileAction = async () => {
-//         await new RequestBuilder()
-//             .withUrl(ENDPOINTS.SHARED.sharedId(shareMetadata.id))
-//             .withMethod('PUT')
-//             .withDefaults()
-//             .withBody({
-//                 userId: selectedUser?.id
-//             })
-//             .send((response: any) => {
-//                 toast.success(response.message, DefaultToastOptions)
-//                 callback(true)
-//             }, () => callback(false))
-//     }
-
-//     return (
-//         <div className="container">
-//             <Box className="row align-items-center d-flex justify-content-center"
-//                 component="form" noValidate onSubmit={handleSubmit}
-//             >
-//                 <div className="row align-items-end d-flex justify-content-center">
-//                     <TextField
-//                         className="col-10"
-//                         label="File"
-//                         variant="standard"
-//                         disabled={true}
-//                         id="file"
-//                         sx={{ width: 275 }}
-//                         value={shareMetadata.file.title}
-//                     />
-//                     <Autocomplete
-//                         disablePortal
-//                         onChange={(event, value) => setSelectedUser(value)}
-//                         id="user"
-//                         getOptionLabel={(option: IUserForSharing) => option.email}
-//                         options={users}
-//                         sx={{ mt: 3, width: 300 }}
-//                         defaultValue={shareMetadata.user}
-//                         renderInput={(params) =>
-//                             <TextField {...params}
-//                                 placeholder="Start typing for users to load"
-//                                 label="User"
-//                                 variant="standard"
-//                                 onChange={(e: any) => FetchUsersWithEmailsLike(e.target.value, (users) => {
-//                                     setUsers(users)
-//                                 })}
-//                             />
-//                         }
-//                     />
-//                 </div>
-//                 <div className="selected-file-wrapper">
-//                     <Button
-//                         type="submit"
-//                         variant="contained"
-//                         className="upload-button"
-//                         sx={{ mt: 3, mb: 2 }}
-//                         disabled={!validateForm()}
-//                     >
-//                         Save
-//                     </Button>
-//                 </div>
-//             </Box>
-//         </div>
-//     );
-// }
-
-// function Delete({ shareMetadata, callback }: IShareModalProps): JSX.Element {
-//     const DeleteFileAction = async () => {
-//         await new RequestBuilder()
-//             .withUrl(ENDPOINTS.SHARED.sharedId(shareMetadata.id))
-//             .withMethod('DELETE')
-//             .withDefaults()
-//             .send((response: any) => {
-//                 toast.success(response.message, DefaultToastOptions)
-//                 callback(true)
-//             }, () => callback(false))
-//     }
-
-//     return (
-//         <div className="container">
-//             <div className="row align-items-end d-flex justify-content-center">
-//                 <div className="col-auto">
-//                     <h3 style={{ textAlign: "center" }}>Are you sure you want to delete this shared access?</h3>
-//                 </div>
-//             </div>
-//             <div className="row align-items-end d-flex justify-content-center">
-//                 <div className="col-auto">
-//                     <p style={{ textAlign: "center" }}><i>{shareMetadata.file.title} & {shareMetadata.user.email}</i></p>
-//                 </div>
-//             </div>
-//             <div className="row align-items-center d-flex justify-content-center"
-//                 style={{ marginTop: "20px" }}>
-//                 <div className="col-4">
-//                     <Button
-//                         className="btn btn-danger"
-//                         style={{ width: "100%" }}
-//                         sx={{ m: 3 }}
-//                         onClick={() => DeleteFileAction()}
-//                     >
-//                         Yes
-//                     </Button>
-//                 </div>
-//                 <div className="col-4">
-//                     <Button
-//                         className="btn btn-secondary"
-//                         style={{ width: "100%" }}
-//                         sx={{ m: 3 }}
-//                         onClick={() => callback(false)}
-//                     >
-//                         No
-//                     </Button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
+    return (
+        <div className="container">
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="col-auto">
+                    <h3 style={{ textAlign: "center" }}>Are you sure you want to delete this user?</h3>
+                </div>
+            </div>
+            <div className="row align-items-end d-flex justify-content-center">
+                <div className="col-auto">
+                    <p style={{ textAlign: "center" }}><i>{userData.email}</i></p>
+                </div>
+            </div>
+            <div className="row align-items-center d-flex justify-content-center"
+                style={{ marginTop: "20px" }}>
+                <div className="col-4">
+                    <Button
+                        className="btn btn-danger"
+                        style={{ width: "100%" }}
+                        sx={{ m: 3 }}
+                        onClick={() => DeleteUserAction()}
+                    >
+                        Yes
+                    </Button>
+                </div>
+                <div className="col-4">
+                    <Button
+                        className="btn btn-secondary"
+                        style={{ width: "100%" }}
+                        sx={{ m: 3 }}
+                        onClick={() => callback(false)}
+                    >
+                        No
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export const USER_CHUNK_SIZE = 10
 
@@ -437,14 +547,14 @@ export function Users({ userData, userCount, selected,
             if (modalData.action == UserAction.Create) return (<Create {...{ callback: modalCallback }} />);
             else if (modalData.userData) {
                 const modalProps: IUserModalProps = {
-                    user: modalData.userData,
+                    userData: modalData.userData,
                     callback: modalCallback
                 }
                 switch (modalData.action) {
                     case UserAction.Edit:
-                    // return (<Edit {...modalProps} />);
+                    return (<Edit {...modalProps} />);
                     case UserAction.Delete:
-                    // return (<Delete {...modalProps} />);
+                    return (<Delete {...modalProps} />);
                 }
             }
         }

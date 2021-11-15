@@ -89,7 +89,7 @@ data class EditableUser(
     var email: String,
     var password: String,
     var role: String,
-    var registered: LocalDateTime?,
+    var registered: LocalDateTime,
     var lastActive: LocalDateTime?,
     var confirmed: Boolean,
     var subscribed: Boolean,
@@ -98,9 +98,10 @@ data class EditableUser(
 
 
 fun EditableUser.isValuesValid() {
-    if (email == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN))
-        throw BadRequestException("Email, password and role failed validation.")
+    if (email == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN) || storageSize > MAX_STORAGE_BYTES)
+        throw BadRequestException("Email, role or storage size failed validation.")
 }
+
 
 @Serializable
 data class FullUser(
