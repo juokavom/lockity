@@ -1,5 +1,4 @@
-import { toast } from 'react-toastify';
-import { DefaultToastOptions, RequestBuilder } from './RequestBuilder';
+import { RequestBuilder } from './RequestBuilder';
 import { ROUTES } from './Routes';
 import { ENDPOINTS, URL } from './Server';
 import { User } from './User';

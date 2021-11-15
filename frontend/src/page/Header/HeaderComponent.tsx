@@ -1,19 +1,15 @@
 import { useLocation } from 'react-router-dom'
-import React, { Component, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
+    Navbar, Nav, NavbarToggler, Collapse, NavItem,
     Dropdown, DropdownToggle, DropdownItem, DropdownMenu
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
 import './Header.scss';
-import { User } from '../../model/User';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { ROUTES } from '../../model/Routes';
 import { LogoutAction } from '../../model/RequestActions';
 import { IHeaderProps } from '../main/MainPage';
-
-
 
 function sayHello() {
     const hellos = [

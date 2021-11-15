@@ -4,8 +4,7 @@ import { Copyright } from '../login/LoginPage';
 import { useState } from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
 import { toast } from 'react-toastify';
-import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
-import { ENDPOINTS } from '../../model/Server';
+import { DefaultToastOptions, } from '../../model/RequestBuilder';
 
 enum UploadPageState {
     Initial,
@@ -15,7 +14,7 @@ enum UploadPageState {
 function Upload() {
     const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
     const [fileMeta, setFileMeta] = useState<FileUploadedMetadata | null>(null)
-    const [fileLink, setFileLink] = useState<string | null>(null)
+    const [fileLink] = useState<string | null>(null)
 
     const onFileUploaded = async (uploadMetadata?: FileUploadedMetadata) => {
         if (uploadMetadata) {

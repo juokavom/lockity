@@ -1,27 +1,21 @@
-import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress
+    Button, Modal, ModalHeader, ModalBody, UncontrolledTooltip, Progress
 } from 'reactstrap';
-import { NavLink } from 'react-router-dom';
-import { User } from '../model/User';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
+import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { IMyFilesProps } from './main/MainPage';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
+import FileUploader from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
-import { ProgressBar } from 'react-toastify/dist/components';
-import { ColorizeOutlined } from '@mui/icons-material';
 
 export interface IFileMetadata {
     id: string,
@@ -135,7 +129,7 @@ function Edit({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     const [newTitle, setTitle] = useState(fileMetadata.title.replace(format, ''));
 
     const validateForm = () => {
-        return newTitle.length > 0 && newTitle + format != fileMetadata.title;
+        return newTitle.length > 0 && newTitle + format !== fileMetadata.title;
     }
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
@@ -219,15 +213,15 @@ function Preview({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     );
 
     const pictureJsx = () => (
-        <img style={{ maxWidth: "100%" }} src={src} />
+        <img alt={"pictureContainer"} style={{ maxWidth: "100%" }} src={src} />
     );
 
     let selected = null
 
     if (format) {
-        if (format == "mp4") {
+        if (format === "mp4") {
             selected = videoJsx()
-        } else if (format == "mp3") {
+        } else if (format === "mp3") {
             selected = audioJsx()
         } else if (["png", "jpg", "jpeg"].includes(format)) {
             selected = pictureJsx()
@@ -445,7 +439,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
 
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
-            if (modalData.action == FileAction.Upload) return (<Upload />);
+            if (modalData.action === FileAction.Upload) return (<Upload />);
             else if (modalData.fileMetadata) {
                 const modalProps: IFileModalProps = {
                     fileMetadata: modalData.fileMetadata,
@@ -507,7 +501,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                     </Button>
                 </Box>
                 <Modal className="container" size={
-                    modalData?.action == FileAction.Preview ? "lg" : ""
+                    modalData?.action === FileAction.Preview ? "lg" : ""
                 } isOpen={modalOpen} toggle={() => { toggleModal() }}>
                     <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
@@ -521,7 +515,7 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                     </ModalBody>
                 </Modal>
                 {
-                    fileMetadata && fileMetadata.length != 0 ?
+                    fileMetadata && fileMetadata.length !== 0 ?
                         fileMetadata.map((fileMeta: IFileMetadata) => {
                             return (
                                 <File key={fileMeta.id} {...props(fileMeta)}></File>

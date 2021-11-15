@@ -1,14 +1,14 @@
-type URL = {
+type IURL = {
     Backend: string;
     Frontend: string;
 }
 
-const dev: URL = {
+const dev: IURL = {
     Backend: 'http://localhost:5000',
     Frontend: 'http://localhost:3000'
 }
 
-const prod: URL = {
+const prod: IURL = {
     Backend: 'https://api.lockity.akramas.com',
     Frontend: 'https://lockity.akramas.com'
 }
@@ -18,7 +18,7 @@ export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
 export const SUPPORTED_FILE_TYPES = ['mp4', 'mp3', 'jpg', 'jpeg', 'png']
 export const MAX_STORAGE_SIZE = 15000000000
 
-export const URL: URL = process.env.NODE_ENV === "production" ? prod : dev
+export const URL: IURL = process.env.NODE_ENV === "production" ? prod : dev
 
 export namespace ENDPOINTS {
     const endpoint = URL.Backend

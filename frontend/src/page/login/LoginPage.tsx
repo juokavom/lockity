@@ -1,10 +1,9 @@
 import { useState } from "react";
 import './Login.scss';
 import Button from '@mui/material/Button';
-import { DefaultToastOptions, RequestBuilder } from "../../model/RequestBuilder";
+import { RequestBuilder } from "../../model/RequestBuilder";
 import { ENDPOINTS, LANDING_URL } from "../../model/Server";
 import { User } from "../../model/User";
-import { toast } from "react-toastify";
 import { ROUTES } from "../../model/Routes";
 import TextField from '@mui/material/TextField';
 import { Box, Grid } from "@mui/material";

@@ -1,22 +1,7 @@
-import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, PaginationItem, PaginationLink, Pagination
+    PaginationItem, PaginationLink, Pagination
 } from 'reactstrap';
-
-import { NavLink } from 'react-router-dom';
-import { User } from '../model/User';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Box, IconButton } from '@mui/material';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
-import { RequestBuilder } from '../model/RequestBuilder';
-import FileUploader from '../component/FileUploaderComponent';
 
 interface IPaginationProps {
     total: number,
@@ -65,7 +50,7 @@ export default function CustomPagination(props: IPaginationProps) {
     return (
         <div className="center-horizontally" style={{ marginTop: "2rem" }}>
             <Pagination>
-                <PaginationItem disabled={props.selected == 1}>
+                <PaginationItem disabled={props.selected === 1}>
                     <PaginationLink
                         first
                         onClick={() => {
@@ -74,7 +59,7 @@ export default function CustomPagination(props: IPaginationProps) {
                         }}
                     />
                 </PaginationItem>
-                <PaginationItem disabled={props.selected == 1}>
+                <PaginationItem disabled={props.selected === 1}>
                     <PaginationLink
                         previous
                         onClick={() => {

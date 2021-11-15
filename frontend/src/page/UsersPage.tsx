@@ -1,27 +1,19 @@
-import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress, Table
+    Button, Modal, ModalHeader, ModalBody
 } from 'reactstrap';
-import { NavLink } from 'react-router-dom';
 import { User } from '../model/User';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Autocomplete, Box, FormControl, IconButton, InputAdornment, InputLabel, Input, MenuItem, OutlinedInput, Pagination, Select, TextField, Typography, Switch, FormControlLabel } from '@mui/material';
-import { IMyFilesProps, ISharedProps, IUserProps } from './main/MainPage';
-import { ENDPOINTS, MAX_STORAGE_SIZE, SUPPORTED_FILE_TYPES } from '../model/Server';
+import {
+    Box, FormControl, IconButton, InputLabel, Input, MenuItem,
+    Select, TextField, Switch, FormControlLabel
+} from '@mui/material';
+import { IUserProps } from './main/MainPage';
+import { ENDPOINTS, MAX_STORAGE_SIZE } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
-import { ProgressBar } from 'react-toastify/dist/components';
-import { ColorizeOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const UserAction = {
     Create: "Create user",
@@ -77,9 +69,9 @@ function Create({ callback }: any): JSX.Element {
 
     const validateForm = () => {
         return user != null &&
-            user.email != null && user.email != "" &&
-            user.password != null &&  user.password != "" &&
-            user.role != null && user.role != "" &&
+            user.email !== null && user.email !== "" &&
+            user.password !== null && user.password !== "" &&
+            user.role !== null && user.role !== "" &&
             user.registered != null
     }
 
@@ -180,7 +172,7 @@ function Create({ callback }: any): JSX.Element {
                 id="registered"
                 label="Registered"
                 type="datetime-local"
-                inputProps={{step: 1}}
+                inputProps={{ step: 1 }}
                 onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
                 InputLabelProps={{
                     shrink: true,
@@ -193,7 +185,7 @@ function Create({ callback }: any): JSX.Element {
                 id="lastActive"
                 label="Last active"
                 type="datetime-local"
-                inputProps={{step: 1}}
+                inputProps={{ step: 1 }}
                 onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
                 InputLabelProps={{
                     shrink: true,
@@ -279,18 +271,18 @@ function Edit({ userData, callback }: IUserModalProps): JSX.Element {
 
     const validateForm = () => {
         return user != null &&
-            user.email != null && user.email != "" &&
-            user.role != null && user.role != "" &&
+            user.email != null && user.email !== "" &&
+            user.role != null && user.role !== "" &&
             user.registered != null && (
-                user.email != userData.email ||
-                user.surname != userData.surname ||
-                user.role != userData.role ||
-                user.registered != userData.registered ||
-                user.lastActive != userData.lastActive ||
-                user.confirmed != userData.confirmed ||
-                user.subscribed != userData.subscribed ||
-                user.storageSize != userData.storageSize ||
-                user.password != ""
+                user.email !== userData.email ||
+                user.surname !== userData.surname ||
+                user.role !== userData.role ||
+                user.registered !== userData.registered ||
+                user.lastActive !== userData.lastActive ||
+                user.confirmed !== userData.confirmed ||
+                user.subscribed !== userData.subscribed ||
+                user.storageSize !== userData.storageSize ||
+                user.password !== ""
             )
     }
 
@@ -394,7 +386,7 @@ function Edit({ userData, callback }: IUserModalProps): JSX.Element {
                 id="registered"
                 label="Registered"
                 type="datetime-local"
-                inputProps={{step: 1}}
+                inputProps={{ step: 1 }}
                 defaultValue={userData.registered}
                 onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
                 InputLabelProps={{
@@ -408,7 +400,7 @@ function Edit({ userData, callback }: IUserModalProps): JSX.Element {
                 id="lastActive"
                 label="Last active"
                 type="datetime-local"
-                inputProps={{step: 1}}
+                inputProps={{ step: 1 }}
                 defaultValue={userData.lastActive}
                 onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
                 InputLabelProps={{
@@ -544,7 +536,7 @@ export function Users({ userData, userCount, selected,
 
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
-            if (modalData.action == UserAction.Create) return (<Create {...{ callback: modalCallback }} />);
+            if (modalData.action === UserAction.Create) return (<Create {...{ callback: modalCallback }} />);
             else if (modalData.userData) {
                 const modalProps: IUserModalProps = {
                     userData: modalData.userData,
@@ -552,9 +544,9 @@ export function Users({ userData, userCount, selected,
                 }
                 switch (modalData.action) {
                     case UserAction.Edit:
-                    return (<Edit {...modalProps} />);
+                        return (<Edit {...modalProps} />);
                     case UserAction.Delete:
-                    return (<Delete {...modalProps} />);
+                        return (<Delete {...modalProps} />);
                 }
             }
         }
@@ -646,7 +638,7 @@ export function Users({ userData, userCount, selected,
                 </ModalBody>
             </Modal>
             {
-                userData && userData.length != 0 ?
+                userData && userData.length !== 0 ?
                     <div className="row align-items-center d-flex justify-content-center">
                         <table className="table table-hover table-ellipsis">
                             <thead>

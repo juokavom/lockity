@@ -1,28 +1,14 @@
-import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress, Table
+    Button, Modal, ModalHeader, ModalBody
 } from 'reactstrap';
-import { NavLink } from 'react-router-dom';
-import { User } from '../model/User';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Autocomplete, Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
-import { IMyFilesProps, ISharedProps } from './main/MainPage';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { Autocomplete, Box, TextField } from '@mui/material';
+import { ISharedProps } from './main/MainPage';
+import { ENDPOINTS } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
-import { ProgressBar } from 'react-toastify/dist/components';
-import { ColorizeOutlined } from '@mui/icons-material';
-
 const ShareAction = {
     Create: "Share file",
     Edit: "Edit share ",
@@ -142,7 +128,7 @@ function Create({ callback }: any): JSX.Element {
 
 
 const FetchWithTitlesLike = async (title: string, setFiles: (files: IFileMetadataForSharing[]) => void) => {
-    if (title != "") {
+    if (title !== "") {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.getFileMetadataWithTitleLike(title))
             .withMethod('GET')
@@ -155,7 +141,7 @@ const FetchWithTitlesLike = async (title: string, setFiles: (files: IFileMetadat
 }
 
 const FetchUsersWithEmailsLike = async (email: string, setUsers: (users: IUserForSharing[]) => void) => {
-    if (email != "") {
+    if (email !== "") {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.USER.getUserWithEmailLike(email))
             .withMethod('GET')
@@ -173,7 +159,7 @@ function Edit({ shareMetadata, callback }: IShareModalProps): JSX.Element {
     const [selectedUser, setSelectedUser] = useState<IUserForSharing | null>(shareMetadata.user);
 
     const validateForm = () => {
-        return selectedUser != null && shareMetadata.user != selectedUser;
+        return selectedUser !== null && shareMetadata.user !== selectedUser;
     }
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
@@ -323,7 +309,7 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
 
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
-            if (modalData.action == ShareAction.Create) return (<Create {...{ callback: modalCallback }} />);
+            if (modalData.action === ShareAction.Create) return (<Create {...{ callback: modalCallback }} />);
             else if (modalData.shareMetadata) {
                 const modalProps: IShareModalProps = {
                     shareMetadata: modalData.shareMetadata,
@@ -425,7 +411,7 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
                 </ModalBody>
             </Modal>
             {
-                sharedMetadata && sharedMetadata.length != 0 ?
+                sharedMetadata && sharedMetadata.length !== 0 ?
                     <div className="row align-items-center d-flex justify-content-center">
                         <table className="table table-hover table-ellipsis">
                             <thead>
