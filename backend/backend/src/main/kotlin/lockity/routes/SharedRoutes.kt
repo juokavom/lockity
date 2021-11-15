@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import lockity.models.EditableSharedAccess
 import lockity.models.SharedAccessCount
 import lockity.models.UploadableSharedAccess
 import lockity.models.isValuesValid
@@ -131,21 +132,22 @@ fun Application.sharedRoutes() {
 //                    }
 //                }
 //
-//                put("/{shareId}") {
-//                    call.withErrorHandler {
-//                        val shareId = call.parameters["shareId"]
-//                            ?: throw BadRequestException("Share id is not present in the parameters.")
-//                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
-//                            ?: throw NotFoundException("Shared access was not found")
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this users received access")
-//                        if (!sharedAccessRecord.ownerId.contentEquals(currentUser.id))
-//                            throw NoPermissionException("User do not have permission to get this users received access")
-//
-//                        val newAccess = call.receive<SharedAccess>()
-//                        newAccess.isValuesValid()
-//                        if (!userRepository.userExist(UUID.fromString(newAccess.recipientId)))
-//                            throw BadRequestException("Receiver doesn't exist")
+                put("/{shareId}") {
+                    call.withErrorHandler {
+                        val shareId = call.parameters["shareId"]
+                            ?: throw BadRequestException("Share id is not present in the parameters.")
+                        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(shareId))
+                            ?: throw NotFoundException("Shared access was not found")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this users received access")
+                        if (!sharedAccessRecord.ownerId.contentEquals(currentUser.id))
+                            throw NoPermissionException("User do not have permission to get this users received access")
+
+                        val editedAccess = call.receive<EditableSharedAccess>()
+                        editedAccess.isValuesValid()
+                        val recipientUUID = UUID.fromString(editedAccess.userId)
+                        if (!userRepository.userExist(recipientUUID))
+                            throw BadRequestException("Receiver doesn't exist")
 //                        if (!fileRepository.fileExist(UUID.fromString(newAccess.fileId)))
 //                            throw BadRequestException("File doesn't exist")
 //                        val fileOwner = fileRepository.fileOwner(
@@ -153,28 +155,37 @@ fun Application.sharedRoutes() {
 //                        )
 //                        if (fileOwner == null || !fileOwner.contentEquals(currentUser.id))
 //                            throw NoPermissionException("User is not the owner of the file")
-//
-//                        if (fileOwner.contentEquals(databaseService.uuidToBin(UUID.fromString(newAccess.recipientId)))) {
-//                            throw BadRequestException("Owner cannot be recipient of the shared file")
-//                        }
-//                        if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
-//                                fileUuid = UUID.fromString(newAccess.fileId),
-//                                recipientUuid = UUID.fromString(newAccess.recipientId)
-//                            )
-//                        ) throw BadRequestException("Shared access with the same file and recipient already exists")
-//
+
+                        if (sharedAccessRecord.ownerId.contentEquals(
+                                databaseService.uuidToBin(UUID.fromString(editedAccess.userId))
+                            )
+                        ) {
+                            throw BadRequestException("Owner cannot be recipient of the shared file")
+                        }
+
+                        if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
+                                fileUuid = databaseService.binToUuid(sharedAccessRecord.fileId!!),
+                                recipientUuid = UUID.fromString(editedAccess.userId)
+                            )
+                        ) throw BadRequestException("Shared access with the same file and recipient already exists")
+
 //                        val updatedSharedAccessRecord = SharedAccessRecord(
 //                            id = sharedAccessRecord.id,
 //                            fileId = databaseService.uuidToBin(UUID.fromString(newAccess.fileId)),
 //                            ownerId = currentUser.id,
 //                            recipientId = databaseService.uuidToBin(UUID.fromString(newAccess.recipientId))
 //                        )
-//                        sharedAccessRepository.update(updatedSharedAccessRecord)
-//                        call.respond(
-//                            call.respond(sharedAccessRepository.fromRecord(sharedAccessRecord))
-//                        )
-//                    }
-//                }
+                        sharedAccessRepository.updateRecipient(
+                            sharedId = sharedAccessRecord.id!!,
+                            userId = databaseService.uuidToBin(recipientUUID)
+                        )
+
+                        call.respondJSON(
+                            "Shared access edited successfully",
+                            HttpStatusCode.Created
+                        )
+                    }
+                }
 //
 //                delete("/{shareId}") {
 //                    call.withErrorHandler {

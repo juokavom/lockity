@@ -48,6 +48,8 @@ export namespace ENDPOINTS {
     }
     export namespace SHARED {
         export const sharedAccess = endpoint + '/shared-access'
+
+        export const sharedId = (id: string) => sharedAccess + '/' + id
         export const getSharedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             sharedAccess + '/offset/' + offset + '/limit/' + limit
         export const getSharedMetadataInfo = sharedAccess + '/info'

@@ -36,6 +36,12 @@ class SharedAccessRepository(
         .set(sharedAccessRecord)
         .execute()
 
+    fun updateRecipient(sharedId: ByteArray, userId: ByteArray) = databaseService.dsl
+        .update(SharedAccessTable)
+        .set(SharedAccessTable.RecipientId, userId)
+        .where(SharedAccessTable.Id.eq(sharedId))
+        .execute()
+
     fun delete(uuid: UUID) = databaseService.dsl
         .deleteFrom(SharedAccessTable)
         .where(SharedAccessTable.Id.eq(databaseService.uuidToBin(uuid)))

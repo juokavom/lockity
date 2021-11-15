@@ -18,6 +18,15 @@ fun UploadableSharedAccess.isValuesValid() {
 }
 
 @Serializable
+data class EditableSharedAccess(
+    val userId: String
+)
+
+fun EditableSharedAccess.isValuesValid() {
+    if (userId == "") throw BadRequestException("User cannot be empty.")
+}
+
+@Serializable
 data class SharedAccessCount(
     val sharedAccessCount: Int
 )
