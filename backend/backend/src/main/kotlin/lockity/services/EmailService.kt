@@ -18,28 +18,21 @@ class EmailService(
         }
     }
 
-    //TODO: pakeist i redirectinima i frona ir frontas kvies xmlHttp, del email provideriu galimo CORS konflikto
-    fun confirmRegistrationTemplate(confirmationLinkRecord: ConfirmationLinkRecord) = """
+    fun confirmRegistrationTemplate(
+        confirmationLinkRecord: ConfirmationLinkRecord,
+        link: String? = "${configurationService.configValue(CONFIG.CORS_SCHEME)}://" +
+                "${configurationService.configValue(CONFIG.CORS_HOST)}/confirm/${confirmationLinkRecord.link}"
+    ) = """
        <html>
              <head>
              </head>
              <body>
                  <p>
-                        Please confirm your registration until ${
-        confirmationLinkRecord.validUntil!!.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-    } by clicking the following button: <button type="button" onclick="sendConfirm()">confirm registration</button>. See you!
+                        Please confirm your registration by clicking the following
+                        <a href="$link">link</a>. 
+                        (Or paste it browser: $link). See you!
                  </p>
              </body>
-             <script>
-                function sendConfirm() {
-                  var xhr = new XMLHttpRequest();
-                  xhr.open("POST", ${configurationService.configValue(CONFIG.CORS_HOST)}/confirm, true);
-                  xhr.setRequestHeader('Content-Type', 'application/json');
-                  xhr.send(JSON.stringify({
-                      link: ${confirmationLinkRecord.link}
-                  }));
-                }
-             </script>
        </html>
        """.trimIndent()
 

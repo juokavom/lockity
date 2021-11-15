@@ -9,12 +9,13 @@ import './Main.scss';
 import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileMetadataInfo } from '../FilesPage';
 import { IReceivedFileMetadata, ReceivedFiles, RECEIVED_CHUNK_SIZE } from '../ReceivedFilesPage';
 import Header from '../Header/HeaderComponent';
-import Newsletter from '../NewsletterPage';
 import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
 import Footer from '../FooterComponent';
-import { RequestBuilder } from '../../model/RequestBuilder';
+import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
 import { ENDPOINTS } from '../../model/Server';
 import { IShareMetadata, SharedFiles, SHARE_CHUNK_SIZE } from '../SharedFilesPage';
+import { toast } from 'react-toastify';
+import { Button } from 'reactstrap';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -240,7 +241,7 @@ export default function Main() {
         fetchUserData: fetchUserData,
         fetchUserCount: fetchUserCount
     }
-    
+
     const [receivedMetadataCount, setReceivedMetadataCount] = useState<number | null>(null)
     const [receivedMetadata, setReceivedMetadata] = useState<IReceivedFileMetadata[] | null>(null)
     const [receivedSelected, setReceivedSelected] = useState<number>(1)
@@ -284,7 +285,7 @@ export default function Main() {
         fetchReceivedMetadata: fetchReceivedMetadata,
         fetchReceivedMetadataCount: fetchReceivedMetadataCount
     }
-    
+
     useEffect(() => {
         if (isAuthed) {
             fetchFileMetadataInfo()
@@ -304,6 +305,7 @@ export default function Main() {
         return (
             <div>
                 <Switch>
+                    <Route path="/confirm/:id" component={ConfirmWithId} />
                     <Route exact path={ROUTES.login} component={() => <Login />} />
                     <Route exact path={ROUTES.upload} component={() => <Upload />} />
                     <Route exact path={ROUTES.test} component={() => <Test />} />
@@ -326,9 +328,6 @@ export default function Main() {
                                 <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles  {...sharedProps} />} />
 
                                 {isAdmin &&
-                                    <Route exact path={ROUTES.sendNewsletter} component={() => <Newsletter />} />
-                                }
-                                {isAdmin &&
                                     <Route exact path={ROUTES.users} component={() => <Users {...userProps} />} />
                                 }
 
@@ -343,3 +342,35 @@ export default function Main() {
     }
 }
 
+
+const ConfirmWithId = ({ match }: any) => {
+    const ConfirmAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.AUTH.registerConfirm)
+            .withMethod('POST')
+            .withDefaults()
+            .withBody({
+                link: match.params.id
+            })
+            .send((response: any) => {
+                toast.success(response.message, DefaultToastOptions)
+                window.location.replace(ROUTES.login)
+            }, () => { })
+    };
+
+    return (
+        <div className="container mainbox-main">
+            <div className="row align-center justify-content-center" >
+                <div className="col-auto" >
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        onClick={() => ConfirmAction()}
+                    >
+                        Confirm registration
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -23,8 +23,7 @@ data class RegistrableUser(
     val name: String?,
     val surname: String?,
     val email: String,
-    val password: String,
-    val subscribed: Boolean
+    val password: String
 )
 
 fun RegistrableUser.isValuesValid() {

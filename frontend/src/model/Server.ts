@@ -26,6 +26,8 @@ export namespace ENDPOINTS {
     export namespace AUTH {
         export const login = endpoint + '/login'
         export const logout = endpoint + '/logout'
+        export const register = endpoint + '/register'
+        export const registerConfirm = register + '/confirm'
     }
     export namespace FILE {
         export const file = endpoint + '/file'

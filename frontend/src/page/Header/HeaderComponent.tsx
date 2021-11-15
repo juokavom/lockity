@@ -343,13 +343,6 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
                             </NavItem>
                             {isAdmin &&
                                 <NavItem>
-                                    <NavLink className="nav-link" to={ROUTES.sendNewsletter} >
-                                        <p className={navlinkClasses.get(ROUTES.sendNewsletter)}>Send Newsletter</p>
-                                    </NavLink>
-                                </NavItem>
-                            }
-                            {isAdmin &&
-                                <NavItem>
                                     <NavLink className="nav-link" to={ROUTES.users} >
                                         <p className={navlinkClasses.get(ROUTES.users)}>Users</p>
                                     </NavLink>
