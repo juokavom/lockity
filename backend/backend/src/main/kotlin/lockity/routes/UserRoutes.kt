@@ -126,7 +126,7 @@ fun Application.userRoutes() {
 
                         call.respondJSON(
                             "User edited successfully.",
-                            HttpStatusCode.Created
+                            HttpStatusCode.OK
                         )
                     }
                 }
@@ -153,148 +153,75 @@ fun Application.userRoutes() {
                 }
             }
             authenticate(AUTHENTICATED) {
-//                /**
-//                 * Description: Gets user storage info
-//                 * Params: { userId }
-//                 * Body: null
-//                 * Validation: Check if user exist and requester have permission
-//                 * OK Response: StorageData { totalSize, usedSize }
-//                 * Scope: Authenticated
-//                 */
-//                get("/{userId}/storage") {
-//                    call.withErrorHandler {
-//                        val userId = call.parameters["userId"]
-//                            ?: throw BadRequestException("User id is not present in the parameters.")
-//                        val userUuid = UUID.fromString(userId)
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this users storage info")
-//                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
-//                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid))
-//                            && currentUserRole!!.name != ROLE.ADMIN
-//                        ) {
-//                            throw NoPermissionException("\"User do not have permission to get this users storage info")
-//                        }
-//
-//                        val userRecord = userRepository.fetch(userUuid)
-//                            ?: throw NotFoundException("User was not found")
-//
-//                        call.respond(
-//                            StorageData(
-//                                totalSize = userRecord.storageSize!!,
-//                                usedSize = fileRepository.userFileSizeSum(userRecord.id!!)
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                /**
-//                 * Description: Get full user
-//                 * Params: {userId}
-//                 * Body: null
-//                 * Validation: Check if user exist and requester have permission
-//                 * OK Response: Full User
-//                 * Scope: Registered (his own file), Admin (all)
-//                 */
-//                get("/{userId}") {
-//                    call.withErrorHandler {
-//                        val userId = call.parameters["userId"]
-//                            ?: throw BadRequestException("User id is not present in the parameters.")
-//                        val userUuid = UUID.fromString(userId)
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to get this user")
-//                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
-//                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid))
-//                            && currentUserRole!!.name != ROLE.ADMIN
-//                        ) {
-//                            throw NoPermissionException("User do not have permission to get this user")
-//                        }
-//                        val userRecord = userRepository.fetch(userUuid)
-//                            ?: throw NotFoundException("User was not found")
-//                        call.respond(
-//                            fullUserFromUserRecordAndRole(
-//                                userId = userId,
-//                                userRecord = userRecord,
-//                                role = roleRepository.fetch(userRecord.role!!)!!.name!!
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                /**
-//                 * Description: Edit user
-//                 * Params: {userId}
-//                 * Body: CreatableUser { name?, surname?, email, password, registered?,
-//                 * lastActive?, confirmed, subscribed, storageSize }
-//                 * Validation: Too much to summarize :-)
-//                 * OK Response: Full User
-//                 * Scope: Registered (himself), Admin (all)
-////                 */
-//                put("/{userId}") {
-//                    call.withErrorHandler {
-//                        val userId = call.parameters["userId"]
-//                            ?: throw BadRequestException("User id is not present in the parameters.")
-//                        val userUUID = UUID.fromString(userId)
-//                        val currentUser = call.jwtUser()
-//                            ?: throw NoPermissionException("User do not have permission to edit this user")
-//                        val currentUserRole = roleRepository.fetch(currentUser.role!!)
-//                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUUID))
-//                            && currentUserRole!!.name != ROLE.ADMIN
-//                        ) {
-//                            throw NoPermissionException("User do not have permission to edit this user")
-//                        }
-//
-//                        val editedUser = call.receive<EditableUser>()
-//                        editedUser.isValuesValid()
-//                        if (!emailService.isEmailValid(editedUser.email))
-//                            throw BadRequestException("Email is not in correct format.")
-//                        if (!userRepository.isAnyoneElseEmailUnique(userUUID, editedUser.email))
-//                            throw BadRequestException("Email exists.")
-//
-//                        val userRecord = userRepository.fetch(userUUID)
-//                            ?: throw NotFoundException("User was not found")
-//
-//                        val editedUserRecord =
-//                            if (currentUserRole!!.name == ROLE.ADMIN)
-//                                UserRecord(
-//                                    id = userRecord.id,
-//                                    name = editedUser.name,
-//                                    surname = editedUser.surname,
-//                                    email = editedUser.email,
-//                                    password = if (editedUser.password != "")
-//                                        bcryptPassword(editedUser.password) else userRecord.password,
-//                                    role = roleRepository.roleUUID(editedUser.role),
-//                                    registered = editedUser.registered,
-//                                    lastActive = editedUser.lastActive,
-//                                    confirmed = if (editedUser.confirmed) "1".toByte() else "0".toByte(),
-//                                    subscribed = if (editedUser.subscribed) "1".toByte() else "0".toByte(),
-//                                    storageSize = editedUser.storageSize
-//                                )
-//                            else
-//                                UserRecord(
-//                                    id = userRecord.id,
-//                                    name = editedUser.name,
-//                                    surname = editedUser.surname,
-//                                    email = editedUser.email,
-//                                    password = if (editedUser.password != "")
-//                                        bcryptPassword(editedUser.password) else userRecord.password,
-//                                    role = userRecord.role,
-//                                    registered = userRecord.registered,
-//                                    lastActive = userRecord.lastActive,
-//                                    confirmed = userRecord.confirmed,
-//                                    subscribed = if (editedUser.subscribed) "1".toByte() else "0".toByte(),
-//                                    storageSize = userRecord.storageSize
-//                                )
-//
-//                        userRepository.updateUser(editedUserRecord)
-//                        call.respond(
-//                            fullUserFromUserRecordAndRole(
-//                                userId = userId,
-//                                userRecord = editedUserRecord,
-//                                role = roleRepository.fetch(editedUserRecord.role!!)!!.name!!
-//                            )
-//                        )
-//                    }
-//                }
+
+                get("/{userId}") {
+                    call.withErrorHandler {
+                        val userId = call.parameters["userId"]
+                            ?: throw BadRequestException("User id is not present in the parameters.")
+                        val userUuid = UUID.fromString(userId)
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this user")
+                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUuid)))
+                            throw NoPermissionException("User do not have permission to get this user data")
+
+                        call.respond(
+                            UserData(
+                                id = databaseService.binToUuid(currentUser.id!!).toString(),
+                                name = currentUser.name,
+                                surname = currentUser.surname,
+                                email = currentUser.email!!,
+                                role = roleRepository.fetch(currentUser.role!!)!!.name!!,
+                                registered = currentUser.registered!!,
+                                lastActive = currentUser.lastActive,
+                                confirmed = currentUser.confirmed == "1".toByte(),
+                                subscribed = currentUser.subscribed == "1".toByte(),
+                                storageSize = currentUser.storageSize!!
+                            )
+                        )
+                    }
+                }
+
+                put("/{userId}/self") {
+                    call.withErrorHandler {
+                        val userId = call.parameters["userId"]
+                            ?: throw BadRequestException("User id is not present in the parameters.")
+                        val userUUID = UUID.fromString(userId)
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to edit this user")
+                        if (!currentUser.id.contentEquals(databaseService.uuidToBin(userUUID))) {
+                            throw NoPermissionException("User do not have permission to edit this user")
+                        }
+
+                        val editedUser = call.receive<EditableUserSelf>()
+                        editedUser.isValuesValid()
+                        if (!emailService.isEmailValid(editedUser.email))
+                            throw BadRequestException("Email is not in correct format.")
+                        if (!userRepository.isAnyoneElseEmailUnique(userUUID, editedUser.email))
+                            throw BadRequestException("Email exists.")
+
+                        userRepository.updateUser(
+                            UserRecord(
+                                id = currentUser.id,
+                                name = editedUser.name,
+                                surname = editedUser.surname,
+                                email = editedUser.email,
+                                password = if (editedUser.password != "")
+                                    bcryptPassword(editedUser.password) else currentUser.password,
+                                role = currentUser.role,
+                                registered = currentUser.registered,
+                                lastActive = currentUser.lastActive,
+                                confirmed = currentUser.confirmed,
+                                subscribed = if (editedUser.subscribed) "1".toByte() else "0".toByte(),
+                                storageSize = currentUser.storageSize
+                            )
+                        )
+
+                        call.respondJSON(
+                            "User edited successfully.",
+                            HttpStatusCode.OK
+                        )
+                    }
+                }
 
                 get("/email-starts-with/{email}") {
                     call.withErrorHandler {

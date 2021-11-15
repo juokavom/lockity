@@ -33,6 +33,7 @@ fun RegistrableUser.isValuesValid() {
 
 @Serializable
 data class FrontendUser(
+    val id: String,
     val email: String,
     val role: String
 )
@@ -100,6 +101,19 @@ data class EditableUser(
 fun EditableUser.isValuesValid() {
     if (email == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN) || storageSize > MAX_STORAGE_BYTES)
         throw BadRequestException("Email, role or storage size failed validation.")
+}
+
+@Serializable
+data class EditableUserSelf(
+    var name: String?,
+    var surname: String?,
+    var email: String,
+    var password: String,
+    var subscribed: Boolean,
+)
+
+fun EditableUserSelf.isValuesValid() {
+    if (email == "") throw BadRequestException("Email failed validation.")
 }
 
 

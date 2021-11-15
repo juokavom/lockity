@@ -62,6 +62,7 @@ fun Application.authRoutes() {
                             call.respond(
                                 HttpStatusCode.OK,
                                 FrontendUser(
+                                    id = databaseService.binToUuid(userRecord.id!!).toString(),
                                     email = userRecord.email!!,
                                     role = roleRepository.fetch(userRecord.role!!)!!.name!!
                                 )

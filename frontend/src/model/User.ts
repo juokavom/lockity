@@ -10,6 +10,7 @@ export namespace User {
     export const isAdmin = (input: Role) => input === Role.Admin
 
     export interface FrontendUser {
+        id: string;
         email: string;
         role: Role;
     }
