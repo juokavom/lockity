@@ -52,6 +52,11 @@ export namespace ENDPOINTS {
         export const getReceivedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             file + '/received/metadata/offset/' + offset + '/limit/' + limit
         export const getReceivedMetadataCount = file + '/received/metadata/count'
+        
+        export const dynlinkId = (id: string) => file + '/dynlink-id/' + id
+
+        export const downloadDynlinkId = (id: string) => dynlinkId(id) + '/download'
+        export const fetchDynlinkId = (id: string) => file + '/metadata/dynlink-id/' + id
     }
     export namespace USER {
         export const user = endpoint + '/user'

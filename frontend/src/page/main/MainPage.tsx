@@ -16,6 +16,7 @@ import { ENDPOINTS } from '../../model/Server';
 import { IShareMetadata, SharedFiles, SHARE_CHUNK_SIZE } from '../SharedFilesPage';
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
+import Download from '../DownloadPage';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -308,6 +309,7 @@ export default function Main() {
                     <Route path="/confirm/:id" component={ConfirmWithId} />
                     <Route exact path={ROUTES.login} component={() => <Login />} />
                     <Route exact path={ROUTES.upload} component={() => <Upload />} />
+                    <Route path={ROUTES.download + "/:id"}  component={Download} />
                     <Route exact path={ROUTES.test} component={() => <Test />} />
                     <Redirect to={ROUTES.upload} />
                 </Switch>

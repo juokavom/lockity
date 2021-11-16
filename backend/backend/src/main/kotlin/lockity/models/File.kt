@@ -46,3 +46,14 @@ data class ReceivedFileMetadata(
 data class ReceivedFileMetadataCount(
     val receivedCount: Int
 )
+
+@Serializable
+data class FileLink(
+    val link: String
+)
+
+@Serializable
+data class FileTitleLink(
+    val title: String,
+    val link: String
+)

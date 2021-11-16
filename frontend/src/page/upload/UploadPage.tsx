@@ -2,7 +2,7 @@ import FileUploader, { FileUploadedMetadata } from '../../component/FileUploader
 import { ROUTES } from '../../model/Routes';
 import { Copyright } from '../login/LoginPage';
 import { useState } from 'react';
-import { UncontrolledTooltip } from 'reactstrap';
+import { Button, UncontrolledTooltip } from 'reactstrap';
 import { toast } from 'react-toastify';
 import { DefaultToastOptions, } from '../../model/RequestBuilder';
 
@@ -13,33 +13,21 @@ enum UploadPageState {
 
 function Upload() {
     const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
-    const [fileMeta, setFileMeta] = useState<FileUploadedMetadata | null>(null)
-    const [fileLink] = useState<string | null>(null)
+    const [fileMeta, setFileMeta] = useState<any | null>(null)
 
-    const onFileUploaded = async (uploadMetadata?: FileUploadedMetadata) => {
+    const onFileUploaded = async (uploadMetadata?: any) => {
         if (uploadMetadata) {
             setFileMeta(uploadMetadata)
             setState(UploadPageState.Uploaded)
-            // await GenerateLinkAction(uploadMetadata)
         }
     }
 
     const copyFileUrl = async () => {
-        if (fileLink) {
-            await navigator.clipboard.writeText(fileLink);
+        if (fileMeta?.link) {
+            await navigator.clipboard.writeText(ROUTES.getAnonymousFile(fileMeta?.link));
             toast.info("Link copied to clipboard!", DefaultToastOptions)
         }
     }
-
-    // const GenerateLinkAction = async (fileMetaData: FileUploadedMetadata) => {
-    //     await new RequestBuilder()
-    //         .withUrl(ENDPOINTS.DYNLINK.generateLink(fileMetaData.fileId, fileMetaData.fileKey))
-    //         .withMethod('POST')
-    //         .withDefaults()
-    //         .send((response: any) => {
-    //             setFileLink(response.fileLink)
-    //         })
-    // };
 
     return (
         <div className="container upload-main">
@@ -51,30 +39,33 @@ function Upload() {
                             <div>
                                 <p>
                                     This is a platform for file storing and sharing. Here you can upload
-                                    your file and select sharing method either by a link or email.
+                                    your file and share it with the world.
                                 </p>
-                                <div className="float-login">
-                                    <button
-                                        className="upload-button"
+                                <div className="float-login" style={{ marginTop: "1rem" }}>
+                                    <Button
+                                        outline
+                                        variant="contained"
+                                        sx={{ mt: 3, mb: 2 }}
+                                        style={{ color: "#ebf0f" }}
                                         onClick={() => window.location.replace(ROUTES.login)}>
                                         Login
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     {
                         state === UploadPageState.Initial &&
-                        <FileUploader {...{ isAuthed: false, onUpload: onFileUploaded, onError: () => {} }} />
+                        <FileUploader {...{ isAuthed: false, onUpload: onFileUploaded, onError: () => { } }} />
                     }
                     {
                         state === UploadPageState.Uploaded &&
                         <div className="border-box">
-                            <h1>Sharing options</h1>
+                            <h1>Sharing link</h1>
                             <div className="col-12 col-md-10 col-xl-10">
                                 <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5><br />
-                                <div id="fileLink" className="dropzone selected-file ellipse-text" style={{ cursor: "default" }} onClick={copyFileUrl}>
-                                    {fileLink}
+                                <div id="fileLink" className="dropzone selected-file" style={{ cursor: "default" }} onClick={copyFileUrl}>
+                                    {ROUTES.getAnonymousFile(fileMeta?.link)}
                                 </div>
                                 <UncontrolledTooltip
                                     placement="auto"

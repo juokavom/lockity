@@ -36,6 +36,11 @@ class FileRepository(
         .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
         .fetchOne()
 
+    fun fetchWithDynlink(link: String): FileRecord? = databaseService.dsl
+        .selectFrom(FileTable)
+        .where(FileTable.Link.eq(link))
+        .fetchOne()
+
     fun fetchUserFiles(userUuid: UUID): List<FileRecord> = databaseService.dsl
         .selectFrom(FileTable)
         .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))

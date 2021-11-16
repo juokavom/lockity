@@ -12,10 +12,7 @@ import io.ktor.routing.*
 import lockity.models.*
 import lockity.repositories.*
 import lockity.services.*
-import lockity.utils.AUTHENTICATED
-import lockity.utils.DatabaseService
-import lockity.utils.respondJSON
-import lockity.utils.withErrorHandler
+import lockity.utils.*
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.time.LocalDateTime
@@ -38,45 +35,45 @@ fun Application.fileRoutes() {
     routing {
         route("/file") {
 
-//            post("/anonymous") {
-//                call.withErrorHandler {
-//                    val fileSize = call.request.headers["Content-Length"]!!.toLong()
-//                    if (fileSize > DEFAULT_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
-//
-//                    val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
-//
-//                    val fileId = databaseService.uuidToBin()
-//                    val fileIdStringed = databaseService.binToUuid(fileId).toString()
-//                    if (part is PartData.FileItem) {
-//                        val fileName = part.originalFileName!!
-//                        val fileFolderLocation = fileService.uploadsLocation(fileIdStringed)
-//                        File(fileFolderLocation).mkdir()
-//                        val fileLocation = "$fileFolderLocation/$fileName"
-//                        part.streamProvider().use { inputStream ->
-//                            File(fileLocation).outputStream().buffered().use { outputStream ->
-//                                fileService.copyTo(inputStream, outputStream)
-//                            }
-//                        }
-//                        part.dispose
-//
-//                        val fileKey = UUID.randomUUID().toString()
-//                        fileRepository.insert(
-//                            FileRecord(
-//                                id = fileId,
-//                                title = fileName,
-//                                location = fileFolderLocation,
-//                                user = null,
-//                                key = fileKey,
-//                                link = null,
-//                                uploaded = LocalDateTime.now(),
-//                                lastAccessed = null,
-//                                size = fileSize
-//                            )
-//                        )
-//                        call.respond(AnonymousFileMetadata(fileIdStringed, fileKey))
-//                    } else throw BadRequestException("Multipart data is not file type")
-//                }
-//            }
+            post("/anonymous") {
+                call.withErrorHandler {
+                    val fileSize = call.request.headers["Content-Length"]!!.toLong()
+                    if (fileSize > GUEST_MAX_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
+
+                    val part = call.receiveMultipart().readPart() ?: throw BadRequestException("File not attached")
+
+                    val fileId = databaseService.uuidToBin()
+                    val fileIdStringed = databaseService.binToUuid(fileId).toString()
+                    if (part is PartData.FileItem) {
+                        val fileName = part.originalFileName!!
+                        val fileFolderLocation = fileService.uploadsLocation(fileIdStringed)
+                        File(fileFolderLocation).mkdir()
+                        val fileLocation = "$fileFolderLocation/$fileName"
+                        part.streamProvider().use { inputStream ->
+                            File(fileLocation).outputStream().buffered().use { outputStream ->
+                                fileService.copyTo(inputStream, outputStream)
+                            }
+                        }
+                        part.dispose
+
+                        val fileLink = UUID.randomUUID().toString()
+                        fileRepository.insert(
+                            FileRecord(
+                                id = fileId,
+                                title = fileName,
+                                location = fileFolderLocation,
+                                user = null,
+                                key = null,
+                                link = fileLink,
+                                uploaded = LocalDateTime.now(),
+                                lastAccessed = null,
+                                size = fileSize
+                            )
+                        )
+                        call.respond(FileLink(fileLink))
+                    } else throw BadRequestException("Multipart data is not file type")
+                }
+            }
 
             authenticate(AUTHENTICATED) {
                 post {
@@ -396,39 +393,47 @@ fun Application.fileRoutes() {
                 }
             }
 
-//        post("/dynlink/file-id/{fileId}") {
-//            call.withErrorHandler {
-//                val fileId = call.parameters["fileId"]
-//                    ?: throw BadRequestException("File id is not present in the parameters.")
-//                val key = call.request.queryParameters["fileKey"]
-//                val user = call.jwtUser()
-//                val file = fileRepository.fetch(UUID.fromString(fileId))
-//                    ?: throw NotFoundException("File was not found")
-//
-//                if (file.link != null) throw BadRequestException("File has link already")
-//                if (file.user != null) {
-//                    if (user == null || !file.user.contentEquals(user.id)) {
-//                        throw NoPermissionException("User do not own the file.")
-//                    }
-//                } else {
-//                    if (key == null) throw BadRequestException("File key is not provided.")
-//                    else if (file.key != key) {
-//                        throw BadRequestException("File key is not correct.")
-//                    }
-//                }
-//
-//                file.link = UUID.randomUUID().toString()
-//                file.key = null
-//                fileRepository.update(file)
-//
-//                call.respondJSON(file.link!!, HttpStatusCode.OK, "fileLink")
-//            }
-//        }
+            get("/dynlink-id/{dynlinkId}/download") {
+                call.withErrorHandler {
+                    val dynlinkId = call.parameters["dynlinkId"]
+                        ?: throw BadRequestException("Dynamic link id is not present in the parameters.")
 
-//        get("/dynlink-id/{dynlinkId}") {
-//            call.withErrorHandler {
-//            }
-//        }
+                    val fileRecord = fileRepository.fetchWithDynlink(dynlinkId)
+                        ?: throw NotFoundException("File was not found")
+
+                    if (fileRecord.link == null) throw NoPermissionException("File is not shared")
+
+                    call.response.header(
+                        HttpHeaders.ContentDisposition,
+                        ContentDisposition.Attachment.withParameter(
+                            ContentDisposition.Parameters.FileName, fileRecord.title!!
+                        ).toString()
+                    )
+
+                    call.respondFile(
+                        File(fileRecord.location!! + "/" + fileRecord.title!!)
+                    )
+                }
+            }
+
+            get("/metadata/dynlink-id/{dynlinkId}") {
+                call.withErrorHandler {
+                    val dynlinkId = call.parameters["dynlinkId"]
+                        ?: throw BadRequestException("Dynamic link id is not present in the parameters.")
+
+                    val fileRecord = fileRepository.fetchWithDynlink(dynlinkId)
+                        ?: throw NotFoundException("File was not found")
+
+                    if (fileRecord.link == null) throw NoPermissionException("File is not shared")
+
+                    call.respond(
+                        FileTitleLink(
+                            title = fileRecord.title!!,
+                            link = fileRecord.link!!
+                        )
+                    )
+                }
+            }
         }
     }
 }

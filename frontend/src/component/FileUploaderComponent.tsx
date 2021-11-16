@@ -9,7 +9,7 @@ import { ROUTES } from '../model/Routes';
 
 interface FileUploaderProps {
     isAuthed: Boolean,
-    onUpload: (uploadMetadata?: FileUploadedMetadata) => void,
+    onUpload: (uploadMetadata?: any) => void,
     onError: () => void
 }
 
@@ -73,8 +73,7 @@ export default function FileUploader(props: FileUploaderProps) {
                     } else {
                         const response = JSON.parse(xhr.response)
                         props.onUpload({
-                            fileId: response.fileId,
-                            fileKey: response.fileKey,
+                            link: response.link,
                             fileName: file[0].name
                         })
                     }
