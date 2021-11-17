@@ -11,13 +11,6 @@ import java.util.*
 class SharedAccessRepository(
     private val databaseService: DatabaseService
 ) {
-//    fun fromRecord(sharedAccessRecord: SharedAccessRecord) = SharedAccess(
-//        id = databaseService.binToUuid(sharedAccessRecord.id!!).toString(),
-//        fileId = databaseService.binToUuid(sharedAccessRecord.fileId!!).toString(),
-//        ownerId = databaseService.binToUuid(sharedAccessRecord.ownerId!!).toString(),
-//        recipientId = databaseService.binToUuid(sharedAccessRecord.recipientId!!).toString()
-//    )
-
     fun insert(sharedAccessRecord: SharedAccessRecord) = databaseService.dsl
         .batchInsert(sharedAccessRecord)
         .execute()
@@ -26,11 +19,6 @@ class SharedAccessRepository(
         .selectFrom(SharedAccessTable)
         .where(SharedAccessTable.Id.eq(databaseService.uuidToBin(uuid)))
         .fetchOne()
-
-    fun update(sharedAccessRecord: SharedAccessRecord) = databaseService.dsl
-        .update(SharedAccessTable)
-        .set(sharedAccessRecord)
-        .execute()
 
     fun updateRecipient(sharedId: ByteArray, userId: ByteArray) = databaseService.dsl
         .update(SharedAccessTable)

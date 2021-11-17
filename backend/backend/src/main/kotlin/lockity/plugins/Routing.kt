@@ -57,7 +57,6 @@ fun Application.configureRouting() {
         authRoutes()
         userRoutes()
         sharedRoutes()
-        emailRoutes()
         fileRoutes()
         testRoutes()
     }

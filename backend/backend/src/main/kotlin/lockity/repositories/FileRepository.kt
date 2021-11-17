@@ -91,18 +91,4 @@ class FileRepository(
         .fetchArray()
         .toList()
 
-//    fun fetchUserReceivedSharedFiles(userBin: ByteArray): List<FileMetadata> = databaseService.dsl
-//        .select()
-//        .from(SharedAccessTable)
-//        .join(FileTable).onKey()
-//        .where(SharedAccessTable.OwnerId.eq(userBin))
-//        .fetchArray()
-//        .toList()
-//        .map {
-//            FileMetadata(
-//                id = i
-//                title = it[FileTable.Title]!!,
-//                size = it[FileTable.Size]!!
-//            )
-//        }
 }
