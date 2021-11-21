@@ -26,9 +26,9 @@ class FileService(
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
 
-    private fun uploadsLocation(fileName: String) = "$storagePath$uploadsPath/$fileName"
+    fun uploadsLocation(fileName: String) = "$storagePath$uploadsPath/$fileName"
 
-    private fun copyTo(inputStream: InputStream, outputStream: OutputStream) {
+    fun copyTo(inputStream: InputStream, outputStream: OutputStream) {
         var bytesCopied: Long = 0
         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
         var bytes = inputStream.read(buffer)
@@ -49,12 +49,13 @@ class FileService(
         return success
     }
 
-    private fun deletePhysicalFile(id: ByteArray): Boolean = File(
+    fun deletePhysicalFile(id: ByteArray): Boolean = File(
         uploadsLocation(databaseService.binToUuid(id).toString())
     ).deleteRecursively()
 
     fun uploadGuestFile(part: PartData.FileItem, fileSize: Long): FileLink {
-        if (fileSize > GUEST_MAX_STORAGE_BYTES) throw BadRequestException("File size exceeds 1GB")
+        if (fileSize > GUEST_MAX_STORAGE_BYTES)
+            throw BadRequestException("File size exceeds 1GB")
         val fileRecord = uploadFile(part, fileSize)
         fileRecord.link = UUID.randomUUID().toString()
         fileRepository.insert(fileRecord)
@@ -70,7 +71,7 @@ class FileService(
         fileRepository.insert(fileRecord)
     }
 
-    private fun uploadFile(part: PartData.FileItem, fileSize: Long): FileRecord {
+    fun uploadFile(part: PartData.FileItem, fileSize: Long): FileRecord {
         val fileId = databaseService.uuidToBin(UUID.randomUUID())
         val fileIdStringed = databaseService.binToUuid(fileId).toString()
         val fileName = part.originalFileName!!

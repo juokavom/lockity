@@ -32,7 +32,7 @@ dependencies {
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("io.insert-koin:koin-test:3.1.2")
-    testImplementation("io.mockk:mockk:1.12.1")
+    testImplementation("io.mockk:mockk:1.12.0")
 }
 
 application {
