@@ -9,7 +9,6 @@ import lockity.models.isValuesValid
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.repositories.UserRepository
-import lockity.utils.DatabaseService
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
@@ -54,7 +53,7 @@ class SharedAccessService(
 
         sharedAccessRepository.insert(
             SharedAccessRecord(
-                id = databaseService.uuidToBin(),
+                id = databaseService.uuidToBin(UUID.randomUUID()),
                 fileId = databaseService.uuidToBin(UUID.fromString(newAccess.fileId)),
                 ownerId = fileOwner,
                 recipientId = databaseService.uuidToBin(UUID.fromString(newAccess.userId)),

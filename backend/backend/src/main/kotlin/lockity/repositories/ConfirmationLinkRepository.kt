@@ -4,7 +4,7 @@ import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.references.ConfirmationLinkTable
 import database.schema.tables.references.UserTable
 import lockity.models.ConfirmationLinkAndUser
-import lockity.utils.DatabaseService
+import lockity.services.DatabaseService
 
 class ConfirmationLinkRepository(
     private val databaseService: DatabaseService

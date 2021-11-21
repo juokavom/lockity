@@ -5,7 +5,7 @@ import database.schema.tables.references.FileTable
 import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
 import lockity.models.*
-import lockity.utils.DatabaseService
+import lockity.services.DatabaseService
 import java.util.*
 
 class SharedAccessRepository(

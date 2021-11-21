@@ -10,8 +10,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.EditableFile
 import lockity.services.FileService
-import lockity.services.jwtUser
 import lockity.utils.AUTHENTICATED
+import lockity.utils.jwtUser
 import lockity.utils.respondJSON
 import lockity.utils.withErrorHandler
 import org.koin.ktor.ext.inject

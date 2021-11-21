@@ -8,9 +8,8 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.EditableUser
+import lockity.services.DatabaseService
 import lockity.services.UserService
-import lockity.services.jwtUser
-import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.*
 import org.koin.ktor.ext.inject
 import javax.naming.NoPermissionException

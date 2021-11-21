@@ -4,7 +4,7 @@ import database.schema.tables.records.UserRecord
 import database.schema.tables.references.RoleTable
 import database.schema.tables.references.UserTable
 import lockity.models.UserData
-import lockity.utils.DatabaseService
+import lockity.services.DatabaseService
 import lockity.utils.USER
 import java.time.LocalDateTime
 import java.util.*

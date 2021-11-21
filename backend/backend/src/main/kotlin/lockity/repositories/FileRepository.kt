@@ -1,15 +1,9 @@
 package lockity.repositories
 
 import database.schema.tables.records.FileRecord
-import database.schema.tables.records.UserRecord
 import database.schema.tables.references.FileTable
-import database.schema.tables.references.SharedAccessTable
-import database.schema.tables.references.UserTable
-import lockity.models.FileMetadata
-import lockity.models.SharedAccess
-import lockity.utils.DatabaseService
+import lockity.services.DatabaseService
 import org.jooq.impl.DSL
-import java.math.BigDecimal
 import java.util.*
 
 class FileRepository(

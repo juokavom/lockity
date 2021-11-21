@@ -2,7 +2,7 @@ package lockity.repositories
 
 import database.schema.tables.records.RoleRecord
 import database.schema.tables.references.RoleTable
-import lockity.utils.DatabaseService
+import lockity.services.DatabaseService
 import java.util.*
 
 class RoleRepository(

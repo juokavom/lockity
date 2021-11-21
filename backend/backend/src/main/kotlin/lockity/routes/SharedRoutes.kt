@@ -1,6 +1,5 @@
 package lockity.routes
 
-import database.schema.tables.records.SharedAccessRecord
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -8,29 +7,15 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.models.EditableSharedAccess
-import lockity.models.SharedAccessCount
-import lockity.models.UploadableSharedAccess
-import lockity.models.isValuesValid
-import lockity.repositories.FileRepository
-import lockity.repositories.SharedAccessRepository
-import lockity.repositories.UserRepository
 import lockity.services.SharedAccessService
-import lockity.services.jwtUser
 import lockity.utils.AUTHENTICATED
-import lockity.utils.DatabaseService
+import lockity.utils.jwtUser
 import lockity.utils.respondJSON
 import lockity.utils.withErrorHandler
 import org.koin.ktor.ext.inject
-import java.time.LocalDateTime
-import java.util.*
 import javax.naming.NoPermissionException
 
 fun Application.sharedRoutes() {
-    val userRepository: UserRepository by inject()
-    val databaseService: DatabaseService by inject()
-    val fileRepository: FileRepository by inject()
-    val sharedAccessRepository: SharedAccessRepository by inject()
     val sharedAccessService: SharedAccessService by inject()
 
     routing {

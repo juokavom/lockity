@@ -1,15 +1,10 @@
 package lockity.repositories
 
-import com.mysql.cj.jdbc.MysqlDataSource
 import com.typesafe.config.ConfigFactory
 import io.ktor.config.*
 import io.ktor.server.testing.*
-import io.mockk.every
 import io.mockk.mockk
-import lockity.utils.CONFIG
-import lockity.utils.DatabaseService
-import org.jooq.SQLDialect
-import org.jooq.impl.DSL
+import lockity.services.DatabaseService
 import org.junit.jupiter.api.Test
 
 internal class UserRepositoryTest {

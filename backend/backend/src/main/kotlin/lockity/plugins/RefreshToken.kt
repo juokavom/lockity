@@ -4,9 +4,9 @@ import io.ktor.application.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import lockity.services.JwtService
-import lockity.services.setResponseJwtCookieHeader
-import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.JWT_COOKIE_NAME
+import lockity.utils.setResponseJwtCookieHeader
+import lockity.utils.unsetResponseJwtCookieHeader
 
 class RefreshToken(configuration: Configuration) {
     private val jwtService = configuration.jwtTokenService

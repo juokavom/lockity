@@ -3,15 +3,9 @@ package lockity
 import io.ktor.application.*
 import lockity.plugins.configureRouting
 import lockity.repositories.*
-import lockity.services.ConfigurationService
-import lockity.services.JwtService
-import lockity.utils.DatabaseService
-import lockity.services.EmailService
-import lockity.services.FileService
+import lockity.services.*
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
-import org.koin.ktor.ext.inject
-import java.io.File
 
 fun Application.main() {
     startKoin {

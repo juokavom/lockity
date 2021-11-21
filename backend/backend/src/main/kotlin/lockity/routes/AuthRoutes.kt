@@ -6,9 +6,9 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.services.UserService
-import lockity.services.setResponseJwtCookieHeader
-import lockity.services.unsetResponseJwtCookieHeader
 import lockity.utils.respondJSON
+import lockity.utils.setResponseJwtCookieHeader
+import lockity.utils.unsetResponseJwtCookieHeader
 import lockity.utils.withErrorHandler
 import org.koin.ktor.ext.inject
 

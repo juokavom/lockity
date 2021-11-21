@@ -1,7 +1,7 @@
-package lockity.utils
+package lockity.services
 
 import com.mysql.cj.jdbc.MysqlDataSource
-import lockity.services.ConfigurationService
+import lockity.utils.CONFIG
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import java.nio.ByteBuffer
@@ -19,7 +19,7 @@ class DatabaseService(
         }, SQLDialect.MARIADB
     )
 
-    fun uuidToBin(uuid: UUID = UUID.randomUUID()): ByteArray {
+    fun uuidToBin(uuid: UUID): ByteArray {
         val bb = ByteBuffer.wrap(ByteArray(16))
         bb.putLong(uuid.mostSignificantBits)
         bb.putLong(uuid.leastSignificantBits)

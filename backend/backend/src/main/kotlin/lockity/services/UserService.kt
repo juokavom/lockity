@@ -60,7 +60,7 @@ class UserService(
             throw BadRequestException("Email is not in correct format.")
         if (!userRepository.isEmailUnique(registrableUser.email))
             throw BadRequestException("User exists.")
-        val userId = databaseService.uuidToBin()
+        val userId = databaseService.uuidToBin(UUID.randomUUID())
         userRepository.insertUser(
             UserRecord(
                 id = userId,
@@ -99,7 +99,7 @@ class UserService(
     }
 
     private fun generateConfirmationLink(userBinId: ByteArray) = ConfirmationLinkRecord(
-        id = databaseService.uuidToBin(),
+        id = databaseService.uuidToBin(UUID.randomUUID()),
         user = userBinId,
         link = UUID.randomUUID().toString(),
         validUntil = LocalDateTime.now().plusMinutes(
@@ -137,7 +137,7 @@ class UserService(
         if (!userRepository.isEmailUnique(creatableUser.email))
             throw BadRequestException("User exists.")
 
-        val userId = databaseService.uuidToBin()
+        val userId = databaseService.uuidToBin(UUID.randomUUID())
         userRepository.insertUser(
             UserRecord(
                 id = userId,

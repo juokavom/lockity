@@ -8,7 +8,6 @@ import lockity.models.*
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.utils.CONFIG
-import lockity.utils.DatabaseService
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import java.io.File
 import java.io.InputStream
@@ -72,7 +71,7 @@ class FileService(
     }
 
     private fun uploadFile(part: PartData.FileItem, fileSize: Long): FileRecord {
-        val fileId = databaseService.uuidToBin()
+        val fileId = databaseService.uuidToBin(UUID.randomUUID())
         val fileIdStringed = databaseService.binToUuid(fileId).toString()
         val fileName = part.originalFileName!!
         val fileFolderLocation = uploadsLocation(fileIdStringed)

@@ -15,8 +15,8 @@ import lockity.repositories.UserRepository
 import lockity.routes.*
 import lockity.services.ConfigurationService
 import lockity.services.JwtService
-import lockity.services.installJwtVerifier
 import lockity.utils.CONFIG
+import lockity.utils.installJwtVerifier
 import org.koin.ktor.ext.inject
 import java.util.*
 
