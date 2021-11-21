@@ -19,6 +19,10 @@ object CONFIG {
     const val DATABASE_USER = "database.user"
     const val DATABASE_PASSWORD = "database.password"
 
+    const val TEST_DATABASE_URL = "testDatabase.url"
+    const val TEST_DATABASE_USER = "testDatabase.user"
+    const val TEST_DATABASE_PASSWORD = "testDatabase.password"
+
     const val FILEPATH_STORAGE = "filePath.storage"
     const val FILEPATH_UPLOADS = "filePath.uploads"
 

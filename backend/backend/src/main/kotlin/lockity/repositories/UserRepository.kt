@@ -1,14 +1,9 @@
 package lockity.repositories
 
 import database.schema.tables.records.UserRecord
-import database.schema.tables.references.FileTable
 import database.schema.tables.references.RoleTable
-import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
-import lockity.models.FileMetadataForSharing
-import lockity.models.SharedAccess
 import lockity.models.UserData
-import lockity.models.UserForSharing
 import lockity.utils.DatabaseService
 import lockity.utils.USER
 import java.time.LocalDateTime
@@ -61,11 +56,6 @@ class UserRepository(
     fun fetchWithEmailLike(emailLike: String): List<UserRecord> = databaseService.dsl
         .selectFrom(UserTable)
         .where(UserTable.Email.like(emailLike))
-        .fetchArray()
-        .toList()
-
-    fun fetchAll(): List<UserRecord> = databaseService.dsl
-        .selectFrom(UserTable)
         .fetchArray()
         .toList()
 
