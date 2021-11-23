@@ -363,10 +363,10 @@ internal class FileServiceTest {
         fail("Not yet implemented")
     }
 
-//    @Test
-//    fun getUserReceivedFilesMetadataCount() {
-//        fail("Not yet implemented")
-//    }
+    @Test
+    fun getUserReceivedFilesMetadataCount() {
+        fail("Not yet implemented")
+    }
 //
 //    @Test
 //    fun getDynamicLinkFileTitleLink() {
