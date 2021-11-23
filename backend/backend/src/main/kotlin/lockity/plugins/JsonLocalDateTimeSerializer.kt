@@ -8,6 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@kotlinx.serialization.ExperimentalSerializationApi
 @Serializer(forClass = LocalDateTime::class)
 object JsonLocalDateTimeSerializer : KSerializer<LocalDateTime> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("java.time.LocalDateTime")

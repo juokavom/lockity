@@ -2,18 +2,23 @@ package lockity.services
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import database.schema.tables.records.FileRecord
+import database.schema.tables.records.SharedAccessRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.utils.io.streams.*
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
+import lockity.models.FileMetadataInfo
+import lockity.models.StorageData
 import lockity.repositories.FileRepository
+import lockity.repositories.SharedAccessRepository
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
+import lockity.utils.Misc
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -23,29 +28,35 @@ import javax.naming.NoPermissionException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FileServiceTest {
-    private val databaseService = mockk<DatabaseService>(relaxed = true)
-    private val fileRepository = mockk<FileRepository>(relaxed = true)
-    private val emptyFileId = "".toByteArray()
+    private lateinit var databaseService: DatabaseService
+    private lateinit var fileRepository: FileRepository
+    private lateinit var sharedAccessRepository: SharedAccessRepository
+    private lateinit var emptyFileId: ByteArray
+    private lateinit var fileService: FileService
 
-    private val fileService = spyk(
-        FileService(
-            mockk(relaxed = true),
-            fileRepository,
-            mockk(relaxed = true),
-            mockk(relaxed = true)
-        )
-    )
-
-    companion object {
-        @JvmStatic
-        fun deleteUserFilesParamsProvider(): List<Arguments> {
-            return listOf<Arguments>(
-                Arguments.of(true),
-                Arguments.of(false)
+    @BeforeEach
+    fun setUp() {
+        databaseService = mockk(relaxed = true)
+        fileRepository = mockk(relaxed = true)
+        sharedAccessRepository = mockk(relaxed = true)
+        emptyFileId = "".toByteArray()
+        fileService = spyk(
+            FileService(
+                mockk(relaxed = true),
+                fileRepository,
+                sharedAccessRepository,
+                mockk(relaxed = true)
             )
-        }
+        )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -59,6 +70,83 @@ internal class FileServiceTest {
             actual = outputStream.toString(),
             expected = value
         )
+    }
+
+    companion object {
+        @JvmStatic
+        fun deleteUserFilesParamsProvider(): List<Arguments> {
+            return listOf<Arguments>(
+                Arguments.of(true),
+                Arguments.of(false)
+            )
+        }
+
+        @JvmStatic
+        fun getUserFileParamsProvider(): List<Arguments> {
+            val randomUser = UserRecord()
+            randomUser.id = Misc.uuidToBin(UUID.randomUUID())
+            val file = FileRecord()
+            file.user = Misc.uuidToBin(UUID.randomUUID())
+            file.location = "location"
+            file.title = "title"
+            val fileUser = UserRecord()
+            fileUser.id = file.user
+            return listOf<Arguments>(
+                Arguments.of(null, randomUser, true),
+                Arguments.of(file, randomUser, true),
+                Arguments.of(file, fileUser, false)
+            )
+        }
+
+        @JvmStatic
+        fun getUserReceivedFileParamsProvider(): List<Arguments> {
+            val randomUser = UserRecord()
+            randomUser.id = Misc.uuidToBin(UUID.randomUUID())
+            val sharedAccess = SharedAccessRecord()
+            sharedAccess.fileId = Misc.uuidToBin(UUID.randomUUID())
+            sharedAccess.recipientId = Misc.uuidToBin(UUID.randomUUID())
+            val sharedAccessUser = UserRecord()
+            sharedAccessUser.id = sharedAccess.recipientId
+            val file = FileRecord()
+            file.location = "location"
+            file.title = "title"
+            return listOf<Arguments>(
+                Arguments.of(null, randomUser, null, true),
+                Arguments.of(sharedAccess, randomUser, null, true),
+                Arguments.of(sharedAccess, sharedAccessUser, null, true),
+                Arguments.of(sharedAccess, sharedAccessUser, file, false)
+            )
+        }
+
+        @JvmStatic
+        fun getDynamicLinkFileParamsProvider(): List<Arguments> {
+            val fileWithDynLink = mockk<FileRecord>(relaxed = true)
+            fileWithDynLink.link = "link"
+            return listOf<Arguments>(
+                Arguments.of(null, true),
+                Arguments.of(FileRecord(), true),
+                Arguments.of(fileWithDynLink, false)
+            )
+        }
+
+        @JvmStatic
+        fun getUserFilesMetadataWithOffsetAndLimitParamsProvider(): List<Arguments> {
+            return listOf<Arguments>(
+                Arguments.of(null, 100, true),
+                Arguments.of(
+                    listOf(
+                        FileRecord(
+                            id = Misc.uuidToBin(UUID.randomUUID()),
+                            title = "test",
+                            size = 205L,
+                            link = UUID.randomUUID().toString()
+                        )
+                    ),
+                    15,
+                    false
+                )
+            )
+        }
     }
 
     @ParameterizedTest
@@ -144,56 +232,155 @@ internal class FileServiceTest {
                 uploaded.lastAccessed == null &&
                 uploaded.size == fileSize)
 
-        assertTrue (
+        assertTrue(
             actual = matches
         )
     }
 
-    @Test
-    fun getUserFile() {
+
+    @ParameterizedTest
+    @MethodSource("getUserFileParamsProvider")
+    fun `it must get user file`(fileRecord: FileRecord?, userRecord: UserRecord, shouldFail: Boolean) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        if (shouldFail) assertFailsWith<Exception> {
+            fileService.getUserFile(UUID.randomUUID().toString(), userRecord)
+        } else {
+            val gottenFile = fileService.getUserFile(UUID.randomUUID().toString(), userRecord)
+            assert(
+                gottenFile.path.contains(fileRecord!!.location!!) &&
+                        gottenFile.path.contains(fileRecord.title!!)
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserReceivedFileParamsProvider")
+    fun `it must get user received file`(
+        sharedAccessRecord: SharedAccessRecord?, userRecord: UserRecord,
+        fileRecord: FileRecord?, shouldFail: Boolean
+    ) {
+        every { sharedAccessRepository.fetch(any()) } returns sharedAccessRecord
+        every { fileRepository.fetch(any()) } returns fileRecord
+        fun test() = fileService.getUserReceivedFile(UUID.randomUUID().toString(), userRecord)
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            val gottenFile = test()
+            assert(
+                gottenFile.path.contains(fileRecord!!.location!!) &&
+                        gottenFile.path.contains(fileRecord.title!!)
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getDynamicLinkFileParamsProvider")
+    fun `it must get dynamic link file`(
+        fileRecord: FileRecord?, shouldFail: Boolean
+    ) {
+        every { fileRepository.fetchWithDynlink(any()) } returns fileRecord
+        fun test() = fileService.getDynamicLinkFile(UUID.randomUUID().toString())
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            val gottenFile = test()
+            assert(
+                gottenFile.path.contains(fileRecord!!.location!!) &&
+                        gottenFile.path.contains(fileRecord.title!!)
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserFilesMetadataWithOffsetAndLimitParamsProvider")
+    fun `it must get user files metadata with offset and limit`(
+        fileRecordList: List<FileRecord>?, limit: Int, shouldFail: Boolean
+    ) {
+        fileRecordList?.let {
+            every {
+                fileRepository.fetchUserFilesWithOffsetAndLimit(any(), any(), any())
+            } returns it
+        }
+        fun test() = fileService.getUserFilesMetadata(mockk(relaxed = true), 0, limit)
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            val gottenMetadata = test()
+            for (i in gottenMetadata.indices) {
+                fileRecordList!!
+                assert(
+                    gottenMetadata[i].title == fileRecordList[i].title!! &&
+                            gottenMetadata[i].size == fileRecordList[i].size!! &&
+                            gottenMetadata[i].link == fileRecordList[i].link!!
+                )
+            }
+        }
     }
 
     @Test
-    fun getUserReceivedFile() {
+    fun `it must get user files metadata with title like`() {
+        val fileRecordList = listOf(
+            FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                title = "test",
+            )
+        )
+        every { fileRepository.fetchUserFilesWithTitleLike(any(), any()) } returns fileRecordList
+        val gottenMetadata = fileService.getUserFilesMetadata(mockk(relaxed = true), "test")
+        for (i in gottenMetadata.indices) {
+            assertEquals(
+                actual = gottenMetadata[i].title,
+                expected = fileRecordList[i].title!!
+            )
+        }
     }
 
     @Test
-    fun getDynamicLinkFile() {
-    }
-
-    @Test
-    fun getUserFilesMetadata() {
-    }
-
-    @Test
-    fun testGetUserFilesMetadata() {
-    }
-
-    @Test
-    fun getUserFilesMetadataInfo() {
+    fun `it must get user files metadata info`() {
+        val userFileSizeSum = 145L
+        val userRecord = mockk<UserRecord>(relaxed = true)
+        userRecord.storageSize = 2000L
+        every { fileRepository.userFileSizeSum(any()) } returns userFileSizeSum
+        every { fileRepository.fetchUserFilesCount(any()) } returns null
+        assertEquals(
+            actual = fileService.getUserFilesMetadataInfo(userRecord),
+            expected = FileMetadataInfo(
+                storageData = StorageData(
+                    totalSize = userRecord.storageSize!!,
+                    usedSize = userFileSizeSum
+                ),
+                fileCount = 0
+            )
+        )
     }
 
     @Test
     fun getUserReceivedFilesMetadata() {
+        fail("Not yet implemented")
     }
 
     @Test
     fun getUserReceivedFilesMetadataCount() {
+        fail("Not yet implemented")
     }
 
     @Test
     fun getDynamicLinkFileTitleLink() {
+        fail("Not yet implemented")
     }
 
     @Test
     fun updateUserFile() {
+        fail("Not yet implemented")
     }
 
     @Test
     fun modifyUserFileSharing() {
+        fail("Not yet implemented")
     }
 
     @Test
     fun deleteFile() {
+        fail("Not yet implemented")
     }
 }

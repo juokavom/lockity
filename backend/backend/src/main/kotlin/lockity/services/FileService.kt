@@ -119,7 +119,8 @@ class FileService(
     fun getDynamicLinkFile(dynlinkId: String): File {
         val fileRecord = fileRepository.fetchWithDynlink(dynlinkId)
             ?: throw NotFoundException("File was not found")
-        if (fileRecord.link == null) throw NoPermissionException("File is not shared")
+        if (fileRecord.link == null)
+            throw NoPermissionException("File is not shared")
         return File(fileRecord.location!! + "/" + fileRecord.title!!)
     }
 

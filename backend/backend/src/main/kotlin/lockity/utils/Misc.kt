@@ -1,6 +1,5 @@
 package lockity.utils
 
-import at.favre.lib.crypto.bcrypt.BCrypt
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.JsonSyntaxException
@@ -19,9 +18,26 @@ import lockity.repositories.UserRepository
 import lockity.services.ConfigurationService
 import lockity.services.JwtService
 import org.koin.ktor.ext.inject
+import java.nio.ByteBuffer
 import java.util.*
 import javax.naming.NoPermissionException
 import javax.security.auth.login.AccountLockedException
+
+class Misc {
+    companion object {
+        fun uuidToBin(uuid: UUID): ByteArray {
+            val bb = ByteBuffer.wrap(ByteArray(16))
+            bb.putLong(uuid.mostSignificantBits)
+            bb.putLong(uuid.leastSignificantBits)
+            return bb.array()
+        }
+
+        fun binToUuid(byteArray: ByteArray): UUID {
+            val byteBuffer = ByteBuffer.wrap(byteArray)
+            return UUID(byteBuffer.long, byteBuffer.long)
+        }
+    }
+}
 
 suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     val badRequestParameters = "Bad request parameters"
