@@ -358,10 +358,10 @@ internal class FileServiceTest {
         )
     }
 
-//    @Test
-//    fun getUserReceivedFilesMetadata() {
-//        fail("Not yet implemented")
-//    }
+    @Test
+    fun getUserReceivedFilesMetadata() {
+        fail("Not yet implemented")
+    }
 //
 //    @Test
 //    fun getUserReceivedFilesMetadataCount() {
