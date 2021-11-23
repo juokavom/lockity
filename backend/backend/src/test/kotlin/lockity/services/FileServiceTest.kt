@@ -213,8 +213,10 @@ internal class FileServiceTest {
 
     @Test
     fun `it must upload file`() {
+        val fileDir = "test"
         val fileName = "testFile.mp4"
         val fileSize = 200L
+        every { fileService.uploadsLocation(any()) } returns fileDir
         val part = PartData.FileItem(
             { "".byteInputStream().asInput() },
             {}, headersOf(
@@ -231,6 +233,8 @@ internal class FileServiceTest {
                 uploaded.link == null &&
                 uploaded.lastAccessed == null &&
                 uploaded.size == fileSize)
+
+        File(fileDir).deleteRecursively()
 
         assertTrue(
             actual = matches
