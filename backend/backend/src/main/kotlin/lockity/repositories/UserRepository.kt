@@ -5,6 +5,7 @@ import database.schema.tables.references.RoleTable
 import database.schema.tables.references.UserTable
 import lockity.models.UserData
 import lockity.services.DatabaseService
+import lockity.utils.Misc
 import lockity.utils.USER
 import java.time.LocalDateTime
 import java.util.*
@@ -15,7 +16,7 @@ class UserRepository(
     fun userExist(uuid: UUID): Boolean = databaseService.dsl
         .selectCount()
         .from(UserTable)
-        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(UserTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()?.value1() == 1
 
     fun isEmailUnique(email: String): Boolean = databaseService.dsl
@@ -29,7 +30,7 @@ class UserRepository(
         .from(UserTable)
         .where(
             UserTable.Email.eq(email)
-                .and(UserTable.Id.ne(databaseService.uuidToBin(uuid)))
+                .and(UserTable.Id.ne(Misc.uuidToBin(uuid)))
         )
         .fetchOne()?.value1() == 0
 
@@ -39,7 +40,7 @@ class UserRepository(
 
     fun delete(uuid: UUID) = databaseService.dsl
         .deleteFrom(UserTable)
-        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(UserTable.Id.eq(Misc.uuidToBin(uuid)))
         .execute()
 
     fun updateUser(userRecord: UserRecord) = databaseService.dsl
@@ -50,7 +51,7 @@ class UserRepository(
 
     fun fetch(uuid: UUID): UserRecord? = databaseService.dsl
         .selectFrom(UserTable)
-        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(UserTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
     fun fetchWithEmailLike(emailLike: String): List<UserRecord> = databaseService.dsl
@@ -62,7 +63,7 @@ class UserRepository(
     fun updateLastActive(uuid: UUID) = databaseService.dsl
         .update(UserTable)
         .set(UserTable.LastActive, LocalDateTime.now())
-        .where(UserTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(UserTable.Id.eq(Misc.uuidToBin(uuid)))
         .execute()
 
     fun fetchLoginUserMap(email: String): Map<String, String?>? = databaseService.dsl
@@ -74,7 +75,7 @@ class UserRepository(
         .fetchOne()
         ?.map {
             mapOf(
-                USER.ID to it[UserTable.Id]?.let { it1 -> databaseService.binToUuid(it1).toString() },
+                USER.ID to it[UserTable.Id]?.let { it1 -> Misc.binToUuid(it1).toString() },
                 USER.PASSWORD to it[UserTable.Password],
                 USER.CONFIRMED to it[UserTable.Confirmed].toString(),
             )
@@ -92,7 +93,7 @@ class UserRepository(
             .fetch()
             .map {
                 UserData(
-                    id = databaseService.binToUuid(it[UserTable.Id]!!).toString(),
+                    id = Misc.binToUuid(it[UserTable.Id]!!).toString(),
                     name = it[UserTable.Name],
                     surname = it[UserTable.Surname],
                     email = it[UserTable.Email]!!,

@@ -9,15 +9,14 @@ import lockity.models.isValuesValid
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.repositories.UserRepository
+import lockity.utils.Misc
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
 
 class SharedAccessService(
-    private val configurationService: ConfigurationService,
     private val fileRepository: FileRepository,
     private val sharedAccessRepository: SharedAccessRepository,
-    private val databaseService: DatabaseService,
     private val userRepository: UserRepository
 ) {
     fun getUserSharedAccessMetadata(user: UserRecord, offset: Int, limit: Int) =
@@ -42,7 +41,7 @@ class SharedAccessService(
         )
         if (fileOwner == null || !fileOwner.contentEquals(user.id))
             throw NoPermissionException("User is not the owner of the file")
-        if (fileOwner.contentEquals(databaseService.uuidToBin(UUID.fromString(newAccess.userId)))) {
+        if (fileOwner.contentEquals(Misc.uuidToBin(UUID.fromString(newAccess.userId)))) {
             throw BadRequestException("Owner cannot be recipient of the shared file")
         }
         if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
@@ -53,10 +52,10 @@ class SharedAccessService(
 
         sharedAccessRepository.insert(
             SharedAccessRecord(
-                id = databaseService.uuidToBin(UUID.randomUUID()),
-                fileId = databaseService.uuidToBin(UUID.fromString(newAccess.fileId)),
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                fileId = Misc.uuidToBin(UUID.fromString(newAccess.fileId)),
                 ownerId = fileOwner,
-                recipientId = databaseService.uuidToBin(UUID.fromString(newAccess.userId)),
+                recipientId = Misc.uuidToBin(UUID.fromString(newAccess.userId)),
                 created = LocalDateTime.now()
             )
         )
@@ -72,19 +71,19 @@ class SharedAccessService(
         if (!userRepository.userExist(recipientUUID))
             throw BadRequestException("Receiver doesn't exist")
         if (sharedAccessRecord.ownerId.contentEquals(
-                databaseService.uuidToBin(UUID.fromString(editedAccess.userId))
+                Misc.uuidToBin(UUID.fromString(editedAccess.userId))
             )
         ) {
             throw BadRequestException("Owner cannot be recipient of the shared file")
         }
         if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
-                fileUuid = databaseService.binToUuid(sharedAccessRecord.fileId!!),
+                fileUuid = Misc.binToUuid(sharedAccessRecord.fileId!!),
                 recipientUuid = UUID.fromString(editedAccess.userId)
             )
         ) throw BadRequestException("Shared access with the same file and recipient already exists")
         sharedAccessRepository.updateRecipient(
             sharedId = sharedAccessRecord.id!!,
-            userId = databaseService.uuidToBin(recipientUUID)
+            userId = Misc.uuidToBin(recipientUUID)
         )
     }
 

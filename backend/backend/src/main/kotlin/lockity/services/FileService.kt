@@ -9,6 +9,7 @@ import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.utils.CONFIG
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
+import lockity.utils.Misc
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -18,10 +19,9 @@ import javax.naming.NoPermissionException
 import javax.security.auth.login.AccountLockedException
 
 class FileService(
-    private val configurationService: ConfigurationService,
+    configurationService: ConfigurationService,
     private val fileRepository: FileRepository,
     private val sharedAccessRepository: SharedAccessRepository,
-    private val databaseService: DatabaseService
 ) {
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
@@ -50,7 +50,7 @@ class FileService(
     }
 
     fun deletePhysicalFile(id: ByteArray): Boolean = File(
-        uploadsLocation(databaseService.binToUuid(id).toString())
+        uploadsLocation(Misc.binToUuid(id).toString())
     ).deleteRecursively()
 
     fun uploadGuestFile(part: PartData.FileItem, fileSize: Long): FileLink {
@@ -72,8 +72,8 @@ class FileService(
     }
 
     fun uploadFile(part: PartData.FileItem, fileSize: Long): FileRecord {
-        val fileId = databaseService.uuidToBin(UUID.randomUUID())
-        val fileIdStringed = databaseService.binToUuid(fileId).toString()
+        val fileId = Misc.uuidToBin(UUID.randomUUID())
+        val fileIdStringed = Misc.binToUuid(fileId).toString()
         val fileName = part.originalFileName!!
         val fileFolderLocation = uploadsLocation(fileIdStringed)
         File(fileFolderLocation).mkdir()
@@ -111,7 +111,7 @@ class FileService(
             ?: throw NotFoundException("Shared access record was not found")
         if (!sharedAccessRecord.recipientId.contentEquals(user.id))
             throw NoPermissionException("User do not have permission to stream this file")
-        val fileRecord = fileRepository.fetch(databaseService.binToUuid(sharedAccessRecord.fileId!!))
+        val fileRecord = fileRepository.fetch(Misc.binToUuid(sharedAccessRecord.fileId!!))
             ?: throw NotFoundException("File was not found")
         return File(fileRecord.location!! + "/" + fileRecord.title!!)
     }
@@ -127,12 +127,12 @@ class FileService(
     fun getUserFilesMetadata(user: UserRecord, offset: Int, limit: Int): List<FileMetadata> {
         if (limit > 20) throw BadRequestException("Maximum limit(20) is exceeded.")
         return fileRepository.fetchUserFilesWithOffsetAndLimit(
-            userUuid = databaseService.binToUuid(user.id!!),
+            userUuid = Misc.binToUuid(user.id!!),
             offset = offset,
             limit = limit
         ).map {
             FileMetadata(
-                id = databaseService.binToUuid(it.id!!).toString(),
+                id = Misc.binToUuid(it.id!!).toString(),
                 title = it.title!!,
                 size = it.size!!,
                 link = it.link
@@ -145,7 +145,7 @@ class FileService(
         titleLike = "$title%"
     ).map {
         FileMetadataForSharing(
-            id = databaseService.binToUuid(it.id!!).toString(),
+            id = Misc.binToUuid(it.id!!).toString(),
             title = it.title!!
         )
     }
@@ -156,7 +156,7 @@ class FileService(
             usedSize = fileRepository.userFileSizeSum(user.id!!)
         ),
         fileCount = fileRepository.fetchUserFilesCount(
-            userUuid = databaseService.binToUuid(user.id!!)
+            userBinId = user.id!!
         ) ?: 0
     )
 
@@ -176,7 +176,8 @@ class FileService(
     fun getDynamicLinkFileTitleLink(dynlinkId: String): FileTitleLink {
         val fileRecord = fileRepository.fetchWithDynlink(dynlinkId)
             ?: throw NotFoundException("File was not found")
-        if (fileRecord.link == null) throw NoPermissionException("File is not shared")
+        if (fileRecord.link == null)
+            throw NoPermissionException("File is not shared")
         return FileTitleLink(
             title = fileRecord.title!!,
             link = fileRecord.link!!
@@ -193,9 +194,7 @@ class FileService(
         val sourceFile = File(fileRecord.location, fileRecord.title!!)
         val newTitle = editedFile.title + "." + sourceFile.extension
         val destinationFile = File(fileRecord.location, newTitle)
-
-        if (!sourceFile.renameTo(destinationFile))
-            throw BadRequestException("File renaming failed, check title")
+        if (!sourceFile.renameTo(destinationFile)) throw BadRequestException("File renaming failed, check title")
         fileRecord.title = newTitle
         fileRepository.update(fileRecord)
     }

@@ -8,12 +8,12 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.utils.io.streams.*
 import io.mockk.*
-import lockity.models.FileMetadataInfo
-import lockity.models.StorageData
+import lockity.models.*
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import lockity.utils.Misc
+import lockity.utils.MiscTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,28 +28,22 @@ import javax.naming.NoPermissionException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FileServiceTest {
-    private lateinit var databaseService: DatabaseService
     private lateinit var fileRepository: FileRepository
     private lateinit var sharedAccessRepository: SharedAccessRepository
-    private lateinit var emptyFileId: ByteArray
     private lateinit var fileService: FileService
 
     @BeforeEach
     fun setUp() {
-        databaseService = mockk(relaxed = true)
         fileRepository = mockk(relaxed = true)
         sharedAccessRepository = mockk(relaxed = true)
-        emptyFileId = "".toByteArray()
         fileService = spyk(
             FileService(
                 mockk(relaxed = true),
                 fileRepository,
-                sharedAccessRepository,
-                mockk(relaxed = true)
+                sharedAccessRepository
             )
         )
     }
@@ -147,14 +141,42 @@ internal class FileServiceTest {
                 )
             )
         }
+
+        @JvmStatic
+        fun getUserReceivedFilesMetadataWithOffsetAndLimitParamsProvider(): List<Arguments> {
+            return listOf<Arguments>(
+                Arguments.of(null, 100, true),
+                Arguments.of(
+                    listOf(
+                        ReceivedFileMetadata(
+                            id = UUID.randomUUID().toString(),
+                            title = "test",
+                            size = 205L,
+                            ownerEmail = UUID.randomUUID().toString()
+                        )
+                    ),
+                    15,
+                    false
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `it must format uploads location`() {
+        val fileName = "test"
+        assert(
+            fileService.uploadsLocation(fileName).contains(fileName)
+        )
     }
 
     @ParameterizedTest
     @MethodSource("deleteUserFilesParamsProvider")
     fun `it must successfully delete user files`(success: Boolean) {
+        val emptyByteArray = "test".toByteArray()
         every { fileRepository.fetchUserFiles(any()) } returns listOf(
-            FileRecord(id = emptyFileId),
-            FileRecord(id = emptyFileId)
+            FileRecord(id = emptyByteArray),
+            FileRecord(id = emptyByteArray)
         )
         every { fileService.deletePhysicalFile(any()) } returns success
         assertEquals(
@@ -170,7 +192,7 @@ internal class FileServiceTest {
         File("$dirName/test.txt").createNewFile()
         every { fileService.uploadsLocation(any()) } returns dirName
         assertTrue(
-            actual = fileService.deletePhysicalFile("".toByteArray())
+            actual = fileService.deletePhysicalFile(UUID.randomUUID().toString().toByteArray())
         )
     }
 
@@ -191,7 +213,7 @@ internal class FileServiceTest {
     @Test
     fun `it must upload user file`() {
         val userRecord = UserRecord()
-        userRecord.id = databaseService.uuidToBin(UUID.randomUUID())
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
         userRecord.storageSize = 100L
         every { fileRepository.userFileSizeSum(any()) } returns 10L
         every { fileService.uploadFile(any(), any()) } returns FileRecord()
@@ -202,7 +224,7 @@ internal class FileServiceTest {
     @Test
     fun `it must not let upload user file if user storage space is exceeded`() {
         val userRecord = UserRecord()
-        userRecord.id = databaseService.uuidToBin(UUID.randomUUID())
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
         userRecord.storageSize = 10L
         every { fileRepository.userFileSizeSum(any()) } returns 10L
         every { fileService.uploadFile(any(), any()) } returns FileRecord()
@@ -305,7 +327,9 @@ internal class FileServiceTest {
                 fileRepository.fetchUserFilesWithOffsetAndLimit(any(), any(), any())
             } returns it
         }
-        fun test() = fileService.getUserFilesMetadata(mockk(relaxed = true), 0, limit)
+        val userRecord = UserRecord()
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        fun test() = fileService.getUserFilesMetadata(userRecord, 0, limit)
         if (shouldFail) assertFailsWith<Exception> {
             test()
         } else {
@@ -343,6 +367,7 @@ internal class FileServiceTest {
     fun `it must get user files metadata info`() {
         val userFileSizeSum = 145L
         val userRecord = mockk<UserRecord>(relaxed = true)
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
         userRecord.storageSize = 2000L
         every { fileRepository.userFileSizeSum(any()) } returns userFileSizeSum
         every { fileRepository.fetchUserFilesCount(any()) } returns null
@@ -358,21 +383,68 @@ internal class FileServiceTest {
         )
     }
 
-//    @Test
-//    fun getUserReceivedFilesMetadata() {
-//        fail("Not yet implemented")
-//    }
-//
-//    @Test
-//    fun getUserReceivedFilesMetadataCount() {
-//        fail("Not yet implemented")
-//    }
-//
-//    @Test
-//    fun getDynamicLinkFileTitleLink() {
-//        fail("Not yet implemented")
-//    }
-//
+    @ParameterizedTest
+    @MethodSource("getUserReceivedFilesMetadataWithOffsetAndLimitParamsProvider")
+    fun `it must get user received files metadata with offset and limit`(
+        receivedRecordList: List<ReceivedFileMetadata>?, limit: Int, shouldFail: Boolean
+    ) {
+        receivedRecordList?.let {
+            every {
+                sharedAccessRepository.fetchRecipientFilesWithOffsetAndLimit(any(), any(), any())
+            } returns it
+        }
+        fun test() = fileService.getUserReceivedFilesMetadata(mockk(relaxed = true), 0, limit)
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            val gottenMetadata = test()
+            for (i in gottenMetadata.indices) {
+                receivedRecordList!!
+                assert(
+                    gottenMetadata[i].title == receivedRecordList[i].title &&
+                            gottenMetadata[i].size == receivedRecordList[i].size &&
+                            gottenMetadata[i].ownerEmail == receivedRecordList[i].ownerEmail
+                )
+            }
+        }
+    }
+
+
+    @Test
+    fun `it must get user received files metadata count`() {
+        val count = 77
+        every {
+            sharedAccessRepository.fetchRecipientSharedAccessCount(any())
+        } returns count
+        assertEquals(
+            actual = fileService.getUserReceivedFilesMetadataCount(mockk(relaxed = true)),
+            expected = ReceivedFileMetadataCount(
+                receivedCount = count
+            )
+        )
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("getDynamicLinkFileParamsProvider")
+    fun `it must get dynamic link file title and link`(
+        fileRecord: FileRecord?, shouldFail: Boolean
+    ) {
+        every { fileRepository.fetchWithDynlink(any()) } returns fileRecord
+        fun test() = fileService.getDynamicLinkFileTitleLink(UUID.randomUUID().toString())
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            assertEquals(
+                actual = test(),
+                expected = FileTitleLink(
+                    title = fileRecord!!.title!!,
+                    link = fileRecord.link!!
+                )
+            )
+        }
+    }
+
 //    @Test
 //    fun updateUserFile() {
 //        fail("Not yet implemented")

@@ -3,6 +3,7 @@ package lockity.repositories
 import database.schema.tables.records.FileRecord
 import database.schema.tables.references.FileTable
 import lockity.services.DatabaseService
+import lockity.utils.Misc
 import org.jooq.impl.DSL
 import java.util.*
 
@@ -12,13 +13,13 @@ class FileRepository(
     fun fileExist(uuid: UUID): Boolean = databaseService.dsl
         .selectCount()
         .from(FileTable)
-        .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(FileTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()?.value1() == 1
 
     fun fileOwner(uuid: UUID): ByteArray? = databaseService.dsl
         .select(FileTable.User)
         .from(FileTable)
-        .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(FileTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()?.value1()
 
     fun insert(fileRecord: FileRecord) = databaseService.dsl
@@ -27,7 +28,7 @@ class FileRepository(
 
     fun fetch(uuid: UUID): FileRecord? = databaseService.dsl
         .selectFrom(FileTable)
-        .where(FileTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(FileTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
     fun fetchWithDynlink(link: String): FileRecord? = databaseService.dsl
@@ -37,29 +38,29 @@ class FileRepository(
 
     fun fetchUserFiles(userUuid: UUID): List<FileRecord> = databaseService.dsl
         .selectFrom(FileTable)
-        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
         .orderBy(FileTable.Uploaded.desc())
         .fetchArray()
         .toList()
 
     fun fetchUserFilesWithOffsetAndLimit(userUuid: UUID, offset: Int, limit: Int): List<FileRecord> = databaseService.dsl
         .selectFrom(FileTable)
-        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
         .orderBy(FileTable.Uploaded.desc())
         .offset(offset)
         .limit(limit)
         .fetchArray()
         .toList()
 
-    fun fetchUserFilesCount(userUuid: UUID): Int? = databaseService.dsl
+    fun fetchUserFilesCount(userBinId: ByteArray): Int? = databaseService.dsl
         .selectCount()
         .from(FileTable)
-        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .where(FileTable.User.eq(userBinId))
         .fetchOne()?.value1()
 
     fun deleteUserFiles(userUuid: UUID) = databaseService.dsl
         .deleteFrom(FileTable)
-        .where(FileTable.User.eq(databaseService.uuidToBin(userUuid)))
+        .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
         .execute()
 
     fun update(fileRecord: FileRecord) = databaseService.dsl

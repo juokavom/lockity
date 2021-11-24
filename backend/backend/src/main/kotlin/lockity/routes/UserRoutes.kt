@@ -16,7 +16,6 @@ import javax.naming.NoPermissionException
 
 fun Application.userRoutes() {
     val userService: UserService by inject()
-    val databaseService: DatabaseService by inject()
 
     routing {
         route("/user") {
@@ -65,7 +64,7 @@ fun Application.userRoutes() {
                         val userId = call.parameters["userId"]
                             ?: throw BadRequestException("User id is not present in the parameters.")
                         userService.deleteUser(userId)
-                        if (databaseService.binToUuid(call.jwtUser()!!.id!!).toString() == userId) {
+                        if (Misc.binToUuid(call.jwtUser()!!.id!!).toString() == userId) {
                             call.unsetResponseJwtCookieHeader()
                         }
                         call.respondJSON(

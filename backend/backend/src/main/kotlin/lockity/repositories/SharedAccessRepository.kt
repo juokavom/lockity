@@ -6,6 +6,7 @@ import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
 import lockity.models.*
 import lockity.services.DatabaseService
+import lockity.utils.Misc
 import java.util.*
 
 class SharedAccessRepository(
@@ -17,7 +18,7 @@ class SharedAccessRepository(
 
     fun fetch(uuid: UUID): SharedAccessRecord? = databaseService.dsl
         .selectFrom(SharedAccessTable)
-        .where(SharedAccessTable.Id.eq(databaseService.uuidToBin(uuid)))
+        .where(SharedAccessTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
     fun updateRecipient(sharedId: ByteArray, userId: ByteArray) = databaseService.dsl
@@ -44,13 +45,13 @@ class SharedAccessRepository(
             .fetchArray()
             .map {
                 SharedAccess(
-                    id = databaseService.binToUuid(it[SharedAccessTable.Id]!!).toString(),
+                    id = Misc.binToUuid(it[SharedAccessTable.Id]!!).toString(),
                     file = FileMetadataForSharing(
-                        id = databaseService.binToUuid(it[FileTable.Id]!!).toString(),
+                        id = Misc.binToUuid(it[FileTable.Id]!!).toString(),
                         title = it[FileTable.Title]!!
                     ),
                     user = UserForSharing(
-                        id = databaseService.binToUuid(it[UserTable.Id]!!).toString(),
+                        id = Misc.binToUuid(it[UserTable.Id]!!).toString(),
                         email = it[UserTable.Email]!!
                     )
                 )
@@ -76,7 +77,7 @@ class SharedAccessRepository(
             .fetchArray()
             .map {
                 ReceivedFileMetadata(
-                    id = databaseService.binToUuid(it[SharedAccessTable.Id]!!).toString(),
+                    id = Misc.binToUuid(it[SharedAccessTable.Id]!!).toString(),
                     title = it[FileTable.Title]!!,
                     size = it[FileTable.Size]!!,
                     ownerEmail = it[UserTable.Email]!!
@@ -94,8 +95,8 @@ class SharedAccessRepository(
         .selectCount()
         .from(SharedAccessTable)
         .where(
-            SharedAccessTable.FileId.eq(databaseService.uuidToBin(fileUuid))
-                .and(SharedAccessTable.RecipientId.eq(databaseService.uuidToBin(recipientUuid)))
+            SharedAccessTable.FileId.eq(Misc.uuidToBin(fileUuid))
+                .and(SharedAccessTable.RecipientId.eq(Misc.uuidToBin(recipientUuid)))
         )
         .fetchOne()?.value1() == 0
 }

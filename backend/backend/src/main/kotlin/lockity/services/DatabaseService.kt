@@ -18,16 +18,4 @@ class DatabaseService(
             password = configurationService.configValue(CONFIG.DATABASE_PASSWORD)
         }, SQLDialect.MARIADB
     )
-
-    fun uuidToBin(uuid: UUID): ByteArray {
-        val bb = ByteBuffer.wrap(ByteArray(16))
-        bb.putLong(uuid.mostSignificantBits)
-        bb.putLong(uuid.leastSignificantBits)
-        return bb.array()
-    }
-
-    fun binToUuid(byteArray: ByteArray): UUID {
-        val byteBuffer = ByteBuffer.wrap(byteArray)
-        return UUID(byteBuffer.long, byteBuffer.long)
-    }
 }

@@ -21,7 +21,6 @@ class UserService(
     private val emailService: EmailService,
     private val roleRepository: RoleRepository,
     private val userRepository: UserRepository,
-    private val databaseService: DatabaseService,
     private val fileService: FileService,
     private val fileRepository: FileRepository
 ) {
@@ -45,7 +44,7 @@ class UserService(
             dbUser[USER.ID]?.let { uid ->
                 userRepository.fetch(UUID.fromString(uid))?.let { userRecord ->
                     return FrontendUser(
-                        id = databaseService.binToUuid(userRecord.id!!).toString(),
+                        id = Misc.binToUuid(userRecord.id!!).toString(),
                         email = userRecord.email!!,
                         role = roleRepository.fetch(userRecord.role!!)!!.name!!
                     )
@@ -60,7 +59,7 @@ class UserService(
             throw BadRequestException("Email is not in correct format.")
         if (!userRepository.isEmailUnique(registrableUser.email))
             throw BadRequestException("User exists.")
-        val userId = databaseService.uuidToBin(UUID.randomUUID())
+        val userId = Misc.uuidToBin(UUID.randomUUID())
         userRepository.insertUser(
             UserRecord(
                 id = userId,
@@ -99,7 +98,7 @@ class UserService(
     }
 
     private fun generateConfirmationLink(userBinId: ByteArray) = ConfirmationLinkRecord(
-        id = databaseService.uuidToBin(UUID.randomUUID()),
+        id = Misc.uuidToBin(UUID.randomUUID()),
         user = userBinId,
         link = UUID.randomUUID().toString(),
         validUntil = LocalDateTime.now().plusMinutes(
@@ -121,7 +120,7 @@ class UserService(
         emailLike = "$email%"
     ).filter { it.email != user.email }.map {
         UserForSharing(
-            id = databaseService.binToUuid(it.id!!).toString(),
+            id = Misc.binToUuid(it.id!!).toString(),
             email = it.email!!
         )
     }
@@ -137,7 +136,7 @@ class UserService(
         if (!userRepository.isEmailUnique(creatableUser.email))
             throw BadRequestException("User exists.")
 
-        val userId = databaseService.uuidToBin(UUID.randomUUID())
+        val userId = Misc.uuidToBin(UUID.randomUUID())
         userRepository.insertUser(
             UserRecord(
                 id = userId,
@@ -194,10 +193,10 @@ class UserService(
     }
 
     fun getUser(user: UserRecord, userId: String): UserData {
-        if (!user.id.contentEquals(databaseService.uuidToBin(UUID.fromString(userId))))
+        if (!user.id.contentEquals(Misc.uuidToBin(UUID.fromString(userId))))
             throw NoPermissionException("User do not have permission to get this user data")
         return UserData(
-            id = databaseService.binToUuid(user.id!!).toString(),
+            id = Misc.binToUuid(user.id!!).toString(),
             name = user.name,
             surname = user.surname,
             email = user.email!!,
@@ -212,7 +211,7 @@ class UserService(
 
     fun editUser(user: UserRecord, userId: String, editedSelf: EditableUserSelf) {
         val userUUID = UUID.fromString(userId)
-        if (!user.id.contentEquals(databaseService.uuidToBin(userUUID))) {
+        if (!user.id.contentEquals(Misc.uuidToBin(userUUID))) {
             throw NoPermissionException("User do not have permission to edit this user")
         }
         editedSelf.isValuesValid()
