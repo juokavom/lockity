@@ -589,7 +589,13 @@ internal class FileServiceTest {
     }
 
     @Test
-    fun `it should fail this test`(){
+    fun `it should fail this test`() {
         fail("Failed test on purpose to test CI")
+    }
+    fun `it should pass this test`() {
+        assertEquals(
+            expected = 2,
+            actual = 2
+        )
     }
 }
