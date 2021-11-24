@@ -227,7 +227,8 @@ class FileService(
             ?: throw NotFoundException("File was not found")
         if (!fileRecord.user.contentEquals(user.id))
             throw NoPermissionException("User do not have permission to get this file metadata")
-        if (!deletePhysicalFile(fileRecord.id!!)) throw AccountLockedException("Unable to delete physical files")
+        if (!deletePhysicalFile(fileRecord.id!!))
+            throw AccountLockedException("Unable to delete physical files")
         fileRepository.delete(fileRecord.id!!)
     }
 }
