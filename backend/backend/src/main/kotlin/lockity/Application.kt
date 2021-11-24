@@ -22,6 +22,7 @@ fun Application.main() {
                 single { JwtService(get()) }
                 single { ConfirmationLinkRepository(get()) }
                 single { SharedAccessRepository(get()) }
+                single { UserService(get(), get(), get(), get(), get(), get(), get()) }
             }
         )
     }
