@@ -13,7 +13,6 @@ import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import lockity.utils.Misc
-import lockity.utils.MiscTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -158,6 +157,84 @@ internal class FileServiceTest {
                     15,
                     false
                 )
+            )
+        }
+
+        @JvmStatic
+        fun updateUserFileParamsProvider(): List<Arguments> {
+            val editedEmptyFile = EditableFile(
+                title = ""
+            )
+            val editedFile = EditableFile(
+                title = "test"
+            )
+            val fileRecordRandom = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                user = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val userRecord = UserRecord(
+                id = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val fileRecordUser = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                location = "testLocation",
+                title = "oldTitle.txt",
+                user = userRecord.id
+            )
+            return listOf<Arguments>(
+                Arguments.of(null, editedEmptyFile, userRecord, true),
+                Arguments.of(fileRecordRandom, editedEmptyFile, userRecord, true),
+                Arguments.of(fileRecordUser, editedEmptyFile, userRecord, true),
+                Arguments.of(fileRecordUser, editedFile, userRecord, false)
+            )
+        }
+
+        @JvmStatic
+        fun modifyUserFileSharingParamsProvider(): List<Arguments> {
+            val fileRecordRandom = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                user = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val userRecord = UserRecord(
+                id = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val fileRecordWithLink = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                link = UUID.randomUUID().toString(),
+                user = userRecord.id
+            )
+            val fileRecordWithoutLink = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                user = userRecord.id
+            )
+            return listOf<Arguments>(
+                Arguments.of(null, userRecord, true, true),
+                Arguments.of(fileRecordRandom, userRecord, true, true),
+                Arguments.of(fileRecordWithLink.copy(), userRecord, true, true),
+                Arguments.of(fileRecordWithoutLink.copy(), userRecord, true, false),
+                Arguments.of(fileRecordWithLink.copy(), userRecord, false, false),
+                Arguments.of(fileRecordWithoutLink.copy(), userRecord, false, true)
+            )
+        }
+
+        @JvmStatic
+        fun deleteFileParamsProvider(): List<Arguments> {
+            val fileRecordRandom = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                user = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val userRecord = UserRecord(
+                id = Misc.uuidToBin(UUID.randomUUID())
+            )
+            val userFileRecord = FileRecord(
+                id = Misc.uuidToBin(UUID.randomUUID()),
+                user = userRecord.id
+            )
+            return listOf<Arguments>(
+                Arguments.of(null, userRecord, false, true),
+                Arguments.of(fileRecordRandom, userRecord, false, true),
+                Arguments.of(userFileRecord, userRecord, false, true),
+                Arguments.of(userFileRecord, userRecord, true, false)
             )
         }
     }
@@ -424,7 +501,6 @@ internal class FileServiceTest {
         )
     }
 
-
     @ParameterizedTest
     @MethodSource("getDynamicLinkFileParamsProvider")
     fun `it must get dynamic link file title and link`(
@@ -445,18 +521,69 @@ internal class FileServiceTest {
         }
     }
 
-//    @Test
-//    fun updateUserFile() {
-//        fail("Not yet implemented")
-//    }
-//
-//    @Test
-//    fun modifyUserFileSharing() {
-//        fail("Not yet implemented")
-//    }
-//
-//    @Test
-//    fun deleteFile() {
-//        fail("Not yet implemented")
-//    }
+    @ParameterizedTest
+    @MethodSource("updateUserFileParamsProvider")
+    fun `it must update user file`(
+        fileRecord: FileRecord?, editedFile: EditableFile,
+        userRecord: UserRecord, shouldFail: Boolean
+    ) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        fun test() = fileService.updateUserFile(
+            userRecord,
+            UUID.randomUUID().toString(),
+            editedFile
+        )
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            val dir = File(fileRecord!!.location!!)
+            dir.mkdir()
+            File(fileRecord.location, fileRecord.title!!).createNewFile()
+            test()
+            verify { fileRepository.update(any()) }
+            dir.deleteRecursively()
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("modifyUserFileSharingParamsProvider")
+    fun `it must modify user file sharing`(
+        fileRecord: FileRecord?, userRecord: UserRecord,
+        shareCondition: Boolean, shouldFail: Boolean
+    ) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        fun test() = fileService.modifyUserFileSharing(
+            userRecord,
+            UUID.randomUUID().toString(),
+            shareCondition
+        )
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            test()
+            verify { fileRepository.update(any()) }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("deleteFileParamsProvider")
+    fun `it must delete file`(
+        fileRecord: FileRecord?, userRecord: UserRecord,
+        physicalDeletionStatus: Boolean, shouldFail: Boolean
+    ) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        every {
+            fileService.deletePhysicalFile(any())
+        } returns physicalDeletionStatus
+        fun test() = fileService.deleteFile(
+            userRecord,
+            UUID.randomUUID().toString()
+        )
+        if (shouldFail) assertFailsWith<Exception> {
+            test()
+        } else {
+            test()
+            verify { fileRepository.delete(any()) }
+        }
+    }
 }
