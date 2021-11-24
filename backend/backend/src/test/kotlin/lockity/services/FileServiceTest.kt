@@ -586,4 +586,12 @@ internal class FileServiceTest {
             verify { fileRepository.delete(any()) }
         }
     }
+
+    @Test
+    fun `it should pass this test`() {
+        assertEquals(
+            expected = 2,
+            actual = 2
+        )
+    }
 }
