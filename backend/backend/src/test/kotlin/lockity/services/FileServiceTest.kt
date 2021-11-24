@@ -178,7 +178,7 @@ internal class FileServiceTest {
             val fileRecordUser = FileRecord(
                 id = Misc.uuidToBin(UUID.randomUUID()),
                 location = "testLocation",
-                title = "oldTitle",
+                title = "oldTitle.txt",
                 user = userRecord.id
             )
             return listOf<Arguments>(
@@ -536,8 +536,7 @@ internal class FileServiceTest {
         if (shouldFail) assertFailsWith<Exception> {
             test()
         } else {
-            fileRecord!!.location = fileService.uploadsLocation(fileRecord.location!!)
-            val dir = File(fileRecord.location!!)
+            val dir = File(fileRecord!!.location!!)
             dir.mkdir()
             File(fileRecord.location, fileRecord.title!!).createNewFile()
             test()
