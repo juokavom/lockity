@@ -27,6 +27,7 @@ import javax.naming.NoPermissionException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FileServiceTest {
@@ -585,5 +586,10 @@ internal class FileServiceTest {
             test()
             verify { fileRepository.delete(any()) }
         }
+    }
+
+    @Test
+    fun `it should fail this test`(){
+        fail("Failed test on purpose to test CI")
     }
 }
