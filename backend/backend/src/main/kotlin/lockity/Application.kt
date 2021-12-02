@@ -12,16 +12,21 @@ fun Application.main() {
         modules(
             module {
                 single { Application(get()) }
+
+                // Repositories
+                single { RoleRepository(get()) }
+                single { ConfirmationLinkRepository(get()) }
+                single { FileRepository(get()) }
+                single { SharedAccessRepository(get()) }
+                single { UserRepository(get()) }
+
+                // Services
                 single { ConfigurationService(environment) }
+                single { JwtService(get()) }
                 single { EmailService(get()) }
                 single { DatabaseService(get()) }
-                single { UserRepository(get()) }
-                single { FileRepository(get()) }
                 single { FileService(get(), get(), get()) }
-                single { RoleRepository(get()) }
-                single { JwtService(get()) }
-                single { ConfirmationLinkRepository(get()) }
-                single { SharedAccessRepository(get()) }
+                single { SharedAccessService(get(), get(), get()) }
                 single { UserService(get(), get(), get(), get(), get(), get(), get()) }
             }
         )

@@ -64,7 +64,10 @@ function Upload() {
                             <h1>Sharing link</h1>
                             <div className="col-12 col-md-10 col-xl-10">
                                 <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5><br />
-                                <div id="fileLink" className="dropzone selected-file" style={{ cursor: "default" }} onClick={copyFileUrl}>
+                                <div id="fileLink" className="dropzone selected-file" style={{
+                                    cursor: "default",
+                                    overflowWrap: "break-word"
+                                }} onClick={copyFileUrl}>
                                     {ROUTES.getAnonymousFile(fileMeta?.link)}
                                 </div>
                                 <UncontrolledTooltip
@@ -85,7 +88,7 @@ function Upload() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
