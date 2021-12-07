@@ -7,6 +7,7 @@ import lockity.services.*
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
 
+// Entry point
 fun Application.main() {
     startKoin {
         modules(
