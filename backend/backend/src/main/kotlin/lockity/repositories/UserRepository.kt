@@ -77,7 +77,7 @@ class UserRepository(
             mapOf(
                 USER.ID to it[UserTable.Id]?.let { it1 -> Misc.binToUuid(it1).toString() },
                 USER.PASSWORD to it[UserTable.Password],
-                USER.CONFIRMED to it[UserTable.Confirmed].toString(),
+                USER.CONFIRMED to it[UserTable.Confirmed].toString()
             )
         }
 

@@ -427,7 +427,7 @@ internal class FileServiceTest {
         val fileRecordList = listOf(
             FileRecord(
                 id = Misc.uuidToBin(UUID.randomUUID()),
-                title = "test",
+                title = "test"
             )
         )
         every { fileRepository.fetchUserFilesWithTitleLike(any(), any()) } returns fileRecordList

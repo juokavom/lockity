@@ -108,7 +108,7 @@ data class EditableUserSelf(
     var surname: String?,
     var email: String,
     var password: String,
-    var subscribed: Boolean,
+    var subscribed: Boolean
 )
 
 fun EditableUserSelf.isValuesValid() {

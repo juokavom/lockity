@@ -21,7 +21,7 @@ import javax.security.auth.login.AccountLockedException
 class FileService(
     configurationService: ConfigurationService,
     private val fileRepository: FileRepository,
-    private val sharedAccessRepository: SharedAccessRepository,
+    private val sharedAccessRepository: SharedAccessRepository
 ) {
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
