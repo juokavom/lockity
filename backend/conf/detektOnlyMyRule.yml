@@ -1,0 +1,6 @@
+MyRuleSet:
+  MyRule:
+    active: true
+    threshold: 5
+  OtherRule:
+    active: false
