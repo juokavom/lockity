@@ -5,3 +5,4 @@ pluginManagement {
 }
 
 include("backend")
+include("detekt-custom-rule")
