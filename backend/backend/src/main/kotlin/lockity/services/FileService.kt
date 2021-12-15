@@ -49,14 +49,6 @@ class FileService(
         return success
     }
 
-    fun doSmthStupid(input: String) {
-        val myExposedConnection = "jdbc:mysql://localhost:3397/lockity"
-//        val myExposedConnection = "fix"
-        myExposedConnection.firstNotNullOf { it.uppercase() }.forEach{
-            it.toString()
-        }
-    }
-
     fun deletePhysicalFile(id: ByteArray): Boolean = File(
         uploadsLocation(Misc.binToUuid(id).toString())
     ).deleteRecursively()
