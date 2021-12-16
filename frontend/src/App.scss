@@ -19,6 +19,8 @@
   color: #000;
   font-weight: bold;
   text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .border-box {
@@ -41,7 +43,7 @@
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap
+  white-space: nowrap;
 }
 
 .table.table-ellipsis tbody td:hover {
