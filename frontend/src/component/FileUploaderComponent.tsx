@@ -66,7 +66,7 @@ export default function FileUploader(props: FileUploaderProps) {
         xhr.onreadystatechange = (ev: Event) => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 var status = xhr.status;
-                if (status === 0 && String(status).charAt(0) == '2') {
+                if (String(status).charAt(0) === '2') {
                     toast.success('Your file was uploaded successfully', DefaultToastOptions)
                     if (props.isAuthed) {
                         props.onUpload()
