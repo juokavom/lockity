@@ -54,7 +54,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("File id is not present in the parameters.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("No permission to stream the file")
-                        call.respond(fileService.getUserFile(fileId, currentUser))
+                        call.respondFile(fileService.getUserFile(fileId, currentUser))
                     }
                 }
 
@@ -71,7 +71,7 @@ fun Application.fileRoutes() {
                                 ContentDisposition.Parameters.FileName, file.name
                             ).toString()
                         )
-                        call.respond(file)
+                        call.respondFile(file)
                     }
                 }
 
