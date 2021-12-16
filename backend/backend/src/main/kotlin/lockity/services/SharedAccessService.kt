@@ -33,9 +33,9 @@ class SharedAccessService(
     fun createSharedAccess(user: UserRecord, newAccess: UploadableSharedAccess) {
         newAccess.isValuesValid()
         if (!userRepository.userExist(UUID.fromString(newAccess.userId)))
-            throw BadRequestException("Receiver doesn't exist")
+            throw NotFoundException("Receiver doesn't exist")
         if (!fileRepository.fileExist(UUID.fromString(newAccess.fileId)))
-            throw BadRequestException("File doesn't exist")
+            throw NotFoundException("File doesn't exist")
         val fileOwner = fileRepository.fileOwner(
             UUID.fromString(newAccess.fileId)
         )

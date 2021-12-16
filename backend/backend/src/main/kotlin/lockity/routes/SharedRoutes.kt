@@ -62,7 +62,7 @@ fun Application.sharedRoutes() {
                         sharedAccessService.editSharedAccess(currentUser, sharedId, call.receive())
                         call.respondJSON(
                             "Shared access edited successfully",
-                            HttpStatusCode.Created
+                            HttpStatusCode.OK
                         )
                     }
                 }
