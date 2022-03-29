@@ -13,7 +13,6 @@ import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
-import { IMyFilesProps } from './main/MainPage';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
 import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
@@ -22,6 +21,10 @@ import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
 import { ProgressBar } from 'react-toastify/dist/components';
 import { ColorizeOutlined } from '@mui/icons-material';
+import { Action, setFileMetadata, setFileMetadataInfo, setFileSelected } from '../redux/ActionCreators';
+import { useDispatch } from 'react-redux';
+import { MasterState, useTypedSelector } from '..';
+import { IFileState } from '../redux/reducers/FileReducer';
 
 export interface IFileMetadata {
     id: string,
@@ -42,7 +45,6 @@ export interface IFileMetadataInfo {
 
 interface IFileProps {
     fileMetadata: IFileMetadata,
-    changedLayout: Boolean,
     action: (action: string) => void
 }
 
@@ -71,7 +73,7 @@ export function formatBytes(bytes: number, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-function File({ fileMetadata, changedLayout, action }: IFileProps) {
+function File({ fileMetadata, action }: IFileProps) {
     const format = fileMetadata.title.split('.').pop();
 
     const buttons = (
@@ -119,13 +121,14 @@ function File({ fileMetadata, changedLayout, action }: IFileProps) {
                 <div className="col-4 col-lg-2 d-flex justify-content-center">
                     {formatBytes(fileMetadata.size)}
                 </div>
-                {!changedLayout && buttons}
+                {/* {!changedLayout && buttons} */}
+                {buttons}
             </div>
-            {changedLayout &&
+            {/* {changedLayout &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>
-            }
+            } */}
         </div>
     );
 }
@@ -408,13 +411,55 @@ function StorageStatusBar({ totalSize, usedSize }: StorageData): JSX.Element {
     );
 }
 
-export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
-    selected, fetchFileMetadata, fetchFileMetadataInfo }: IMyFilesProps) {
+const fetchFileMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            dispatch(setFileSelected(selected))
+            if (response) {
+                const fileMetadata: IFileMetadata[] = response
+                dispatch(setFileMetadata(fileMetadata))
+            } else {
+                dispatch(setFileMetadata(null))
+            }
+        }, () => dispatch(setFileMetadata(null))
+    )
+
+
+const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) => 
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            if (response) {
+                const fileMetadataInfo: IFileMetadataInfo = response
+                dispatch(setFileMetadataInfo(fileMetadataInfo))
+            } else {
+                dispatch(setFileMetadataInfo(null))
+            }
+        }, () => dispatch(setFileMetadataInfo(null))
+    )
+
+export function MyFiles() {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
         fileMetadata: IFileMetadata | null
     } | null>(null)
+
+    const dispatch = useDispatch()
+    const fileState = useTypedSelector((state) => state.fileReducer)
+
+
+    useEffect(() => {
+        // if (isAuthed) {
+            dispatch(fetchFileMetadataInfo())
+            dispatch(fetchFileMetadata(0, FILE_CHUNK_SIZE, 1))
+        // }
+    }, [])
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
@@ -464,7 +509,6 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
     const props = (fileMetadata: IFileMetadata): IFileProps => {
         return {
             fileMetadata: fileMetadata,
-            changedLayout: changedLayout,
             action: (action: string) => {
                 setModalData({
                     action: action,
@@ -480,9 +524,9 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
             <div className="row align-items-center d-flex justify-content-center">
                 <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
                     {
-                        fileMetadataInfo?.storageData &&
+                        fileState.fileMetadataInfo?.storageData &&
                         <div>
-                            <StorageStatusBar {...fileMetadataInfo?.storageData} />
+                            <StorageStatusBar {...fileState.fileMetadataInfo?.storageData} />
                             <br />
                         </div>
                     }
@@ -516,8 +560,8 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                     </ModalBody>
                 </Modal>
                 {
-                    fileMetadata && fileMetadata.length != 0 ?
-                        fileMetadata.map((fileMeta: IFileMetadata) => {
+                    fileState.fileMetadatas && fileState.fileMetadatas.length != 0 ?
+                    fileState.fileMetadatas.map((fileMeta: IFileMetadata) => {
                             return (
                                 <File key={fileMeta.id} {...props(fileMeta)}></File>
                             );
@@ -532,11 +576,11 @@ export function MyFiles({ changedLayout, fileMetadata, fileMetadataInfo,
                         </div>
                 }
                 {
-                    fileMetadataInfo && fileMetadataInfo.fileCount > 0 ? <CustomPagination {...{
-                        total: fileMetadataInfo.fileCount,
+                    fileState.fileMetadataInfo && fileState.fileMetadataInfo.fileCount > 0 ? <CustomPagination {...{
+                        total: fileState.fileMetadataInfo.fileCount,
                         chunkSize: FILE_CHUNK_SIZE,
-                        selected: selected,
-                        fetchItems: fetchFileMetadata
+                        selected: fileState.fileSelected,
+                        fetchItems: (offset: number, limit: number, selected: number) => dispatch(fetchFileMetadata(offset, limit, selected))
                     }} /> : <div></div>
                 }
             </div>

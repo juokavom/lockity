@@ -29,6 +29,7 @@ export namespace ENDPOINTS {
         export const register = endpoint + '/register'
         export const registerConfirm = register + '/confirm'
     }
+
     export namespace FILE {
         export const file = endpoint + '/file'
         export const metadata = file + '/metadata'
@@ -58,6 +59,7 @@ export namespace ENDPOINTS {
         export const downloadDynlinkId = (id: string) => dynlinkId(id) + '/download'
         export const fetchDynlinkId = (id: string) => file + '/metadata/dynlink-id/' + id
     }
+
     export namespace USER {
         export const user = endpoint + '/user'
 
@@ -68,6 +70,7 @@ export namespace ENDPOINTS {
             user + '/offset/' + offset + '/limit/' + limit
         export const getUserCount = user + '/count'
     }
+    
     export namespace SHARED {
         export const sharedAccess = endpoint + '/shared-access'
 

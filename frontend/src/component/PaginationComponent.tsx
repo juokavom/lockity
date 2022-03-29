@@ -44,7 +44,7 @@ export default function CustomPagination(props: IPaginationProps) {
 
         setPaginations(paginations)
 
-    }, [])
+    }, [props.selected])
 
 
     return (

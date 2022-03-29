@@ -8,7 +8,7 @@ import Test from '../TestPage';
 import './Main.scss';
 import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileMetadataInfo } from '../FilesPage';
 import { IReceivedFileMetadata, ReceivedFiles, RECEIVED_CHUNK_SIZE } from '../ReceivedFilesPage';
-import Header from '../Header/HeaderComponent';
+import Header from '../header/HeaderComponent';
 import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
 import Footer from '../FooterComponent';
 import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
@@ -17,6 +17,9 @@ import { IShareMetadata, SharedFiles, SHARE_CHUNK_SIZE } from '../SharedFilesPag
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
 import Download from '../DownloadPage';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { Dispatch } from 'redux';
+import { IFileState } from '../../redux/reducers/FileReducer';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -53,14 +56,14 @@ export interface IHeaderProps {
     changedLayout: Boolean
 }
 
-export interface IMyFilesProps {
-    changedLayout: Boolean,
-    fileMetadata: IFileMetadata[] | null,
-    fileMetadataInfo: IFileMetadataInfo | null,
-    selected: number,
-    fetchFileMetadata: (offset: number, limit: number, selected: number) => void,
-    fetchFileMetadataInfo: () => void
-}
+// export interface IMyFilesProps {
+//     changedLayout: Boolean,
+//     fileMetadata: IFileMetadata[] | null,
+//     fileMetadataInfo: IFileMetadataInfo | null,
+//     selected: number,
+//     fetchFileMetadata: (offset: number, limit: number, selected: number) => void,
+//     fetchFileMetadataInfo: () => void
+// }
 
 export interface IReceivedProps {
     changedLayout: Boolean,
@@ -107,40 +110,46 @@ export default function Main() {
     }, [windowSize])
 
 
-    const [fileMetadataInfo, setFileMetadataInfo] = useState<IFileMetadataInfo | null>(null)
-    const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
-    const [fileSelected, setFileSelected] = useState<number>(1)
 
-    const fetchFileMetadata = async (offset: number, limit: number, selected: number) =>
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                setFileSelected(selected)
-                if (response) {
-                    const fileMetadata: IFileMetadata[] = response
-                    setFileMetadata(fileMetadata)
-                } else {
-                    setFileMetadata(null)
-                }
-            }, () => setFileMetadata(null))
+    // const dispatch: Dispatch<any> = useDispatch()
 
 
-    const fetchFileMetadataInfo = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                if (response) {
-                    const fileMetadataInfo: IFileMetadataInfo = response
-                    setFileMetadataInfo(fileMetadataInfo)
-                } else {
-                    setFileMetadataInfo(null)
-                }
-            }, () => setFileMetadataInfo(null))
-    }
+
+
+    // const [fileMetadataInfo, setFileMetadataInfo] = useState<IFileMetadataInfo | null>(null)
+    // const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
+    // const [fileSelected, setFileSelected] = useState<number>(1)
+
+    // const fetchFileMetadata = async (offset: number, limit: number, selected: number) =>
+    //     await new RequestBuilder()
+    //         .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
+    //         .withMethod('GET')
+    //         .withDefaults()
+    //         .send((response: any) => {
+    //             setFileSelected(selected)
+    //             if (response) {
+    //                 const fileMetadata: IFileMetadata[] = response
+    //                 setFileMetadata(fileMetadata)
+    //             } else {
+    //                 setFileMetadata(null)
+    //             }
+    //         }, () => setFileMetadata(null))
+
+
+    // const fetchFileMetadataInfo = async () => {
+    //     await new RequestBuilder()
+    //         .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
+    //         .withMethod('GET')
+    //         .withDefaults()
+    //         .send((response: any) => {
+    //             if (response) {
+    //                 const fileMetadataInfo: IFileMetadataInfo = response
+    //                 setFileMetadataInfo(fileMetadataInfo)
+    //             } else {
+    //                 setFileMetadataInfo(null)
+    //             }
+    //         }, () => setFileMetadataInfo(null))
+    // }
 
     const headerProps: IHeaderProps = {
         user: user!,
@@ -148,14 +157,14 @@ export default function Main() {
         changedLayout: changedLayout
     }
 
-    const myFilesProps: IMyFilesProps = {
-        changedLayout: changedLayout,
-        fileMetadata: fileMetadata,
-        fileMetadataInfo: fileMetadataInfo,
-        selected: fileSelected,
-        fetchFileMetadata: fetchFileMetadata,
-        fetchFileMetadataInfo: fetchFileMetadataInfo
-    }
+    // const myFilesProps: IMyFilesProps = {
+    //     changedLayout: changedLayout,
+    //     fileMetadata: fileMetadata,
+    //     fileMetadataInfo: fileMetadataInfo,
+    //     selected: fileSelected,
+    //     fetchFileMetadata: fetchFileMetadata,
+    //     fetchFileMetadataInfo: fetchFileMetadataInfo
+    // }
 
     const [sharedCount, setSharedCount] = useState<number | null>(null)
     const [sharedMetadata, setSharedMetadata] = useState<IShareMetadata[] | null>(null)
@@ -289,8 +298,8 @@ export default function Main() {
 
     useEffect(() => {
         if (isAuthed) {
-            fetchFileMetadataInfo()
-            fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
+            // fetchFileMetadataInfo()
+            // fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
             fetchSharedMetadataCount()
             fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
             fetchReceivedMetadataCount()
@@ -325,7 +334,7 @@ export default function Main() {
                             <Switch>
                                 <Route exact path={ROUTES.test} component={() => <Test />} />
 
-                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles {...myFilesProps} />} />
+                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
                                 <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles {...receivedProps} />} />
                                 <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles  {...sharedProps} />} />
 
