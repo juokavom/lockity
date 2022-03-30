@@ -7,12 +7,12 @@ import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';
 import { User } from '../../model/User';
 import Download from '../DownloadPage';
-import { MyFiles } from '../FilesPage';
+import { FilesPage } from '../FilesPage';
 import Footer from '../FooterComponent';
 import Header from '../header/HeaderComponent';
 import Login from '../login/LoginPage';
-import { IReceivedFileMetadata, ReceivedFiles, RECEIVED_CHUNK_SIZE } from '../ReceivedFilesPage';
-import { SharedFiles } from '../SharedFilesPage';
+import { ReceivedPage } from '../ReceivedPage';
+import { SharedPage } from '../SharedPage';
 import Test from '../TestPage';
 import Upload from '../upload/UploadPage';
 import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
@@ -51,15 +51,6 @@ export interface IHeaderProps {
     user: User.FrontendUser,
     isAdmin: Boolean,
     changedLayout: Boolean
-}
-
-export interface IReceivedProps {
-    changedLayout: Boolean,
-    receivedMetadata: IReceivedFileMetadata[] | null,
-    receivedMetadataCount: number | null,
-    selected: number,
-    fetchReceivedMetadata: (offset: number, limit: number, selected: number) => void,
-    fetchReceivedMetadataCount: () => void
 }
 
 export interface IUserProps {
@@ -138,56 +129,10 @@ export default function Main() {
         fetchUserCount: fetchUserCount
     }
 
-    const [receivedMetadataCount, setReceivedMetadataCount] = useState<number | null>(null)
-    const [receivedMetadata, setReceivedMetadata] = useState<IReceivedFileMetadata[] | null>(null)
-    const [receivedSelected, setReceivedSelected] = useState<number>(1)
-
-    const fetchReceivedMetadata = async (offset: number, limit: number, selected: number) =>
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.getReceivedMetadataWithOffsetAndLimit(offset, limit))
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                setReceivedSelected(selected)
-                if (response) {
-                    const receivedMetadata: IReceivedFileMetadata[] = response
-                    setReceivedMetadata(receivedMetadata)
-                } else {
-                    setReceivedMetadata(null)
-                }
-            }, () => setReceivedMetadata(null))
-
-
-    const fetchReceivedMetadataCount = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.FILE.getReceivedMetadataCount)
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                if (response) {
-                    const receivedCount: { receivedCount: number } = response
-                    setReceivedMetadataCount(receivedCount.receivedCount)
-                } else {
-                    setReceivedMetadataCount(null)
-                }
-            }, () => setReceivedMetadataCount(null))
-    }
-
-    const receivedProps: IReceivedProps = {
-        changedLayout: changedLayout,
-        receivedMetadata: receivedMetadata,
-        receivedMetadataCount: receivedMetadataCount,
-        selected: receivedSelected,
-        fetchReceivedMetadata: fetchReceivedMetadata,
-        fetchReceivedMetadataCount: fetchReceivedMetadataCount
-    }
-
     useEffect(() => {
         if (isAuthed) {
-            // fetchSharedMetadataCount()
-            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
-            fetchReceivedMetadataCount()
-            fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1)
+            // fetchReceivedMetadataCount()
+            // fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1)
             if (isAdmin) {
                 fetchUserCount()
                 fetchUserData(0, USER_CHUNK_SIZE, 1)
@@ -218,15 +163,15 @@ export default function Main() {
                             <Switch>
                                 <Route exact path={ROUTES.test} component={() => <Test />} />
 
-                                <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
-                                <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles {...receivedProps} />} />
-                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
+                                <Route exact path={ROUTES.filesPage} component={() => <FilesPage />} />
+                                <Route exact path={ROUTES.receivedPage} component={() => <ReceivedPage />} />
+                                <Route exact path={ROUTES.sharedPage} component={() => <SharedPage />} />
 
                                 {isAdmin &&
                                     <Route exact path={ROUTES.users} component={() => <Users {...userProps} />} />
                                 }
 
-                                <Redirect to={ROUTES.myFiles} />
+                                <Redirect to={ROUTES.filesPage} />
                             </Switch>
                         </div>
                         <Footer />

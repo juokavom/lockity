@@ -6,9 +6,9 @@ export namespace ROUTES {
     export const download = '/download'
     export const test = '/test'
 
-    export const myFiles = '/my-files'
-    export const receivedFiles = '/received-files'
-    export const sharedFiles = '/shared-files'
+    export const filesPage = '/files'
+    export const receivedPage = '/received'
+    export const sharedPage = '/shared'
     
     export const sendNewsletter = '/send-newsletter'
     export const users = '/users'

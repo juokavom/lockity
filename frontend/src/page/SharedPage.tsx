@@ -289,7 +289,7 @@ function Delete({ shareMetadata, callback }: IShareModalProps): JSX.Element {
 
 export const SHARED_CHUNK_SIZE = 10
 
-const fetchSharedMetadata = (offset: number, limit: number, selected: number)  => async (dispatch: Dispatch<Action>) =>
+const fetchSharedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
     await new RequestBuilder()
         .withUrl(ENDPOINTS.SHARED.getSharedMetadataWithOffsetAndLimit(offset, limit))
         .withMethod('GET')
@@ -320,7 +320,7 @@ const fetchSharedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
         }, () => dispatch(SharedActionCreators.setSharedMetadataCount(null)))
 }
 
-export function SharedFiles() {
+export function SharedPage() {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
@@ -346,7 +346,7 @@ export function SharedFiles() {
         if (success) {
             // fetchSharedMetadataCount()
             // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)            
-            window.location.replace(ROUTES.sharedFiles)
+            window.location.replace(ROUTES.sharedPage)
         }
     }
 

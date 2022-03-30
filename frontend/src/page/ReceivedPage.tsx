@@ -1,24 +1,28 @@
-import { useState } from 'react';
-import {
-    Modal, ModalHeader, ModalBody,
-} from 'reactstrap';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { IconButton, Typography } from '@mui/material';
-import { IReceivedProps } from './main/MainPage';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { Dispatch, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+    Modal, ModalBody, ModalHeader
+} from 'reactstrap';
 import CustomPagination from '../component/PaginationComponent';
+import { RequestBuilder } from '../model/RequestBuilder';
+import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { Action } from '../redux/actionCreators/Action';
+import { ReceivedActionCreators } from '../redux/actionCreators/ReceivedActionCreators';
+import { useTypedSelector } from '../redux/Store';
 import { formatBytes } from './FilesPage';
 
 
 interface IReceivedFileProps {
-    receivedMetadata: IReceivedFileMetadata,
-    changedLayout: Boolean,
+    receivedMetadata: IReceivedMetadata,
+    // changedLayout: Boolean,
     action: (action: string) => void
 }
 
-export interface IReceivedFileMetadata {
+export interface IReceivedMetadata {
     id: string,
     title: string,
     size: number,
@@ -26,7 +30,7 @@ export interface IReceivedFileMetadata {
 }
 
 interface IReceivedModalProps {
-    receivedMetadata: IReceivedFileMetadata,
+    receivedMetadata: IReceivedMetadata,
     callback: (success: boolean) => void
 }
 
@@ -34,7 +38,7 @@ const FileAction = {
     Preview: "Preview file"
 }
 
-function File({ receivedMetadata, changedLayout, action }: IReceivedFileProps) {
+function File({ receivedMetadata, action }: IReceivedFileProps) {
     const format = receivedMetadata.title.split('.').pop();
 
     const buttons = (
@@ -70,13 +74,14 @@ function File({ receivedMetadata, changedLayout, action }: IReceivedFileProps) {
                 <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
                     <p className="ellipse-text" style={{ maxWidth: "150px" }}>{receivedMetadata.ownerEmail}</p>
                 </div>
-                {!changedLayout && buttons}
+                {/* {!changedLayout && buttons} */}
+                {buttons}
             </div>
-            {changedLayout &&
+            {/* {changedLayout &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>
-            }
+            } */}
         </div>
     );
 }
@@ -140,15 +145,55 @@ function Preview({ receivedMetadata, callback }: IReceivedModalProps): JSX.Eleme
     }
 }
 
+const fetchReceivedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.FILE.getReceivedMetadataWithOffsetAndLimit(offset, limit))
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            dispatch(ReceivedActionCreators.setReceivedSelected(selected))
+            if (response) {
+                const receivedMetadata: IReceivedMetadata[] = response
+                dispatch(ReceivedActionCreators.setReceivedMetadata(receivedMetadata))
+            } else {
+                dispatch(ReceivedActionCreators.setReceivedMetadata(null))
+            }
+        }, () => dispatch(ReceivedActionCreators.setReceivedMetadata(null)))
+
+
+const fetchReceivedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.FILE.getReceivedMetadataCount)
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            if (response) {
+                const receivedCount: { receivedCount: number } = response
+                dispatch(ReceivedActionCreators.setReceivedMetadataCount(receivedCount.receivedCount))
+            } else {
+                dispatch(ReceivedActionCreators.setReceivedMetadataCount(null))
+            }
+        }, () => dispatch(ReceivedActionCreators.setReceivedMetadataCount(null)))
+}
+
 export const RECEIVED_CHUNK_SIZE = 5
 
-export function ReceivedFiles({ changedLayout, receivedMetadata, receivedMetadataCount,
-    selected, fetchReceivedMetadata, fetchReceivedMetadataCount }: IReceivedProps) {
+export function ReceivedPage() {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
-        receivedMetadata: IReceivedFileMetadata | null
+        receivedMetadata: IReceivedMetadata | null
     } | null>(null)
+
+    const dispatch = useDispatch()
+    const receivedState = useTypedSelector((state) => state.receivedReducer)
+
+    useEffect(() => {
+        // if (isAuthed) {
+        dispatch(fetchReceivedMetadataCount())
+        dispatch(fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1))
+        // }
+    }, [])
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
@@ -170,10 +215,10 @@ export function ReceivedFiles({ changedLayout, receivedMetadata, receivedMetadat
         return (<div></div>);
     }
 
-    const props = (receivedMetadata: IReceivedFileMetadata): IReceivedFileProps => {
+    const props = (receivedMetadata: IReceivedMetadata): IReceivedFileProps => {
         return {
             receivedMetadata: receivedMetadata,
-            changedLayout: changedLayout,
+            // changedLayout: changedLayout,
             action: (action: string) => {
                 setModalData({
                     action: action,
@@ -202,8 +247,8 @@ export function ReceivedFiles({ changedLayout, receivedMetadata, receivedMetadat
                     </ModalBody>
                 </Modal>
                 {
-                    receivedMetadata && receivedMetadata.length != 0 ?
-                        receivedMetadata.map((receivedMeta: IReceivedFileMetadata) => {
+                    receivedState.receivedMetadatas && receivedState.receivedMetadatas.length != 0 ?
+                    receivedState.receivedMetadatas.map((receivedMeta: IReceivedMetadata) => {
                             return (
                                 <File key={receivedMeta.id} {...props(receivedMeta)}></File>
                             );
@@ -218,11 +263,11 @@ export function ReceivedFiles({ changedLayout, receivedMetadata, receivedMetadat
                         </div>
                 }
                 {
-                    receivedMetadataCount && receivedMetadataCount > 0 ? <CustomPagination {...{
-                        total: receivedMetadataCount,
+                    receivedState.receivedMetadataCount && receivedState.receivedMetadataCount > 0 ? <CustomPagination {...{
+                        total: receivedState.receivedMetadataCount,
                         chunkSize: RECEIVED_CHUNK_SIZE,
-                        selected: selected,
-                        fetchItems: fetchReceivedMetadata
+                        selected: receivedState.pageSelected,
+                        fetchItems:  (offset: number, limit: number, selected: number) => dispatch(fetchReceivedMetadata(offset, limit, selected))
                     }} /> : <div></div>
                 }
             </div>

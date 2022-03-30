@@ -1,4 +1,4 @@
-import { ISharedMetadata } from "../../page/SharedFilesPage";
+import { ISharedMetadata } from "../../page/SharedPage";
 import { SharedActionTypes } from "../actionTypes/SharedActionTypes";
 import { Action } from "./Action";
 

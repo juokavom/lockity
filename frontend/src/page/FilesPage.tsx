@@ -437,7 +437,7 @@ const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) =>
         }, () => dispatch(FileActionCreators.setFileMetadataInfo(null))
         )
 
-export function MyFiles() {
+export function FilesPage() {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
@@ -460,7 +460,7 @@ export function MyFiles() {
         if (success) {
             // fetchFileMetadataInfo()
             // fetchFileMetadata(0, SHARE_CHUNK_SIZE, 1)            
-            window.location.replace(ROUTES.myFiles)
+            window.location.replace(ROUTES.filesPage)
         }
     }
 

@@ -146,7 +146,7 @@ function Login() {
             .send((loggedUser: User.FrontendUser) => {
                 // toast.success('Login successful', DefaultToastOptions)
                 localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
-                window.location.replace(ROUTES.myFiles)
+                window.location.replace(ROUTES.filesPage)
             }, () => { })
     };
 

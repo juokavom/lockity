@@ -1,0 +1,5 @@
+export namespace ReceivedActionTypes {
+    export const SET_RECEIVED_SELECTED = 'SET_RECEIVED_SELECTED';
+    export const SET_RECEIVED_METADATA = 'SET_RECEIVED_METADATA';
+    export const SET_RECEIVED_METADATA_COUNT = 'SET_RECEIVED_METADATA_COUNT';
+}

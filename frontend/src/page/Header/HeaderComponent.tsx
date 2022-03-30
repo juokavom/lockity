@@ -276,7 +276,7 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
 
     const emptyNavLinkMap = (): Map<string, string> => {
         const navLinkMap = new Map<string, string>();
-        [ROUTES.myFiles, ROUTES.receivedFiles, ROUTES.sharedFiles, ROUTES.sendNewsletter, ROUTES.users]
+        [ROUTES.filesPage, ROUTES.receivedPage, ROUTES.sharedPage, ROUTES.sendNewsletter, ROUTES.users]
             .forEach((route: string) => navLinkMap.set(route, "text-color-toggler"))
         return navLinkMap;
     }
@@ -327,18 +327,18 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
                     <Collapse isOpen={isNavOpen} navbar>
                         <Nav navbar className="center-vertically">
                             <NavItem>
-                                <NavLink className="nav-link" to={ROUTES.myFiles} >
-                                    <p className={navlinkClasses.get(ROUTES.myFiles)}>My Files</p>
+                                <NavLink className="nav-link" to={ROUTES.filesPage} >
+                                    <p className={navlinkClasses.get(ROUTES.filesPage)}>My Files</p>
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to={ROUTES.receivedFiles} >
-                                    <p className={navlinkClasses.get(ROUTES.receivedFiles)}>Received Files</p>
+                                <NavLink className="nav-link" to={ROUTES.receivedPage} >
+                                    <p className={navlinkClasses.get(ROUTES.receivedPage)}>Received Files</p>
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to={ROUTES.sharedFiles} >
-                                    <p className={navlinkClasses.get(ROUTES.sharedFiles)}>Shared Files</p>
+                                <NavLink className="nav-link" to={ROUTES.sharedPage} >
+                                    <p className={navlinkClasses.get(ROUTES.sharedPage)}>Shared Files</p>
                                 </NavLink>
                             </NavItem>
                             {isAdmin &&
