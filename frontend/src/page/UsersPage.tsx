@@ -1,19 +1,22 @@
-import { useState } from 'react';
-import {
-    Button, Modal, ModalHeader, ModalBody
-} from 'reactstrap';
-import { User } from '../model/User';
-import {
-    Box, FormControl, IconButton, InputLabel, Input, MenuItem,
-    Select, TextField, Switch, FormControlLabel
-} from '@mui/material';
-import { IUserProps } from './main/MainPage';
-import { ENDPOINTS, MAX_STORAGE_SIZE } from '../model/Server';
-import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import CustomPagination from '../component/PaginationComponent';
-import { toast } from 'react-toastify';
-import { ROUTES } from '../model/Routes';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import {
+    Box, FormControl, FormControlLabel, IconButton, Input, InputLabel, MenuItem,
+    Select, Switch, TextField
+} from '@mui/material';
+import { Dispatch, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import {
+    Button, Modal, ModalBody, ModalHeader
+} from 'reactstrap';
+import CustomPagination from '../component/PaginationComponent';
+import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
+import { ROUTES } from '../model/Routes';
+import { ENDPOINTS, MAX_STORAGE_SIZE } from '../model/Server';
+import { User } from '../model/User';
+import { Action } from '../redux/actionCreators/Action';
+import { UserActionCreators } from '../redux/actionCreators/UserActionCreators';
+import { useTypedSelector } from '../redux/Store';
 
 const UserAction = {
     Create: "Create user",
@@ -513,14 +516,55 @@ function Delete({ userData, callback }: IUserModalProps): JSX.Element {
 
 export const USER_CHUNK_SIZE = 10
 
-export function Users({ userData, userCount, selected,
-    fetchUserData, fetchUserCount }: IUserProps) {
-    const [modalOpen, setModalOpen] = useState(false)
+const fetchUserData = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.USER.getUserDataWithOffsetAndLimit(offset, limit))
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            dispatch(UserActionCreators.setUserSelected(selected))
+            if (response) {
+                const userData: IUserData[] = response
+                dispatch(UserActionCreators.setUserData(userData))
+            } else {
+                dispatch(UserActionCreators.setUserData(null))
+            }
+        }, () => dispatch(UserActionCreators.setUserData(null)))
 
+
+const fetchUserCount = () => async (dispatch: Dispatch<Action>) => {
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.USER.getUserCount)
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            if (response) {
+                const userCount: { userCount: number } = response
+                dispatch(UserActionCreators.setUserCount(userCount.userCount))
+            } else {
+                dispatch(UserActionCreators.setUserCount(null))
+            }
+        }, () => dispatch(UserActionCreators.setUserCount(null)))
+}
+
+export function Users() {
+    const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
         action: string,
         userData: IUserData | null
     } | null>(null)
+
+    const dispatch = useDispatch()
+    const userState = useTypedSelector((state) => state.userReducer)
+
+    useEffect(() => {
+        // if (isAuthed) {
+        //     if (isAdmin) {
+        dispatch(fetchUserCount())
+        dispatch(fetchUserData(0, USER_CHUNK_SIZE, 1))
+        //     }
+        // }
+    }, [])
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
@@ -596,8 +640,8 @@ export function Users({ userData, userCount, selected,
     );
 
     const UserRows = () => {
-        if (userData) {
-            return userData?.map((uData: IUserData) => {
+        if (userState.userDatas) {
+            return userState.userDatas?.map((uData: IUserData) => {
                 return (
                     <UserFileRow key={uData.id} {...uData} />
                 );
@@ -639,7 +683,7 @@ export function Users({ userData, userCount, selected,
                 </ModalBody>
             </Modal>
             {
-                userData && userData.length !== 0 ?
+                userState.userDatas && userState.userDatas.length !== 0 ?
                     <div className="row align-items-center d-flex justify-content-center">
                         <table className="table table-hover table-ellipsis">
                             <thead>
@@ -665,11 +709,11 @@ export function Users({ userData, userCount, selected,
                     </div>
             }
             {
-                userCount && userCount > 0 ? <CustomPagination {...{
-                    total: userCount,
+                userState.userCount && userState.userCount > 0 ? <CustomPagination {...{
+                    total: userState.userCount,
                     chunkSize: USER_CHUNK_SIZE,
-                    selected: selected,
-                    fetchItems: fetchUserData
+                    selected: userState.pageSelected,
+                    fetchItems:  (offset: number, limit: number, selected: number) => dispatch(fetchUserData(offset, limit, selected))
                 }} /> : <div></div>
             }
         </div>

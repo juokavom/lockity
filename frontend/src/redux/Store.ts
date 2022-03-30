@@ -5,13 +5,15 @@ import { Action } from "./actionCreators/Action";
 import { FileReducer } from "./reducers/FileReducer";
 import { ReceivedReducer } from "./reducers/ReceivedReducer";
 import { SharedReducer } from "./reducers/SharedReducer";
+import { UserReducer } from "./reducers/UserReducer";
 
 export const useTypedSelector: TypedUseSelectorHook<MasterState> = useSelector;
 
 const reducers = combineReducers({
   fileReducer: FileReducer,
   sharedReducer: SharedReducer,
-  receivedReducer: ReceivedReducer
+  receivedReducer: ReceivedReducer,
+  userReducer: UserReducer
 })
 
 export type MasterState = ReturnType<typeof reducers>

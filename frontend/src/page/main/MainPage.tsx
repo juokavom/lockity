@@ -53,14 +53,6 @@ export interface IHeaderProps {
     changedLayout: Boolean
 }
 
-export interface IUserProps {
-    userData: IUserData[] | null,
-    userCount: number | null,
-    selected: number,
-    fetchUserData: (offset: number, limit: number, selected: number) => void,
-    fetchUserCount: () => void
-}
-
 export default function Main() {
     const [user] = useState<User.FrontendUser | null>(parsedUser)
 
@@ -85,60 +77,6 @@ export default function Main() {
         isAdmin: isAdmin,
         changedLayout: changedLayout
     }
-
-    const [userCount, setUserCount] = useState<number | null>(null)
-    const [userData, setUserData] = useState<IUserData[] | null>(null)
-    const [userSelected, setUserSelected] = useState<number>(1)
-
-    const fetchUserData = async (offset: number, limit: number, selected: number) =>
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.USER.getUserDataWithOffsetAndLimit(offset, limit))
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                setUserSelected(selected)
-                if (response) {
-                    const userData: IUserData[] = response
-                    setUserData(userData)
-                } else {
-                    setUserData(null)
-                }
-            }, () => setUserData(null))
-
-
-    const fetchUserCount = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.USER.getUserCount)
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                if (response) {
-                    const userCount: { userCount: number } = response
-                    setUserCount(userCount.userCount)
-                } else {
-                    setUserCount(null)
-                }
-            }, () => setUserCount(null))
-    }
-
-    const userProps: IUserProps = {
-        userData: userData,
-        userCount: userCount,
-        selected: userSelected,
-        fetchUserData: fetchUserData,
-        fetchUserCount: fetchUserCount
-    }
-
-    useEffect(() => {
-        if (isAuthed) {
-            // fetchReceivedMetadataCount()
-            // fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1)
-            if (isAdmin) {
-                fetchUserCount()
-                fetchUserData(0, USER_CHUNK_SIZE, 1)
-            }
-        }
-    }, [])
 
     if (!isAuthed) {
         return (
@@ -168,7 +106,7 @@ export default function Main() {
                                 <Route exact path={ROUTES.sharedPage} component={() => <SharedPage />} />
 
                                 {isAdmin &&
-                                    <Route exact path={ROUTES.users} component={() => <Users {...userProps} />} />
+                                    <Route exact path={ROUTES.users} component={() => <Users />} />
                                 }
 
                                 <Redirect to={ROUTES.filesPage} />
