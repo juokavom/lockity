@@ -1,25 +1,22 @@
-import Upload from '../upload/UploadPage';
-import { Switch, Route, Redirect } from 'react-router-dom';
-import Login from '../login/LoginPage';
-import { ROUTES } from '../../model/Routes';
 import { useEffect, useState } from 'react';
-import { User } from '../../model/User';
-import Test from '../TestPage';
-import './Main.scss';
-import { MyFiles, FILE_CHUNK_SIZE, IFileMetadata, IFileMetadataInfo } from '../FilesPage';
-import { IReceivedFileMetadata, ReceivedFiles, RECEIVED_CHUNK_SIZE } from '../ReceivedFilesPage';
-import Header from '../header/HeaderComponent';
-import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
-import Footer from '../FooterComponent';
-import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
-import { ENDPOINTS } from '../../model/Server';
-import { IShareMetadata, SharedFiles, SHARE_CHUNK_SIZE } from '../SharedFilesPage';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
+import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
+import { ROUTES } from '../../model/Routes';
+import { ENDPOINTS } from '../../model/Server';
+import { User } from '../../model/User';
 import Download from '../DownloadPage';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { Dispatch } from 'redux';
-import { IFileState } from '../../redux/reducers/FileReducer';
+import { MyFiles } from '../FilesPage';
+import Footer from '../FooterComponent';
+import Header from '../header/HeaderComponent';
+import Login from '../login/LoginPage';
+import { IReceivedFileMetadata, ReceivedFiles, RECEIVED_CHUNK_SIZE } from '../ReceivedFilesPage';
+import { SharedFiles } from '../SharedFilesPage';
+import Test from '../TestPage';
+import Upload from '../upload/UploadPage';
+import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
+import './Main.scss';
 
 const localStorageUser = localStorage.getItem(User.storagename)
 let parsedUser: User.FrontendUser | null = null
@@ -56,15 +53,6 @@ export interface IHeaderProps {
     changedLayout: Boolean
 }
 
-// export interface IMyFilesProps {
-//     changedLayout: Boolean,
-//     fileMetadata: IFileMetadata[] | null,
-//     fileMetadataInfo: IFileMetadataInfo | null,
-//     selected: number,
-//     fetchFileMetadata: (offset: number, limit: number, selected: number) => void,
-//     fetchFileMetadataInfo: () => void
-// }
-
 export interface IReceivedProps {
     changedLayout: Boolean,
     receivedMetadata: IReceivedFileMetadata[] | null,
@@ -72,14 +60,6 @@ export interface IReceivedProps {
     selected: number,
     fetchReceivedMetadata: (offset: number, limit: number, selected: number) => void,
     fetchReceivedMetadataCount: () => void
-}
-
-export interface ISharedProps {
-    sharedMetadata: IShareMetadata[] | null,
-    sharedCount: number | null,
-    selected: number,
-    fetchSharedMetadata: (offset: number, limit: number, selected: number) => void,
-    fetchSharedMetadataCount: () => void
 }
 
 export interface IUserProps {
@@ -109,104 +89,10 @@ export default function Main() {
         }
     }, [windowSize])
 
-
-
-    // const dispatch: Dispatch<any> = useDispatch()
-
-
-
-
-    // const [fileMetadataInfo, setFileMetadataInfo] = useState<IFileMetadataInfo | null>(null)
-    // const [fileMetadata, setFileMetadata] = useState<IFileMetadata[] | null>(null)
-    // const [fileSelected, setFileSelected] = useState<number>(1)
-
-    // const fetchFileMetadata = async (offset: number, limit: number, selected: number) =>
-    //     await new RequestBuilder()
-    //         .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
-    //         .withMethod('GET')
-    //         .withDefaults()
-    //         .send((response: any) => {
-    //             setFileSelected(selected)
-    //             if (response) {
-    //                 const fileMetadata: IFileMetadata[] = response
-    //                 setFileMetadata(fileMetadata)
-    //             } else {
-    //                 setFileMetadata(null)
-    //             }
-    //         }, () => setFileMetadata(null))
-
-
-    // const fetchFileMetadataInfo = async () => {
-    //     await new RequestBuilder()
-    //         .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
-    //         .withMethod('GET')
-    //         .withDefaults()
-    //         .send((response: any) => {
-    //             if (response) {
-    //                 const fileMetadataInfo: IFileMetadataInfo = response
-    //                 setFileMetadataInfo(fileMetadataInfo)
-    //             } else {
-    //                 setFileMetadataInfo(null)
-    //             }
-    //         }, () => setFileMetadataInfo(null))
-    // }
-
     const headerProps: IHeaderProps = {
         user: user!,
         isAdmin: isAdmin,
         changedLayout: changedLayout
-    }
-
-    // const myFilesProps: IMyFilesProps = {
-    //     changedLayout: changedLayout,
-    //     fileMetadata: fileMetadata,
-    //     fileMetadataInfo: fileMetadataInfo,
-    //     selected: fileSelected,
-    //     fetchFileMetadata: fetchFileMetadata,
-    //     fetchFileMetadataInfo: fetchFileMetadataInfo
-    // }
-
-    const [sharedCount, setSharedCount] = useState<number | null>(null)
-    const [sharedMetadata, setSharedMetadata] = useState<IShareMetadata[] | null>(null)
-    const [sharedSelected, setSharedSelected] = useState<number>(1)
-
-    const fetchSharedMetadata = async (offset: number, limit: number, selected: number) =>
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.SHARED.getSharedMetadataWithOffsetAndLimit(offset, limit))
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                setSharedSelected(selected)
-                if (response) {
-                    const shareMetadata: IShareMetadata[] = response
-                    setSharedMetadata(shareMetadata)
-                } else {
-                    setSharedMetadata(null)
-                }
-            }, () => setSharedMetadata(null))
-
-
-    const fetchSharedMetadataCount = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.SHARED.getSharedMetadataCount)
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                if (response) {
-                    const sharedAccessCount: { sharedAccessCount: number } = response
-                    setSharedCount(sharedAccessCount.sharedAccessCount)
-                } else {
-                    setSharedCount(null)
-                }
-            }, () => setSharedCount(null))
-    }
-
-    const sharedProps: ISharedProps = {
-        sharedMetadata: sharedMetadata,
-        sharedCount: sharedCount,
-        selected: sharedSelected,
-        fetchSharedMetadata: fetchSharedMetadata,
-        fetchSharedMetadataCount: fetchSharedMetadataCount
     }
 
     const [userCount, setUserCount] = useState<number | null>(null)
@@ -298,10 +184,8 @@ export default function Main() {
 
     useEffect(() => {
         if (isAuthed) {
-            // fetchFileMetadataInfo()
-            // fetchFileMetadata(0, FILE_CHUNK_SIZE, 1)
-            fetchSharedMetadataCount()
-            fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
+            // fetchSharedMetadataCount()
+            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)
             fetchReceivedMetadataCount()
             fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1)
             if (isAdmin) {
@@ -336,7 +220,7 @@ export default function Main() {
 
                                 <Route exact path={ROUTES.myFiles} component={() => <MyFiles />} />
                                 <Route exact path={ROUTES.receivedFiles} component={() => <ReceivedFiles {...receivedProps} />} />
-                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles  {...sharedProps} />} />
+                                <Route exact path={ROUTES.sharedFiles} component={() => <SharedFiles />} />
 
                                 {isAdmin &&
                                     <Route exact path={ROUTES.users} component={() => <Users {...userProps} />} />

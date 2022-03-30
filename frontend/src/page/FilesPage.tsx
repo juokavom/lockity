@@ -1,30 +1,24 @@
-import React, { Component, Dispatch, SetStateAction, useEffect, useState } from 'react';
-import {
-    Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem,
-    Button, Modal, ModalHeader, ModalBody, FormGroup, Label, Form, Input,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip, UncontrolledTooltip, Progress
-} from 'reactstrap';
-import { NavLink } from 'react-router-dom';
-import { User } from '../model/User';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Box, IconButton, Pagination, TextField, Typography } from '@mui/material';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
-import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
-import FileUploader, { FileUploadedMetadata } from '../component/FileUploaderComponent';
-import CustomPagination from '../component/PaginationComponent';
-import { toast } from 'react-toastify';
-import { ROUTES } from '../model/Routes';
-import { ProgressBar } from 'react-toastify/dist/components';
-import { ColorizeOutlined } from '@mui/icons-material';
-import { Action, setFileMetadata, setFileMetadataInfo, setFileSelected } from '../redux/ActionCreators';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import { Box, IconButton, TextField, Typography } from '@mui/material';
+import React, { Dispatch, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { MasterState, useTypedSelector } from '..';
-import { IFileState } from '../redux/reducers/FileReducer';
+import { toast } from 'react-toastify';
+import {
+    Button, Modal, ModalBody, ModalHeader, Progress, UncontrolledTooltip
+} from 'reactstrap';
+import FileUploader from '../component/FileUploaderComponent';
+import CustomPagination from '../component/PaginationComponent';
+import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
+import { ROUTES } from '../model/Routes';
+import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
+import { Action } from '../redux/actionCreators/Action';
+import { FileActionCreators } from '../redux/actionCreators/FileActionCreators';
+import { useTypedSelector } from '../redux/Store';
 
 export interface IFileMetadata {
     id: string,
@@ -403,7 +397,7 @@ function StorageStatusBar({ totalSize, usedSize }: StorageData): JSX.Element {
 
     return (
         <div className="text-center">
-        {formatBytes(usedSize)} / {formatBytes(totalSize)}
+            {formatBytes(usedSize)} / {formatBytes(totalSize)}
             <Progress animated color={color} value={percentage}>
                 {Math.trunc(percentage)}%
             </Progress>
@@ -417,18 +411,18 @@ const fetchFileMetadata = (offset: number, limit: number, selected: number) => a
         .withMethod('GET')
         .withDefaults()
         .send((response: any) => {
-            dispatch(setFileSelected(selected))
+            dispatch(FileActionCreators.setFileSelected(selected))
             if (response) {
                 const fileMetadata: IFileMetadata[] = response
-                dispatch(setFileMetadata(fileMetadata))
+                dispatch(FileActionCreators.setFileMetadata(fileMetadata))
             } else {
-                dispatch(setFileMetadata(null))
+                dispatch(FileActionCreators.setFileMetadata(null))
             }
-        }, () => dispatch(setFileMetadata(null))
-    )
+        }, () => dispatch(FileActionCreators.setFileMetadata(null))
+        )
 
 
-const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) => 
+const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) =>
     await new RequestBuilder()
         .withUrl(ENDPOINTS.FILE.getFileMetadataInfo)
         .withMethod('GET')
@@ -436,12 +430,12 @@ const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) =>
         .send((response: any) => {
             if (response) {
                 const fileMetadataInfo: IFileMetadataInfo = response
-                dispatch(setFileMetadataInfo(fileMetadataInfo))
+                dispatch(FileActionCreators.setFileMetadataInfo(fileMetadataInfo))
             } else {
-                dispatch(setFileMetadataInfo(null))
+                dispatch(FileActionCreators.setFileMetadataInfo(null))
             }
-        }, () => dispatch(setFileMetadataInfo(null))
-    )
+        }, () => dispatch(FileActionCreators.setFileMetadataInfo(null))
+        )
 
 export function MyFiles() {
     const [modalOpen, setModalOpen] = useState(false)
@@ -456,8 +450,8 @@ export function MyFiles() {
 
     useEffect(() => {
         // if (isAuthed) {
-            dispatch(fetchFileMetadataInfo())
-            dispatch(fetchFileMetadata(0, FILE_CHUNK_SIZE, 1))
+        dispatch(fetchFileMetadataInfo())
+        dispatch(fetchFileMetadata(0, FILE_CHUNK_SIZE, 1))
         // }
     }, [])
 
@@ -518,7 +512,7 @@ export function MyFiles() {
             }
         }
     }
-    
+
     return (
         <div className="container">
             <div className="row align-items-center d-flex justify-content-center">
@@ -561,7 +555,7 @@ export function MyFiles() {
                 </Modal>
                 {
                     fileState.fileMetadatas && fileState.fileMetadatas.length != 0 ?
-                    fileState.fileMetadatas.map((fileMeta: IFileMetadata) => {
+                        fileState.fileMetadatas.map((fileMeta: IFileMetadata) => {
                             return (
                                 <File key={fileMeta.id} {...props(fileMeta)}></File>
                             );
@@ -579,7 +573,7 @@ export function MyFiles() {
                     fileState.fileMetadataInfo && fileState.fileMetadataInfo.fileCount > 0 ? <CustomPagination {...{
                         total: fileState.fileMetadataInfo.fileCount,
                         chunkSize: FILE_CHUNK_SIZE,
-                        selected: fileState.fileSelected,
+                        selected: fileState.pageSelected,
                         fetchItems: (offset: number, limit: number, selected: number) => dispatch(fetchFileMetadata(offset, limit, selected))
                     }} /> : <div></div>
                 }

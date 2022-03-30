@@ -43,14 +43,15 @@ class FileRepository(
         .fetchArray()
         .toList()
 
-    fun fetchUserFilesWithOffsetAndLimit(userUuid: UUID, offset: Int, limit: Int): List<FileRecord> = databaseService.dsl
-        .selectFrom(FileTable)
-        .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
-        .orderBy(FileTable.Uploaded.desc())
-        .offset(offset)
-        .limit(limit)
-        .fetchArray()
-        .toList()
+    fun fetchUserFilesWithOffsetAndLimit(userUuid: UUID, offset: Int, limit: Int): List<FileRecord> =
+        databaseService.dsl
+            .selectFrom(FileTable)
+            .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
+            .orderBy(FileTable.Uploaded.desc())
+            .offset(offset)
+            .limit(limit)
+            .fetchArray()
+            .toList()
 
     fun fetchUserFilesCount(userBinId: ByteArray): Int? = databaseService.dsl
         .selectCount()

@@ -1,28 +1,32 @@
-import { useState } from 'react';
+import { useState, Dispatch, useEffect } from 'react';
 import {
     Button, Modal, ModalHeader, ModalBody
 } from 'reactstrap';
 import { Autocomplete, Box, TextField } from '@mui/material';
-import { ISharedProps } from './main/MainPage';
 import { ENDPOINTS } from '../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
 import CustomPagination from '../component/PaginationComponent';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../model/Routes';
+import { useDispatch } from 'react-redux';
+import { SharedActionCreators } from '../redux/actionCreators/SharedActionCreators';
+import { Action } from '../redux/actionCreators/Action';
+import { useTypedSelector } from '../redux/Store';
+
 const ShareAction = {
     Create: "Share file",
     Edit: "Edit share ",
     Delete: "Delete share"
 }
 
-export interface IShareMetadata {
+export interface ISharedMetadata {
     id: string,
     file: IFileMetadataForSharing,
     user: IUserForSharing
 }
 
 interface IShareModalProps {
-    shareMetadata: IShareMetadata,
+    shareMetadata: ISharedMetadata,
     callback: (success: boolean) => void
 }
 
@@ -283,17 +287,56 @@ function Delete({ shareMetadata, callback }: IShareModalProps): JSX.Element {
     );
 }
 
-export const SHARE_CHUNK_SIZE = 10
+export const SHARED_CHUNK_SIZE = 10
 
-export function SharedFiles({ sharedMetadata, sharedCount, selected,
-    fetchSharedMetadata, fetchSharedMetadataCount }: ISharedProps) {
+const fetchSharedMetadata = (offset: number, limit: number, selected: number)  => async (dispatch: Dispatch<Action>) =>
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.SHARED.getSharedMetadataWithOffsetAndLimit(offset, limit))
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            dispatch(SharedActionCreators.setSharedSelected(selected))
+            if (response) {
+                const shareMetadata: ISharedMetadata[] = response
+                dispatch(SharedActionCreators.setSharedMetadata(shareMetadata))
+            } else {
+                dispatch(SharedActionCreators.setSharedMetadata(null))
+            }
+        }, () => dispatch(SharedActionCreators.setSharedMetadata(null)))
+
+
+const fetchSharedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
+    await new RequestBuilder()
+        .withUrl(ENDPOINTS.SHARED.getSharedMetadataCount)
+        .withMethod('GET')
+        .withDefaults()
+        .send((response: any) => {
+            if (response) {
+                const sharedAccessCount: { sharedAccessCount: number } = response
+                dispatch(SharedActionCreators.setSharedMetadataCount(sharedAccessCount.sharedAccessCount))
+            } else {
+                dispatch(SharedActionCreators.setSharedMetadataCount(null))
+            }
+        }, () => dispatch(SharedActionCreators.setSharedMetadataCount(null)))
+}
+
+export function SharedFiles() {
     const [modalOpen, setModalOpen] = useState(false)
-
     const [modalData, setModalData] = useState<{
         action: string,
-        shareMetadata: IShareMetadata | null
+        shareMetadata: ISharedMetadata | null
     } | null>(null)
 
+    const dispatch = useDispatch()
+    const sharedState = useTypedSelector((state) => state.sharedReducer)
+
+    useEffect(() => {
+        // if (isAuthed) {
+        dispatch(fetchSharedMetadataCount())
+        dispatch(fetchSharedMetadata(0, SHARED_CHUNK_SIZE, 1))
+        // }
+    }, [])
+    
     const toggleModal = () => {
         setModalOpen(!modalOpen)
     }
@@ -326,7 +369,7 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
         return (<div></div>);
     }
 
-    const SharedFileRow = (shareMeta: IShareMetadata) => (
+    const SharedFileRow = (shareMeta: ISharedMetadata) => (
         <tr>
             <td>{shareMeta.file.title}</td>
             <td>{shareMeta.user.email}</td>
@@ -368,8 +411,8 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
     );
 
     const SharedRows = () => {
-        if (sharedMetadata) {
-            return sharedMetadata?.map((shareMeta: IShareMetadata) => {
+        if (sharedState.sharedMetadatas) {
+            return sharedState.sharedMetadatas?.map((shareMeta: ISharedMetadata) => {
                 return (
                     <SharedFileRow key={shareMeta.id} {...shareMeta} />
                 );
@@ -411,7 +454,7 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
                 </ModalBody>
             </Modal>
             {
-                sharedMetadata && sharedMetadata.length !== 0 ?
+                sharedState.sharedMetadatas && sharedState.sharedMetadatas.length !== 0 ?
                     <div className="row align-items-center d-flex justify-content-center">
                         <table className="table table-hover table-ellipsis">
                             <thead>
@@ -437,11 +480,11 @@ export function SharedFiles({ sharedMetadata, sharedCount, selected,
                     </div>
             }
             {
-                sharedCount && sharedCount > 0 ? <CustomPagination {...{
-                    total: sharedCount,
-                    chunkSize: SHARE_CHUNK_SIZE,
-                    selected: selected,
-                    fetchItems: fetchSharedMetadata
+                sharedState.sharedMetadataCount && sharedState.sharedMetadataCount > 0 ? <CustomPagination {...{
+                    total: sharedState.sharedMetadataCount,
+                    chunkSize: SHARED_CHUNK_SIZE,
+                    selected: sharedState.pageSelected,
+                    fetchItems: (offset: number, limit: number, selected: number) => dispatch(fetchSharedMetadata(offset, limit, selected))
                 }} /> : <div></div>
             }
         </div>
