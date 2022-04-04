@@ -447,7 +447,6 @@ export function FilesPage() {
     const dispatch = useDispatch()
     const fileState = useTypedSelector((state) => state.fileReducer)
 
-
     useEffect(() => {
         // if (isAuthed) {
         dispatch(fetchFileMetadataInfo())

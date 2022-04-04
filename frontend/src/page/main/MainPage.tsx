@@ -9,21 +9,14 @@ import { User } from '../../model/User';
 import Download from '../DownloadPage';
 import { FilesPage } from '../FilesPage';
 import Footer from '../FooterComponent';
-import Header from '../header/HeaderComponent';
+import Header from '../Header/HeaderComponent';
 import Login from '../login/LoginPage';
 import { ReceivedPage } from '../ReceivedPage';
 import { SharedPage } from '../SharedPage';
 import Test from '../TestPage';
 import Upload from '../upload/UploadPage';
-import { IUserData, Users, USER_CHUNK_SIZE } from '../UsersPage';
+import { Users } from '../UsersPage';
 import './Main.scss';
-
-const localStorageUser = localStorage.getItem(User.storagename)
-let parsedUser: User.FrontendUser | null = null
-
-if (localStorageUser) {
-    parsedUser = JSON.parse(localStorageUser)
-}
 
 function useWindowSize() {
     const [windowSize, setWindowSize] = useState<{
@@ -54,7 +47,8 @@ export interface IHeaderProps {
 }
 
 export default function Main() {
-    const [user] = useState<User.FrontendUser | null>(parsedUser)
+    const localStorageUser = localStorage.getItem(User.storagename)    
+    const user: User.FrontendUser | null = localStorageUser? JSON.parse(localStorageUser) : null
 
     const [changedLayout, setChangedLayout] = useState(false);
 
