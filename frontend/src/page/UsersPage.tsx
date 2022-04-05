@@ -557,13 +557,15 @@ export function Users() {
     const dispatch = useDispatch()
     const userState = useTypedSelector((state) => state.userReducer)
 
-    useEffect(() => {
-        // if (isAuthed) {
-        //     if (isAdmin) {
+    const fetchData = () => {
         dispatch(fetchUserCount())
         dispatch(fetchUserData(0, USER_CHUNK_SIZE, 1))
-        //     }
-        // }
+    }
+
+    useEffect(() => {
+        if (!userState.userCount || !userState.userDatas) { 
+            fetchData()    
+        }
     }, [])
 
     const toggleModal = () => {
@@ -572,10 +574,8 @@ export function Users() {
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {
-            // fetchSharedMetadataCount()
-            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)            
-            window.location.replace(ROUTES.users)
+        if (success) {       
+            fetchData()
         }
     }
 

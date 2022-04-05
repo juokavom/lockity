@@ -11,6 +11,9 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { toast } from "react-toastify";
 import { Modal, ModalBody, ModalHeader } from "reactstrap";
+import { useHistory } from "react-router";
+import { useDispatch } from "react-redux";
+import { LocalUserActionCreators } from "../../redux/actionCreators/LocalUserActionCreators";
 
 export function Copyright(prop: any) {
     return (
@@ -120,6 +123,8 @@ function Login() {
     const [modalOpen, setModalOpen] = useState(false)
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const history = useHistory();
+    const dispatch = useDispatch();
 
     const validateForm = () => {
         return email.length > 0 && password.length > 0;
@@ -144,8 +149,8 @@ function Login() {
                 password: password
             })
             .send((loggedUser: User.FrontendUser) => {
-                // toast.success('Login successful', DefaultToastOptions)
                 localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
+                dispatch(LocalUserActionCreators.setUser(loggedUser))
                 window.location.replace(ROUTES.filesPage)
             }, () => { })
     };
@@ -220,7 +225,7 @@ function Login() {
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
                             style={{ color: "#ebf0f" }}
-                            onClick={() => window.location.replace(ROUTES.upload)}
+                            onClick={() => history.push(ROUTES.upload)}
                         >
                             Proceed to upload page
                         </Button>

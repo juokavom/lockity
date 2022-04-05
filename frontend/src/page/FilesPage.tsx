@@ -447,19 +447,21 @@ export function FilesPage() {
     const dispatch = useDispatch()
     const fileState = useTypedSelector((state) => state.fileReducer)
 
-    useEffect(() => {
-        // if (isAuthed) {
+    const fetchData = () => {    
         dispatch(fetchFileMetadataInfo())
         dispatch(fetchFileMetadata(0, FILE_CHUNK_SIZE, 1))
-        // }
+    }
+
+    useEffect(() => {
+        if (!fileState.fileMetadataInfo || !fileState.fileMetadatas) {
+            fetchData()
+        }
     }, [])
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {
-            // fetchFileMetadataInfo()
-            // fetchFileMetadata(0, SHARE_CHUNK_SIZE, 1)            
-            window.location.replace(ROUTES.filesPage)
+        if (success) {         
+            fetchData()
         }
     }
 
@@ -470,7 +472,8 @@ export function FilesPage() {
     function Upload() {
         return (
             <FileUploader {...{
-                isAuthed: true, onUpload: () => modalCallback(true),
+                isAuthed: true, 
+                onUpload: () => modalCallback(true),
                 onError: () => modalCallback(false)
             }} />
         );

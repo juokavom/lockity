@@ -6,13 +6,15 @@ export type IWindowState = {
     smallView: boolean | null
 }
 
+const isSmallView = (width: number) => width < 992
+
 export const WindowReducer = (state: IWindowState = {
-    windowWidth: null,
-    smallView: null
+    windowWidth: window.innerWidth,
+    smallView: isSmallView(window.innerWidth)
 }, action: Action): IWindowState => {
     switch (action.type) {
         case WindowActionTypes.SET_WINDOW_WIDTH:
-            return { ...state, smallView: action.payload < 992, windowWidth: action.payload }
+            return { ...state, smallView: isSmallView(action.payload), windowWidth: action.payload }
 
         default:
             return state;

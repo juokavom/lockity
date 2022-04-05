@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button, UncontrolledTooltip } from 'reactstrap';
 import { toast } from 'react-toastify';
 import { DefaultToastOptions, } from '../../model/RequestBuilder';
+import { useHistory } from 'react-router-dom';
 
 enum UploadPageState {
     Initial,
@@ -14,6 +15,7 @@ enum UploadPageState {
 function Upload() {
     const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
     const [fileMeta, setFileMeta] = useState<any | null>(null)
+    const history = useHistory();
 
     const onFileUploaded = async (uploadMetadata?: any) => {
         if (uploadMetadata) {
@@ -47,7 +49,7 @@ function Upload() {
                                         variant="contained"
                                         sx={{ mt: 3, mb: 2 }}
                                         style={{ color: "#ebf0f" }}
-                                        onClick={() => window.location.replace(ROUTES.login)}>
+                                        onClick={() => history.push(ROUTES.login)}>
                                         Login
                                     </Button>
                                 </div>

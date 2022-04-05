@@ -5,6 +5,7 @@ import { ROUTES } from '../model/Routes';
 import { RequestBuilder } from '../model/RequestBuilder';
 import { ENDPOINTS } from '../model/Server';
 import { Copyright } from './login/LoginPage';
+import { useHistory } from 'react-router-dom';
 
 export default function Download({ match }: any) {
     const [fileData, setFileData] = useState<{
@@ -12,6 +13,7 @@ export default function Download({ match }: any) {
         link: string
     } | null>(null)
     const id = match.params.id
+    const history = useHistory();
 
     const FetchFileData = async () => {
         await new RequestBuilder()
@@ -21,7 +23,9 @@ export default function Download({ match }: any) {
             .send((response: any) => {
                 setFileData(response)
             },
-                () => window.location.replace(ROUTES.upload)
+                () => { 
+                    history.push(ROUTES.upload)
+                }
             )
     }
 
@@ -45,7 +49,7 @@ export default function Download({ match }: any) {
                                         variant="contained"
                                         sx={{ mt: 3, mb: 2 }}
                                         style={{ color: "#ebf0f" }}
-                                        onClick={() => window.location.replace(ROUTES.login)}>
+                                        onClick={() => history.push(ROUTES.login)}>
                                         Login
                                     </Button>
                                 </div>
@@ -68,7 +72,7 @@ export default function Download({ match }: any) {
                             <button
                                 style={{ marginTop: "2rem" }}
                                 className="upload-button"
-                                onClick={() => { window.location.replace(ROUTES.upload) }}
+                                onClick={() => { history.push(ROUTES.upload) }}
                             >
                                 Upload another file
                             </button>

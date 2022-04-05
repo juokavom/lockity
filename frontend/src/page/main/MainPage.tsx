@@ -1,11 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button } from 'reactstrap';
-import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
+import { ConfirmAccount } from '../../component/ConfirmAccountComponent';
 import { ROUTES } from '../../model/Routes';
-import { ENDPOINTS } from '../../model/Server';
 import { WindowActionCreators } from '../../redux/actionCreators/WindowActionCreators';
 import { useTypedSelector } from '../../redux/Store';
 import Download from '../DownloadPage';
@@ -35,7 +32,7 @@ export default function Main() {
         return (
             <div>
                 <Switch>
-                    <Route path="/confirm/:id" component={ConfirmWithId} />
+                    <Route path="/confirm/:id" component={ConfirmAccount} />
                     <Route exact path={ROUTES.login} component={() => <Login />} />
                     <Route exact path={ROUTES.upload} component={() => <Upload />} />
                     <Route path={ROUTES.download + "/:id"}  component={Download} />
@@ -71,36 +68,4 @@ export default function Main() {
             </div >
         );
     }
-}
-
-const ConfirmWithId = ({ match }: any) => {
-    const ConfirmAction = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.AUTH.registerConfirm)
-            .withMethod('POST')
-            .withDefaults()
-            .withBody({
-                link: match.params.id
-            })
-            .send((response: any) => {
-                toast.success(response.message, DefaultToastOptions)
-                window.location.replace(ROUTES.login)
-            }, () => { })
-    };
-
-    return (
-        <div className="container mainbox-main">
-            <div className="row align-center justify-content-center" >
-                <div className="col-auto" >
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        onClick={() => ConfirmAction()}
-                    >
-                        Confirm registration
-                    </Button>
-                </div>
-            </div>
-        </div>
-    );
 }

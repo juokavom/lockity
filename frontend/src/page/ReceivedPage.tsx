@@ -187,11 +187,15 @@ export function ReceivedPage() {
     const dispatch = useDispatch()
     const receivedState = useTypedSelector((state) => state.receivedReducer)
 
-    useEffect(() => {
-        // if (isAuthed) {
+    const fetchData = () => {
         dispatch(fetchReceivedMetadataCount())
         dispatch(fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1))
-        // }
+    }
+
+    useEffect(() => {        
+        if (!receivedState.receivedMetadataCount || !receivedState.receivedMetadatas) {
+            fetchData()
+        }
     }, [])
 
     const toggleModal = () => {

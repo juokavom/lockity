@@ -330,11 +330,15 @@ export function SharedPage() {
     const dispatch = useDispatch()
     const sharedState = useTypedSelector((state) => state.sharedReducer)
 
-    useEffect(() => {
-        // if (isAuthed) {
+    const fetchData = () => {        
         dispatch(fetchSharedMetadataCount())
         dispatch(fetchSharedMetadata(0, SHARED_CHUNK_SIZE, 1))
-        // }
+    }
+
+    useEffect(() => {    
+        if (!sharedState.sharedMetadataCount || !sharedState.sharedMetadatas) {    
+            fetchData()   
+        }
     }, [])
     
     const toggleModal = () => {
@@ -343,10 +347,8 @@ export function SharedPage() {
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {
-            // fetchSharedMetadataCount()
-            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)            
-            window.location.replace(ROUTES.sharedPage)
+        if (success) {       
+            fetchData()
         }
     }
 

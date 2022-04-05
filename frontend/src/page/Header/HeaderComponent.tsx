@@ -5,6 +5,7 @@ import {
     Select, Switch, TextField
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { NavLink, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button, Collapse, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Modal, ModalBody, ModalHeader, Nav, Navbar, NavbarToggler, NavItem } from 'reactstrap';
@@ -13,6 +14,7 @@ import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder'
 import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';
 import { User } from '../../model/User';
+import { LocalUserActionCreators } from '../../redux/actionCreators/LocalUserActionCreators';
 import { useTypedSelector } from '../../redux/Store';
 import { IUserData } from '../UsersPage';
 import './Header.scss';
@@ -85,7 +87,8 @@ function EditUser({ userData, callback }: IUserEditModalProps): JSX.Element {
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
                 callback(true)
-            }, () => callback(false))
+            }, () => callback(false)
+            )
     }
 
     return (
@@ -246,33 +249,38 @@ interface IUserEditModalProps {
 export default function Header() {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
-
     const [modalOpen, setModalOpen] = useState(false)
     const [userData, setUserData] = useState<IUserData | null>(null)
+    const [hello] = useState(sayHello())
 
     const windowState = useTypedSelector((state) => state.windowReducer)
     const localUserState = useTypedSelector((state) => state.localUserReducer)
-
     const location = useLocation();
-
-    const [hello] = useState(sayHello())
+    const dispatch = useDispatch()
 
     const toggleModal = () => {
         setModalOpen(!modalOpen)
     }
 
-    const openModal = async () => {
+    const fetchUserData = async (onSuccess: (response: any) => void) => {
         if (localUserState.user) {
             await new RequestBuilder()
                 .withUrl(ENDPOINTS.USER.userId(localUserState.user.id))
                 .withMethod('GET')
                 .withDefaults()
                 .send((response: any) => {
-                    const userdata: IUserData = response
-                    setUserData(userdata)
-                    setModalOpen(true)
-                }, () => { })
+                    onSuccess(response)
+                }, () => { }
+            )
         }
+    }
+
+    const openModal = async () => {
+        fetchUserData((response) => {
+            const userdata: IUserData = response
+            setUserData(userdata)
+            setModalOpen(true)
+        })
     }
 
     const emptyNavLinkMap = (): Map<string, string> => {
@@ -284,7 +292,6 @@ export default function Header() {
 
     const [navlinkClasses, setNavlinkClasses] = useState(emptyNavLinkMap())
 
-
     useEffect(() => {
         const map = emptyNavLinkMap();
         if (map.has(location.pathname)) {
@@ -293,11 +300,13 @@ export default function Header() {
         }
     }, [location.pathname])
 
-
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
         if (success) {
-            window.location.replace(location.pathname)
+            fetchUserData((response) => {
+                const userdata: IUserData = response
+                dispatch(LocalUserActionCreators.setUser(userdata))
+            })
         }
     }
 
