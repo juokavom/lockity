@@ -39,7 +39,7 @@ const FileAction = {
 
 function File({ receivedMetadata, action }: IReceivedFileProps) {
     const format = receivedMetadata.title.split('.').pop();
-    const globalState = useTypedSelector((state) => state.globalReducer)
+    const windowState = useTypedSelector((state) => state.windowReducer)
 
     const buttons = (
         <>
@@ -74,9 +74,9 @@ function File({ receivedMetadata, action }: IReceivedFileProps) {
                 <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
                     <p className="ellipse-text" style={{ maxWidth: "150px" }}>{receivedMetadata.ownerEmail}</p>
                 </div>
-                {!globalState.smallView && buttons}
+                {!windowState.smallView && buttons}
             </div>
-            {globalState.smallView &&
+            {windowState.smallView &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>
@@ -186,7 +186,6 @@ export function ReceivedPage() {
 
     const dispatch = useDispatch()
     const receivedState = useTypedSelector((state) => state.receivedReducer)
-    const globalState = useTypedSelector((state) => state.globalReducer)
 
     useEffect(() => {
         // if (isAuthed) {

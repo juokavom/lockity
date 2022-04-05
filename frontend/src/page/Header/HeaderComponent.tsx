@@ -1,26 +1,21 @@
-import { useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react';
-import {
-    Navbar, Nav, NavbarToggler, Collapse, NavItem,
-    Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Modal, ModalHeader, ModalBody, Button
-} from 'reactstrap';
-import { NavLink } from 'react-router-dom';
-import './Header.scss';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import { ROUTES } from '../../model/Routes';
-import { LogoutAction } from '../../model/RequestActions';
-import { IHeaderProps } from '../main/MainPage';
-import {
-    Box, FormControl, IconButton, InputLabel, Input, MenuItem,
-    Select, TextField, Switch, FormControlLabel
-} from '@mui/material';
-import { toast } from 'react-toastify';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { IUserData } from '../UsersPage';
-import { ENDPOINTS } from '../../model/Server';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import {
+    Box, FormControl, FormControlLabel, IconButton, Input, InputLabel, MenuItem,
+    Select, Switch, TextField
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Button, Collapse, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Modal, ModalBody, ModalHeader, Nav, Navbar, NavbarToggler, NavItem } from 'reactstrap';
+import { LogoutAction } from '../../model/RequestActions';
 import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
+import { ROUTES } from '../../model/Routes';
+import { ENDPOINTS } from '../../model/Server';
 import { User } from '../../model/User';
 import { useTypedSelector } from '../../redux/Store';
+import { IUserData } from '../UsersPage';
+import './Header.scss';
 
 function sayHello() {
     const hellos = [
@@ -248,14 +243,15 @@ interface IUserEditModalProps {
     callback: (success: boolean) => void
 }
 
-export default function Header({ user, isAdmin }: IHeaderProps) {
+export default function Header() {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
 
     const [modalOpen, setModalOpen] = useState(false)
     const [userData, setUserData] = useState<IUserData | null>(null)
 
-    const globalState = useTypedSelector((state) => state.globalReducer)
+    const windowState = useTypedSelector((state) => state.windowReducer)
+    const localUserState = useTypedSelector((state) => state.localUserReducer)
 
     const location = useLocation();
 
@@ -266,15 +262,17 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
     }
 
     const openModal = async () => {
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.USER.userId(user.id))
-            .withMethod('GET')
-            .withDefaults()
-            .send((response: any) => {
-                const userdata: IUserData = response
-                setUserData(userdata)
-                setModalOpen(true)
-            }, () => { })
+        if (localUserState.user) {
+            await new RequestBuilder()
+                .withUrl(ENDPOINTS.USER.userId(localUserState.user.id))
+                .withMethod('GET')
+                .withDefaults()
+                .send((response: any) => {
+                    const userdata: IUserData = response
+                    setUserData(userdata)
+                    setModalOpen(true)
+                }, () => { })
+        }
     }
 
     const emptyNavLinkMap = (): Map<string, string> => {
@@ -298,7 +296,7 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {      
+        if (success) {
             window.location.replace(location.pathname)
         }
     }
@@ -342,14 +340,14 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
                                     <p className={navlinkClasses.get(ROUTES.sharedPage)}>Shared Files</p>
                                 </NavLink>
                             </NavItem>
-                            {isAdmin &&
+                            {localUserState.isAdmin &&
                                 <NavItem>
                                     <NavLink className="nav-link" to={ROUTES.users} >
                                         <p className={navlinkClasses.get(ROUTES.users)}>Users</p>
                                     </NavLink>
                                 </NavItem>
                             }
-                            {globalState.smallView &&
+                            {windowState.smallView &&
                                 <>
                                     <NavItem className="nav-link" onClick={() => openModal()}>
                                         <p className="text-color-toggler">My settings</p>
@@ -362,13 +360,13 @@ export default function Header({ user, isAdmin }: IHeaderProps) {
                         </Nav>
                     </Collapse>
                 </div>
-                {!globalState.smallView &&
+                {!windowState.smallView &&
                     <>
                         <div style={{ display: "inline-block" }}>
                             <p style={{ whiteSpace: "pre" }}><b>{hello},&nbsp;</b></p>
                         </div>
                         <div style={{ display: "inline-block" }}>
-                            <p><i><b>{user.email}&nbsp;</b></i></p>
+                            <p><i><b>{localUserState.user?.email}&nbsp;</b></i></p>
                         </div>
                         <div style={{ display: "inline-block" }}>
                         </div>

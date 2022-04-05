@@ -69,7 +69,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 
 function File({ fileMetadata, action }: IFileProps) {
     const format = fileMetadata.title.split('.').pop();
-    const globalState = useTypedSelector((state) => state.globalReducer)
+    const windowState = useTypedSelector((state) => state.windowReducer)
 
     const buttons = (
         <>
@@ -116,9 +116,9 @@ function File({ fileMetadata, action }: IFileProps) {
                 <div className="col-4 col-lg-2 d-flex justify-content-center">
                     {formatBytes(fileMetadata.size)}
                 </div>
-                {!globalState.smallView && buttons}
+                {!windowState.smallView && buttons}
             </div>
-            {globalState.smallView &&
+            {windowState.smallView &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>

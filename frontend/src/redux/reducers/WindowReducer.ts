@@ -1,17 +1,17 @@
 import { Action } from "../actionCreators/Action";
-import { GlobalActionTypes } from "../actionTypes/GlobalActionTypes";
+import { WindowActionTypes } from "../actionTypes/WindowActionTypes";
 
-export type IGlobalState = {
+export type IWindowState = {
     windowWidth: number | null,
     smallView: boolean | null
 }
 
-export const GlobalReducer = (state: IGlobalState = {
+export const WindowReducer = (state: IWindowState = {
     windowWidth: null,
     smallView: null
-}, action: Action): IGlobalState => {
+}, action: Action): IWindowState => {
     switch (action.type) {
-        case GlobalActionTypes.SET_WINDOW_WIDTH:
+        case WindowActionTypes.SET_WINDOW_WIDTH:
             return { ...state, smallView: action.payload < 992, windowWidth: action.payload }
 
         default:
