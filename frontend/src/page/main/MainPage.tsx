@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
@@ -6,6 +7,8 @@ import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder'
 import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';
 import { User } from '../../model/User';
+import { Action } from '../../redux/actionCreators/Action';
+import { GlobalActionCreators } from '../../redux/actionCreators/GlobalActionCreators';
 import Download from '../DownloadPage';
 import { FilesPage } from '../FilesPage';
 import Footer from '../FooterComponent';
@@ -18,58 +21,35 @@ import Upload from '../upload/UploadPage';
 import { Users } from '../UsersPage';
 import './Main.scss';
 
-function useWindowSize() {
-    const [windowSize, setWindowSize] = useState<{
-        width: number | null,
-        height: number | null
-    }>({
-        width: null,
-        height: null,
-    });
-    useEffect(() => {
-        function handleResize() {
-            setWindowSize({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
-        }
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-    return windowSize;
-}
-
 export interface IHeaderProps {
     user: User.FrontendUser,
-    isAdmin: Boolean,
-    changedLayout: Boolean
+    isAuthed: Boolean,
+    isAdmin: Boolean
+}
+
+const setWindowSize = (width: number) => async (dispatch: Dispatch<Action>) => {
+    dispatch(GlobalActionCreators.setWindowWidth(width))
 }
 
 export default function Main() {
     const localStorageUser = localStorage.getItem(User.storagename)    
     const user: User.FrontendUser | null = localStorageUser? JSON.parse(localStorageUser) : null
 
-    const [changedLayout, setChangedLayout] = useState(false);
+    const dispatch = useDispatch()
 
     const isAdmin = user != null ? User.isAdmin(user.role) : false
     const isAuthed = user != null ? User.isAuthed(user.role) : false
 
-    const windowSize = useWindowSize();
-
     useEffect(() => {
-        if (windowSize.width && windowSize.width < 992) {
-            if (!changedLayout) setChangedLayout(true)
-        }
-        else {
-            if (changedLayout) setChangedLayout(false)
-        }
-    }, [windowSize])
+        window.addEventListener("resize", () => {
+            dispatch(setWindowSize(window.innerWidth))
+        });
+    }, []);
 
     const headerProps: IHeaderProps = {
         user: user!,
-        isAdmin: isAdmin,
-        changedLayout: changedLayout
+        isAuthed: isAuthed,
+        isAdmin: isAdmin
     }
 
     if (!isAuthed) {

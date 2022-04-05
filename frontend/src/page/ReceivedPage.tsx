@@ -18,7 +18,6 @@ import { formatBytes } from './FilesPage';
 
 interface IReceivedFileProps {
     receivedMetadata: IReceivedMetadata,
-    // changedLayout: Boolean,
     action: (action: string) => void
 }
 
@@ -40,6 +39,7 @@ const FileAction = {
 
 function File({ receivedMetadata, action }: IReceivedFileProps) {
     const format = receivedMetadata.title.split('.').pop();
+    const globalState = useTypedSelector((state) => state.globalReducer)
 
     const buttons = (
         <>
@@ -74,14 +74,13 @@ function File({ receivedMetadata, action }: IReceivedFileProps) {
                 <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
                     <p className="ellipse-text" style={{ maxWidth: "150px" }}>{receivedMetadata.ownerEmail}</p>
                 </div>
-                {/* {!changedLayout && buttons} */}
-                {buttons}
+                {!globalState.smallView && buttons}
             </div>
-            {/* {changedLayout &&
+            {globalState.smallView &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>
-            } */}
+            }
         </div>
     );
 }
@@ -187,6 +186,7 @@ export function ReceivedPage() {
 
     const dispatch = useDispatch()
     const receivedState = useTypedSelector((state) => state.receivedReducer)
+    const globalState = useTypedSelector((state) => state.globalReducer)
 
     useEffect(() => {
         // if (isAuthed) {
@@ -218,7 +218,6 @@ export function ReceivedPage() {
     const props = (receivedMetadata: IReceivedMetadata): IReceivedFileProps => {
         return {
             receivedMetadata: receivedMetadata,
-            // changedLayout: changedLayout,
             action: (action: string) => {
                 setModalData({
                     action: action,

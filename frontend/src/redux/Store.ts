@@ -3,6 +3,7 @@ import { applyMiddleware, combineReducers, createStore, Store } from "redux";
 import thunk from "redux-thunk";
 import { Action } from "./actionCreators/Action";
 import { FileReducer } from "./reducers/FileReducer";
+import { GlobalReducer } from "./reducers/GlobalReducer";
 import { ReceivedReducer } from "./reducers/ReceivedReducer";
 import { SharedReducer } from "./reducers/SharedReducer";
 import { UserReducer } from "./reducers/UserReducer";
@@ -13,7 +14,8 @@ const reducers = combineReducers({
   fileReducer: FileReducer,
   sharedReducer: SharedReducer,
   receivedReducer: ReceivedReducer,
-  userReducer: UserReducer
+  userReducer: UserReducer,
+  globalReducer: GlobalReducer
 })
 
 export type MasterState = ReturnType<typeof reducers>

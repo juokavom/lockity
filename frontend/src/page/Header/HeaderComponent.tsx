@@ -20,6 +20,7 @@ import { IUserData } from '../UsersPage';
 import { ENDPOINTS } from '../../model/Server';
 import { DefaultToastOptions, RequestBuilder } from '../../model/RequestBuilder';
 import { User } from '../../model/User';
+import { useTypedSelector } from '../../redux/Store';
 
 function sayHello() {
     const hellos = [
@@ -247,12 +248,14 @@ interface IUserEditModalProps {
     callback: (success: boolean) => void
 }
 
-export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
+export default function Header({ user, isAdmin }: IHeaderProps) {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
 
     const [modalOpen, setModalOpen] = useState(false)
     const [userData, setUserData] = useState<IUserData | null>(null)
+
+    const globalState = useTypedSelector((state) => state.globalReducer)
 
     const location = useLocation();
 
@@ -295,9 +298,7 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {
-            // fetchSharedMetadataCount()
-            // fetchSharedMetadata(0, SHARE_CHUNK_SIZE, 1)            
+        if (success) {      
             window.location.replace(location.pathname)
         }
     }
@@ -348,7 +349,7 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
                                     </NavLink>
                                 </NavItem>
                             }
-                            {changedLayout &&
+                            {globalState.smallView &&
                                 <>
                                     <NavItem className="nav-link" onClick={() => openModal()}>
                                         <p className="text-color-toggler">My settings</p>
@@ -361,7 +362,7 @@ export default function Header({ user, isAdmin, changedLayout }: IHeaderProps) {
                         </Nav>
                     </Collapse>
                 </div>
-                {!changedLayout &&
+                {!globalState.smallView &&
                     <>
                         <div style={{ display: "inline-block" }}>
                             <p style={{ whiteSpace: "pre" }}><b>{hello},&nbsp;</b></p>
