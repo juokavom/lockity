@@ -94,7 +94,6 @@ export default function Main() {
     }
 }
 
-
 const ConfirmWithId = ({ match }: any) => {
     const ConfirmAction = async () => {
         await new RequestBuilder()
