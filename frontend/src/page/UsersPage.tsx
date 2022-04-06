@@ -10,11 +10,13 @@ import {
     Button, Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import CustomPagination from '../component/PaginationComponent';
+import { LOADING_TIMEOUT_MS, USER_CHUNK_SIZE } from '../model/Constants';
 import { DefaultToastOptions, RequestBuilder } from '../model/RequestBuilder';
 import { ROUTES } from '../model/Routes';
 import { ENDPOINTS, MAX_STORAGE_SIZE } from '../model/Server';
 import { User } from '../model/User';
 import { Action } from '../redux/actionCreators/Action';
+import { LoadingActionCreators } from '../redux/actionCreators/LoadingActionCreators';
 import { UserActionCreators } from '../redux/actionCreators/UserActionCreators';
 import { useTypedSelector } from '../redux/Store';
 
@@ -514,9 +516,8 @@ function Delete({ userData, callback }: IUserModalProps): JSX.Element {
     );
 }
 
-export const USER_CHUNK_SIZE = 10
-
-const fetchUserData = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+const fetchUserData = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) => {
+    dispatch(LoadingActionCreators.setLoading())
     await new RequestBuilder()
         .withUrl(ENDPOINTS.USER.getUserDataWithOffsetAndLimit(offset, limit))
         .withMethod('GET')
@@ -526,10 +527,19 @@ const fetchUserData = (offset: number, limit: number, selected: number) => async
             if (response) {
                 const userData: IUserData[] = response
                 dispatch(UserActionCreators.setUserData(userData))
+                setTimeout(() => {
+                    dispatch(LoadingActionCreators.setNotLoading())
+                }, LOADING_TIMEOUT_MS)
             } else {
                 dispatch(UserActionCreators.setUserData(null))
+                dispatch(LoadingActionCreators.setNotLoading())
             }
-        }, () => dispatch(UserActionCreators.setUserData(null)))
+        }, () => {
+            dispatch(UserActionCreators.setUserData(null)) 
+            dispatch(LoadingActionCreators.setNotLoading())
+        }
+        )
+}
 
 
 const fetchUserCount = () => async (dispatch: Dispatch<Action>) => {
@@ -563,7 +573,7 @@ export function Users() {
     }
 
     useEffect(() => {
-        if (!userState.userCount || !userState.userDatas) { 
+        if (!userState.fetched) { 
             fetchData()    
         }
     }, [])

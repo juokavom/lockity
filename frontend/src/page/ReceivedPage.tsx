@@ -8,9 +8,11 @@ import {
     Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import CustomPagination from '../component/PaginationComponent';
+import { LOADING_TIMEOUT_MS, RECEIVED_CHUNK_SIZE } from '../model/Constants';
 import { RequestBuilder } from '../model/RequestBuilder';
 import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { Action } from '../redux/actionCreators/Action';
+import { LoadingActionCreators } from '../redux/actionCreators/LoadingActionCreators';
 import { ReceivedActionCreators } from '../redux/actionCreators/ReceivedActionCreators';
 import { useTypedSelector } from '../redux/Store';
 import { formatBytes } from './FilesPage';
@@ -144,7 +146,8 @@ function Preview({ receivedMetadata, callback }: IReceivedModalProps): JSX.Eleme
     }
 }
 
-const fetchReceivedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+const fetchReceivedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) => {
+    dispatch(LoadingActionCreators.setLoading())
     await new RequestBuilder()
         .withUrl(ENDPOINTS.FILE.getReceivedMetadataWithOffsetAndLimit(offset, limit))
         .withMethod('GET')
@@ -154,10 +157,19 @@ const fetchReceivedMetadata = (offset: number, limit: number, selected: number) 
             if (response) {
                 const receivedMetadata: IReceivedMetadata[] = response
                 dispatch(ReceivedActionCreators.setReceivedMetadata(receivedMetadata))
+                setTimeout(() => {
+                    dispatch(LoadingActionCreators.setNotLoading())
+                }, LOADING_TIMEOUT_MS)
             } else {
                 dispatch(ReceivedActionCreators.setReceivedMetadata(null))
+                dispatch(LoadingActionCreators.setNotLoading())
             }
-        }, () => dispatch(ReceivedActionCreators.setReceivedMetadata(null)))
+        }, () => {
+            dispatch(ReceivedActionCreators.setReceivedMetadata(null))
+            dispatch(LoadingActionCreators.setNotLoading())
+        }
+        )
+}
 
 
 const fetchReceivedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
@@ -175,8 +187,6 @@ const fetchReceivedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
         }, () => dispatch(ReceivedActionCreators.setReceivedMetadataCount(null)))
 }
 
-export const RECEIVED_CHUNK_SIZE = 5
-
 export function ReceivedPage() {
     const [modalOpen, setModalOpen] = useState(false)
     const [modalData, setModalData] = useState<{
@@ -192,8 +202,8 @@ export function ReceivedPage() {
         dispatch(fetchReceivedMetadata(0, RECEIVED_CHUNK_SIZE, 1))
     }
 
-    useEffect(() => {        
-        if (!receivedState.receivedMetadataCount || !receivedState.receivedMetadatas) {
+    useEffect(() => {
+        if (!receivedState.fetched) {
             fetchData()
         }
     }, [])
@@ -250,7 +260,7 @@ export function ReceivedPage() {
                 </Modal>
                 {
                     receivedState.receivedMetadatas && receivedState.receivedMetadatas.length != 0 ?
-                    receivedState.receivedMetadatas.map((receivedMeta: IReceivedMetadata) => {
+                        receivedState.receivedMetadatas.map((receivedMeta: IReceivedMetadata) => {
                             return (
                                 <File key={receivedMeta.id} {...props(receivedMeta)}></File>
                             );
@@ -269,7 +279,7 @@ export function ReceivedPage() {
                         total: receivedState.receivedMetadataCount,
                         chunkSize: RECEIVED_CHUNK_SIZE,
                         selected: receivedState.pageSelected,
-                        fetchItems:  (offset: number, limit: number, selected: number) => dispatch(fetchReceivedMetadata(offset, limit, selected))
+                        fetchItems: (offset: number, limit: number, selected: number) => dispatch(fetchReceivedMetadata(offset, limit, selected))
                     }} /> : <div></div>
                 }
             </div>

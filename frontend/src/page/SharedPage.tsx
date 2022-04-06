@@ -12,6 +12,8 @@ import { useDispatch } from 'react-redux';
 import { SharedActionCreators } from '../redux/actionCreators/SharedActionCreators';
 import { Action } from '../redux/actionCreators/Action';
 import { useTypedSelector } from '../redux/Store';
+import { LoadingActionCreators } from '../redux/actionCreators/LoadingActionCreators';
+import { LOADING_TIMEOUT_MS, SHARED_CHUNK_SIZE } from '../model/Constants';
 
 const ShareAction = {
     Create: "Share file",
@@ -287,9 +289,8 @@ function Delete({ shareMetadata, callback }: IShareModalProps): JSX.Element {
     );
 }
 
-export const SHARED_CHUNK_SIZE = 10
-
-const fetchSharedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+const fetchSharedMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) => {
+    dispatch(LoadingActionCreators.setLoading())
     await new RequestBuilder()
         .withUrl(ENDPOINTS.SHARED.getSharedMetadataWithOffsetAndLimit(offset, limit))
         .withMethod('GET')
@@ -299,11 +300,19 @@ const fetchSharedMetadata = (offset: number, limit: number, selected: number) =>
             if (response) {
                 const shareMetadata: ISharedMetadata[] = response
                 dispatch(SharedActionCreators.setSharedMetadata(shareMetadata))
+                setTimeout(() => {
+                    dispatch(LoadingActionCreators.setNotLoading())
+                }, LOADING_TIMEOUT_MS)
             } else {
                 dispatch(SharedActionCreators.setSharedMetadata(null))
+                dispatch(LoadingActionCreators.setNotLoading())
             }
-        }, () => dispatch(SharedActionCreators.setSharedMetadata(null)))
-
+        }, () => {
+            dispatch(SharedActionCreators.setSharedMetadata(null))
+            dispatch(LoadingActionCreators.setNotLoading())
+        }
+        )
+}
 
 const fetchSharedMetadataCount = () => async (dispatch: Dispatch<Action>) => {
     await new RequestBuilder()
@@ -330,24 +339,24 @@ export function SharedPage() {
     const dispatch = useDispatch()
     const sharedState = useTypedSelector((state) => state.sharedReducer)
 
-    const fetchData = () => {        
+    const fetchData = () => {
         dispatch(fetchSharedMetadataCount())
         dispatch(fetchSharedMetadata(0, SHARED_CHUNK_SIZE, 1))
     }
 
-    useEffect(() => {    
-        if (!sharedState.sharedMetadataCount || !sharedState.sharedMetadatas) {    
-            fetchData()   
+    useEffect(() => {
+        if (!sharedState.fetched) {
+            fetchData()
         }
     }, [])
-    
+
     const toggleModal = () => {
         setModalOpen(!modalOpen)
     }
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {       
+        if (success) {
             fetchData()
         }
     }
@@ -491,4 +500,8 @@ export function SharedPage() {
             }
         </div>
     );
+}
+
+function dispatch(arg0: Action) {
+    throw new Error('Function not implemented.');
 }

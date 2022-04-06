@@ -24,6 +24,11 @@ function Upload() {
         }
     }
 
+    const clearHooks = () => {
+        setState(UploadPageState.Initial)
+        setFileMeta(null)
+    }
+
     const copyFileUrl = async () => {
         if (fileMeta?.link) {
             await navigator.clipboard.writeText(ROUTES.getAnonymousFile(fileMeta?.link));
@@ -79,6 +84,15 @@ function Upload() {
                                     Copy to clipboard
                                 </UncontrolledTooltip>
                             </div>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                                style={{ color: "#ebf0f" }}
+                                onClick={() => clearHooks()}
+                            >
+                                Upload another file
+                            </Button>
                         </div>
                     }
                     <div className="jumbotron-bottom">

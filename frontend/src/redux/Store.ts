@@ -3,6 +3,7 @@ import { applyMiddleware, combineReducers, createStore, Store } from "redux";
 import thunk from "redux-thunk";
 import { Action } from "./actionCreators/Action";
 import { FileReducer } from "./reducers/FileReducer";
+import { LoadingReducer } from "./reducers/LoadingReducer";
 import { LocalUserReducer } from "./reducers/LocalUserReducer";
 import { ReceivedReducer } from "./reducers/ReceivedReducer";
 import { SharedReducer } from "./reducers/SharedReducer";
@@ -17,7 +18,8 @@ const reducers = combineReducers({
   receivedReducer: ReceivedReducer,
   userReducer: UserReducer,
   localUserReducer: LocalUserReducer,
-  windowReducer: WindowReducer
+  windowReducer: WindowReducer,
+  loadingReducer: LoadingReducer
 })
 
 export type MasterState = ReturnType<typeof reducers>

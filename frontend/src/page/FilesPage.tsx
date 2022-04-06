@@ -19,6 +19,10 @@ import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../model/Server';
 import { Action } from '../redux/actionCreators/Action';
 import { FileActionCreators } from '../redux/actionCreators/FileActionCreators';
 import { useTypedSelector } from '../redux/Store';
+import PuffLoader from "react-spinners/PuffLoader";
+import { LoadingSpinner } from '../component/LoadingSpinnerComponent';
+import { FILE_CHUNK_SIZE, LOADING_TIMEOUT_MS } from '../model/Constants';
+import { LoadingActionCreators } from '../redux/actionCreators/LoadingActionCreators';
 
 export interface IFileMetadata {
     id: string,
@@ -385,8 +389,6 @@ function Delete({ fileMetadata, callback }: IFileModalProps): JSX.Element {
     );
 }
 
-export const FILE_CHUNK_SIZE = 5
-
 function StorageStatusBar({ totalSize, usedSize }: StorageData): JSX.Element {
     const percentage = usedSize * 100 / totalSize
     let color = "info"
@@ -405,7 +407,8 @@ function StorageStatusBar({ totalSize, usedSize }: StorageData): JSX.Element {
     );
 }
 
-const fetchFileMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) =>
+const fetchFileMetadata = (offset: number, limit: number, selected: number) => async (dispatch: Dispatch<Action>) => {
+    dispatch(LoadingActionCreators.setLoading())
     await new RequestBuilder()
         .withUrl(ENDPOINTS.FILE.getFileMetadataWithOffsetAndLimit(offset, limit))
         .withMethod('GET')
@@ -415,12 +418,19 @@ const fetchFileMetadata = (offset: number, limit: number, selected: number) => a
             if (response) {
                 const fileMetadata: IFileMetadata[] = response
                 dispatch(FileActionCreators.setFileMetadata(fileMetadata))
+                setTimeout(() => {
+                    dispatch(LoadingActionCreators.setNotLoading())
+                }, LOADING_TIMEOUT_MS)
             } else {
                 dispatch(FileActionCreators.setFileMetadata(null))
+                dispatch(LoadingActionCreators.setNotLoading())
             }
-        }, () => dispatch(FileActionCreators.setFileMetadata(null))
+        }, () => {
+            dispatch(FileActionCreators.setFileMetadata(null))
+            dispatch(LoadingActionCreators.setNotLoading())
+        }
         )
-
+}
 
 const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) =>
     await new RequestBuilder()
@@ -447,20 +457,20 @@ export function FilesPage() {
     const dispatch = useDispatch()
     const fileState = useTypedSelector((state) => state.fileReducer)
 
-    const fetchData = () => {    
+    const fetchData = () => {
         dispatch(fetchFileMetadataInfo())
         dispatch(fetchFileMetadata(0, FILE_CHUNK_SIZE, 1))
     }
 
     useEffect(() => {
-        if (!fileState.fileMetadataInfo || !fileState.fileMetadatas) {
+        if (!fileState.fetched) {
             fetchData()
         }
     }, [])
 
     const modalCallback = (success: boolean) => {
         setModalOpen(false)
-        if (success) {         
+        if (success) {
             fetchData()
         }
     }
@@ -472,7 +482,7 @@ export function FilesPage() {
     function Upload() {
         return (
             <FileUploader {...{
-                isAuthed: true, 
+                isAuthed: true,
                 onUpload: () => modalCallback(true),
                 onError: () => modalCallback(false)
             }} />

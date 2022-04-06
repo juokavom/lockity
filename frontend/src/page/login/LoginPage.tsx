@@ -14,6 +14,8 @@ import { Modal, ModalBody, ModalHeader } from "reactstrap";
 import { useHistory } from "react-router";
 import { useDispatch } from "react-redux";
 import { LocalUserActionCreators } from "../../redux/actionCreators/LocalUserActionCreators";
+import { LoadingSpinner } from "../../component/LoadingSpinnerComponent";
+import { LOADING_TIMEOUT_MS } from "../../model/Constants";
 
 export function Copyright(prop: any) {
     return (
@@ -32,6 +34,7 @@ function Register({ callback }: { callback: (success: boolean) => void }) {
     const [surname, setSurname] = useState<string | null>(null);
     const [email, setEmail] = useState<string | null>(null);
     const [password, setPassword] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const validateForm = () => {
         return email != null && email.length > 0 && password != null && password.length > 0;
@@ -43,6 +46,7 @@ function Register({ callback }: { callback: (success: boolean) => void }) {
     }
 
     const RegisterAction = async () => {
+        setLoading(true)
         await new RequestBuilder()
             .withUrl(ENDPOINTS.AUTH.register)
             .withMethod('POST')
@@ -54,75 +58,85 @@ function Register({ callback }: { callback: (success: boolean) => void }) {
                 password: password
             })
             .send((response: any) => {
-                toast.success(response.message, DefaultToastOptions)
-                callback(true)
+                setTimeout(() => {
+                    setLoading(false)
+                    toast.success(response.message, DefaultToastOptions)
+                    callback(true)
+                }, LOADING_TIMEOUT_MS)
             }, () => { })
     };
 
-    return (
-        <div>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                <TextField
-                    margin="normal"
-                    fullWidth
-                    id="name"
-                    label="Name"
-                    name="name"
-                    autoComplete="name"
-                    variant="standard"
-                    onChange={(e: any) => setName(e.target.value)}
-                />
-                <TextField
-                    margin="normal"
-                    fullWidth
-                    id="surname"
-                    label="Surname"
-                    name="surname"
-                    autoComplete="surname"
-                    variant="standard"
-                    onChange={(e: any) => setSurname(e.target.value)}
-                />
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email"
-                    name="email"
-                    autoComplete="email"
-                    variant="standard"
-                    onChange={(e: any) => setEmail(e.target.value)}
-                />
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="password"
-                    variant="standard"
-                    onChange={(e: any) => setPassword(e.target.value)}
-                />
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                    disabled={!validateForm()}
-                >
-                    Register
-                </Button>
-            </Box>
-        </div>
-    );
+    if (loading) {
+        return (
+            <LoadingSpinner />
+        );
+    } else {
+        return (
+            <div>
+                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="name"
+                        label="Name"
+                        name="name"
+                        autoComplete="name"
+                        variant="standard"
+                        onChange={(e: any) => setName(e.target.value)}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="surname"
+                        label="Surname"
+                        name="surname"
+                        autoComplete="surname"
+                        variant="standard"
+                        onChange={(e: any) => setSurname(e.target.value)}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email"
+                        name="email"
+                        autoComplete="email"
+                        variant="standard"
+                        onChange={(e: any) => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="password"
+                        variant="standard"
+                        onChange={(e: any) => setPassword(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={!validateForm()}
+                    >
+                        Register
+                    </Button>
+                </Box>
+            </div>
+        );
+    }
 }
 
 function Login() {
     const [modalOpen, setModalOpen] = useState(false)
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
     const history = useHistory();
     const dispatch = useDispatch();
 
@@ -140,6 +154,7 @@ function Login() {
     }
 
     const LoginAction = async (email: string, password: string) => {
+        setLoading(true)
         await new RequestBuilder()
             .withUrl(ENDPOINTS.AUTH.login)
             .withMethod('POST')
@@ -149,9 +164,12 @@ function Login() {
                 password: password
             })
             .send((loggedUser: User.FrontendUser) => {
-                localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
-                dispatch(LocalUserActionCreators.setUser(loggedUser))
-                window.location.replace(ROUTES.filesPage)
+                setTimeout(() => {
+                    setLoading(false)
+                    localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
+                    dispatch(LocalUserActionCreators.setUser(loggedUser))
+                    history.push(ROUTES.filesPage)
+                }, LOADING_TIMEOUT_MS)
             }, () => { })
     };
 
@@ -172,65 +190,69 @@ function Login() {
             <div className="backImage"></div>
             <div className="loginspinner" >
                 <div>
-                    <Typography align="center" component="h1" variant="h5">
-                        Log in
-                    </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
-                            variant="standard"
-                            onChange={(e: any) => setEmail(e.target.value)}
-                        />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            id="password"
-                            autoComplete="password"
-                            variant="standard"
-                            onChange={(e: any) => setPassword(e.target.value)}
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                            disabled={!validateForm()}
-                        >
-                            Sign In
-                        </Button>
-                        <Grid container>
-                            <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
-                                </Link>
+                    {loading && <LoadingSpinner />}
+                    {!loading &&
+                        <>
+                        <Typography align="center" component="h1" variant="h5">
+                            Log in
+                        </Typography>
+                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Email"
+                                name="email"
+                                autoComplete="email"
+                                variant="standard"
+                                onChange={(e: any) => setEmail(e.target.value)}
+                            />
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Password"
+                                type="password"
+                                id="password"
+                                autoComplete="password"
+                                variant="standard"
+                                onChange={(e: any) => setPassword(e.target.value)}
+                            />
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                                disabled={!validateForm()}
+                            >
+                                Sign In
+                            </Button>
+                            <Grid container>
+                                <Grid item xs>
+                                    <Link href="#" variant="body2">
+                                        Forgot password?
+                                    </Link>
+                                </Grid>
+                                <Grid item>
+                                    <Link href="#" variant="body2" onClick={() => toggleModal()}>
+                                        {"Sign up"}
+                                    </Link>
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <Link href="#" variant="body2" onClick={() => toggleModal()}>
-                                    {"Sign up"}
-                                </Link>
-                            </Grid>
-                        </Grid>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                            style={{ color: "#ebf0f" }}
-                            onClick={() => history.push(ROUTES.upload)}
-                        >
-                            Proceed to upload page
-                        </Button>
-                        {/* <Copyright sx={{ mt: 2 }} /> */}
-                    </Box>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                                style={{ color: "#ebf0f" }}
+                                onClick={() => history.push(ROUTES.upload)}
+                            >
+                                Proceed to upload page
+                            </Button>
+                        </Box>
+                        </>
+                    }
                 </div>
             </div >
         </div>

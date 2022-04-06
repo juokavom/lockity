@@ -10,6 +10,17 @@
   margin-bottom: 20px;
 }
 
+.loading-spinner {
+  min-height: 400px;
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+.loading-spinner.hide {
+  min-height: 400px;
+  pointer-events:none;
+  opacity: 0;
+}
+
 .selected-file-wrapper {
   margin-top: 20px;
   text-align: center;
