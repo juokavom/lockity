@@ -1,13 +1,13 @@
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
 import thunk from "redux-thunk";
-import { Action } from "./actionCreators/Action";
-import { FileReducer } from "./reducers/FileReducer";
+import { FileReducer } from "../page/files/redux/FileReducer";
+import { ReceivedReducer } from "../page/received/redux/ReceivedReducer";
+import { SharedReducer } from "../page/shared/redux/SharedReducer";
+import { UserReducer } from "../page/users/redux/UserReducer";
+import { Action } from "./Action";
 import { LoadingReducer } from "./reducers/LoadingReducer";
 import { LocalUserReducer } from "./reducers/LocalUserReducer";
-import { ReceivedReducer } from "./reducers/ReceivedReducer";
-import { SharedReducer } from "./reducers/SharedReducer";
-import { UserReducer } from "./reducers/UserReducer";
 import { WindowReducer } from "./reducers/WindowReducer";
 
 export const useTypedSelector: TypedUseSelectorHook<MasterState> = useSelector;

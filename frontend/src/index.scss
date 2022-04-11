@@ -1,0 +1,246 @@
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.dropzone {
+  text-align: center;
+  padding: 30px;
+  border: 3px dashed #eeeeee;
+  background-color: #fafafa;
+  color: #bdbdbd;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.loading-spinner {
+  min-height: 400px;
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+.loading-spinner.hide {
+  min-height: 400px;
+  pointer-events:none;
+  opacity: 0;
+}
+
+.selected-file-wrapper {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.selected-file {
+  color: #000;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.border-box {
+  text-align: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding-inline: 2em;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.ellipse-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.table.table-ellipsis tbody td {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table.table-ellipsis tbody td:hover {
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-all;
+}
+
+$color: #0cf;
+
+.upload-button {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10rem;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.15rem;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: $color;
+    border-radius: 10rem;
+    z-index: -2;
+  }
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background-color: darken($color, 20%);
+    transition: all 0.3s;
+    border-radius: 10rem;
+    z-index: -1;
+  }
+  &:hover:enabled {
+    color: #fff;
+    &:before {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .upload-main {
+    top: 5%;
+  }
+  .upload {
+    margin-bottom: 5%;
+  }
+}
+@media (min-width: 600px) {
+  .upload-main {
+    top: 15%;
+  }
+  .upload {
+    margin-bottom: 15%;
+  }
+}
+
+.upload-main {
+  min-width: 400px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.upload {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 0.5em;
+  overflow: hidden;
+}
+
+.mainbox-main {
+  top: 5%;
+  min-width: 400px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.mainbox {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 0.5em;
+  overflow: hidden;
+  margin-bottom: 5%;
+}
+
+.jumbotron-top {
+  padding: 1rem 5rem;
+  margin-bottom: 2rem;
+  background-color: #95b3d4;
+  width: 110%;
+}
+
+.jumbotron-bottom {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 5rem;
+  margin-top: 2rem;
+  background-color: #ebf0f5;
+  width: 110%;
+}
+
+.float-login {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.header {
+  display: flex-start;
+  justify-content: center;
+  padding: 0rem 5rem;
+  margin-bottom: 1rem;
+  background-color: #95b3d4;
+  width: 110%;
+  text-align: center;
+  align-items: center;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 5rem;
+  margin-top: 2rem;
+  background-color: #ebf0f5;
+  width: 110%;
+}
+
+.permanent-marker {
+  font-family: "Permanent Marker", cursive;
+  font-size: 24px;
+}
+
+@media (min-width: 992px) {
+  .min-height {
+    min-height: 400px;
+  }
+}
+
+.route-holder {
+  width: 90%;
+}
+
+.file {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 1em;
+  margin-top: 2rem;
+  padding: 0.75rem;
+}

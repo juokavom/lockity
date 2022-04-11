@@ -1,5 +1,5 @@
 import { WindowActionTypes } from "../actionTypes/WindowActionTypes";
-import { Action } from "./Action";
+import { Action } from "../Action";
 
 export namespace WindowActionCreators {    
     export const setWindowWidth = (windowWidth: number): Action => ({

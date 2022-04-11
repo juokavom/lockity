@@ -1,138 +1,23 @@
-import { useState } from "react";
-import './Login.scss';
-import Button from '@mui/material/Button';
-import { DefaultToastOptions, RequestBuilder } from "../../model/RequestBuilder";
-import { ENDPOINTS, LANDING_URL } from "../../model/Server";
-import { User } from "../../model/User";
-import { ROUTES } from "../../model/Routes";
-import TextField from '@mui/material/TextField';
 import { Box, Grid } from "@mui/material";
-import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
-import { toast } from "react-toastify";
-import { Modal, ModalBody, ModalHeader } from "reactstrap";
-import { useHistory } from "react-router";
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { LocalUserActionCreators } from "../../redux/actionCreators/LocalUserActionCreators";
-import { LoadingSpinner } from "../../component/LoadingSpinnerComponent";
+import { useHistory } from "react-router";
+import { Modal, ModalBody, ModalHeader } from "reactstrap";
 import { LOADING_TIMEOUT_MS } from "../../model/Constants";
+import { RequestBuilder } from "../../model/RequestBuilder";
+import { ROUTES } from "../../model/Routes";
+import { ENDPOINTS } from "../../model/Server";
+import { User } from "../../model/User";
+import { LocalUserActionCreators } from "../../redux/actionCreators/LocalUserActionCreators";
+import { LoadingSpinner } from "../main/components/LoadingSpinnerComponent";
+import { Register } from "./components/RegisterComponent";
+import './styles/Login.scss';
 
-export function Copyright(prop: any) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...prop}>
-            {'© '}{' '}
-            {new Date().getFullYear()}{' '}
-            <Link color="inherit" href={LANDING_URL}>
-                Lockity.com
-            </Link>
-        </Typography>
-    );
-}
-
-function Register({ callback }: { callback: (success: boolean) => void }) {
-    const [name, setName] = useState<string | null>(null);
-    const [surname, setSurname] = useState<string | null>(null);
-    const [email, setEmail] = useState<string | null>(null);
-    const [password, setPassword] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-
-    const validateForm = () => {
-        return email != null && email.length > 0 && password != null && password.length > 0;
-    }
-
-    const handleSubmit = async (event: { preventDefault: () => void; }) => {
-        event.preventDefault();
-        await RegisterAction();
-    }
-
-    const RegisterAction = async () => {
-        setLoading(true)
-        await new RequestBuilder()
-            .withUrl(ENDPOINTS.AUTH.register)
-            .withMethod('POST')
-            .withDefaults()
-            .withBody({
-                name: name,
-                surname: surname,
-                email: email,
-                password: password
-            })
-            .send((response: any) => {
-                setTimeout(() => {
-                    setLoading(false)
-                    toast.success(response.message, DefaultToastOptions)
-                    callback(true)
-                }, LOADING_TIMEOUT_MS)
-            }, () => { })
-    };
-
-    if (loading) {
-        return (
-            <LoadingSpinner />
-        );
-    } else {
-        return (
-            <div>
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        id="name"
-                        label="Name"
-                        name="name"
-                        autoComplete="name"
-                        variant="standard"
-                        onChange={(e: any) => setName(e.target.value)}
-                    />
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        id="surname"
-                        label="Surname"
-                        name="surname"
-                        autoComplete="surname"
-                        variant="standard"
-                        onChange={(e: any) => setSurname(e.target.value)}
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email"
-                        name="email"
-                        autoComplete="email"
-                        variant="standard"
-                        onChange={(e: any) => setEmail(e.target.value)}
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="password"
-                        variant="standard"
-                        onChange={(e: any) => setPassword(e.target.value)}
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                        disabled={!validateForm()}
-                    >
-                        Register
-                    </Button>
-                </Box>
-            </div>
-        );
-    }
-}
-
-function Login() {
+export default function LoginPage() {
     const [modalOpen, setModalOpen] = useState(false)
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -258,5 +143,3 @@ function Login() {
         </div>
     );
 }
-
-export default Login;

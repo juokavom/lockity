@@ -1,5 +1,5 @@
 import { LoadingActionTypes } from "../actionTypes/LoadingActionTypes";
-import { Action } from "./Action";
+import { Action } from "../Action";
 
 export namespace LoadingActionCreators {
     export const setLoading = (): Action => ({

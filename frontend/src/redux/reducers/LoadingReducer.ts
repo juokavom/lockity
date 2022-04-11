@@ -1,4 +1,4 @@
-import { Action } from "../actionCreators/Action";
+import { Action } from "../Action";
 import { LoadingActionTypes } from "../actionTypes/LoadingActionTypes";
 
 export type ILoadingState = {

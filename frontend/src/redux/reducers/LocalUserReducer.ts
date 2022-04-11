@@ -1,5 +1,5 @@
 import { User } from "../../model/User";
-import { Action } from "../actionCreators/Action";
+import { Action } from "../Action";
 import { LocalUserActionTypes } from "../actionTypes/LocalUserActionTypes";
 
 export type ILocalUserState = {

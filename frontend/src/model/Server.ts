@@ -21,7 +21,7 @@ export const MAX_STORAGE_SIZE = 15000000000
 export const URL: IURL = process.env.NODE_ENV === "production" ? prod : dev
 
 export namespace ENDPOINTS {
-    const endpoint = URL.Backend
+    export const endpoint = URL.Backend
 
     export namespace AUTH {
         export const login = endpoint + '/login'

@@ -1,4 +1,4 @@
-import { Action } from "../actionCreators/Action";
+import { Action } from "../Action";
 import { WindowActionTypes } from "../actionTypes/WindowActionTypes";
 
 export type IWindowState = {

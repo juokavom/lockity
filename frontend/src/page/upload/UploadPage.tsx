@@ -1,18 +1,14 @@
-import FileUploader, { FileUploadedMetadata } from '../../component/FileUploaderComponent';
-import { ROUTES } from '../../model/Routes';
-import { Copyright } from '../login/LoginPage';
 import { useState } from 'react';
-import { Button, UncontrolledTooltip } from 'reactstrap';
-import { toast } from 'react-toastify';
-import { DefaultToastOptions, } from '../../model/RequestBuilder';
 import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Button, UncontrolledTooltip } from 'reactstrap';
+import { DefaultToastOptions } from '../../model/RequestBuilder';
+import { ROUTES } from '../../model/Routes';
+import { Copyright } from '../login/components/CopyrightComponent';
+import FileUploader from './components/FileUploaderComponent';
+import { UploadPageState } from './model/UploadModels';
 
-enum UploadPageState {
-    Initial,
-    Uploaded
-}
-
-function Upload() {
+export default function UploadPage() {
     const [state, setState] = useState<UploadPageState>(UploadPageState.Initial)
     const [fileMeta, setFileMeta] = useState<any | null>(null)
     const history = useHistory();
@@ -107,5 +103,3 @@ function Upload() {
         </div >
     );
 }
-
-export default Upload;
