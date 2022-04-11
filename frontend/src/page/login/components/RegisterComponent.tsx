@@ -42,7 +42,9 @@ export function Register({ callback }: { callback: (success: boolean) => void })
                     toast.success(response.message, DefaultToastOptions)
                     callback(true)
                 }, LOADING_TIMEOUT_MS)
-            }, () => { })
+            }, () => {
+                setLoading(false)
+             })
     };
 
     if (loading) {

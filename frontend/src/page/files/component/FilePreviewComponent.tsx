@@ -1,21 +1,18 @@
 import { useState } from "react";
-import { ENDPOINTS } from "../../../model/Server";
 import { IFilePreviewProps } from "../model/FileModels";
 import { fileNameTsx } from "../model/FileNameTsx";
 
-export const FilePreview = ({ id, title }: IFilePreviewProps): JSX.Element => {
+export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element => {
     const [format] = useState(title.split('.').pop());
 
-    const src = ENDPOINTS.FILE.streamWithFileId(id)
-
     const videoJsx = () => (
-        <video style={{ maxWidth: "100%" }} controls controlsList="nodownload nofullscreen">
+        <video style={{ maxWidth: "100%" }} controls controlsList="nodownload">
             <source src={src} type="video/mp4" />
         </video>
     );
 
     const audioJsx = () => (
-        <audio style={{ maxWidth: "100%" }} controls controlsList="nodownload nofullscreen">
+        <audio style={{ maxWidth: "100%" }} controls controlsList="nodownload">
             <source src={src} type="audio/mpeg" />
         </audio>
     );

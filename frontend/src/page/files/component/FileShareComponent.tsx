@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useDispatch } from "react-redux"
 import { toast } from "react-toastify"
 import { Button, UncontrolledTooltip } from "reactstrap"
 import { DefaultToastOptions, RequestBuilder } from "../../../model/RequestBuilder"
@@ -6,10 +7,12 @@ import { ROUTES } from "../../../model/Routes"
 import { ENDPOINTS } from "../../../model/Server"
 import { IFileModalProps } from "../model/FileModels"
 import { fileNameTsx } from "../model/FileNameTsx"
+import { FileActionCreators } from "../redux/FileActionCreators"
 
 export const FileShare = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
-    const [link] = useState(fileMetadata.link);
-
+    const [link, setLink] = useState<string | null>(fileMetadata.link);
+    const dispatch = useDispatch()
+    
     const copyFileUrl = async () => {
         if (link) {
             await navigator.clipboard.writeText(ROUTES.getAnonymousFile(link));
@@ -24,8 +27,12 @@ export const FileShare = ({ fileMetadata, callback }: IFileModalProps): JSX.Elem
             .withDefaults()
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
-                callback(true)
-            }, () => callback(false))
+                setLink(response.fileLink)
+                fileMetadata.link = response.fileLink
+                dispatch(FileActionCreators.editFileShareLink(fileMetadata))
+            }, () =>
+                setLink(null)
+            )
     }
 
     if (link) {

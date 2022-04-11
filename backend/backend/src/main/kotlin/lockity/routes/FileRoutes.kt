@@ -174,11 +174,11 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("Share condition is not present in the parameters or in wrong format.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to modify this file metadata")
-                        fileService.modifyUserFileSharing(currentUser, fileId, shareCondition)
-                        call.respondJSON(
-                            "File ${if (shareCondition) "shared" else "unshared"} successfully",
-                            HttpStatusCode.OK
-                        )
+                        val link = fileService.modifyUserFileSharing(currentUser, fileId, shareCondition)
+                        val returnable = link?.let {
+                            "\"$it\""
+                        } ?: link
+                        call.respondText("{\"fileLink\":$returnable}", ContentType.Application.Json, HttpStatusCode.OK)
                     }
                 }
 

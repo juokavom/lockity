@@ -12,6 +12,11 @@ export namespace FileActionCreators {
         type: FileActionTypes.SET_FILE_METADATA,
         payload: fileMetadata
     })
+
+    export const editFileShareLink = (fileMetadata: IFileMetadata): Action => ({
+        type: FileActionTypes.EDIT_FILE_METADATA,
+        payload: fileMetadata
+    })
     
     export const setFileMetadataInfo = (fileMetadataInfo: IFileMetadataInfo | null): Action => ({
         type: FileActionTypes.SET_FILE_METADATA_INFO,

@@ -16,6 +16,7 @@ import { StorageStatusBar } from './component/StorageStatusBarComponent';
 import { FileAction, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps } from './model/FileModels';
 import { fetchFileMetadata, fetchFileMetadataInfo } from './request/FilesRequests';
 import { File } from './component/FileComponent';
+import { ENDPOINTS } from '../../model/Server';
 
 export function FilesPage() {
     const [modalOpen, setModalOpen] = useState(false)
@@ -59,7 +60,7 @@ export function FilesPage() {
         );
     }
 
-    const selectActionJsx = (): JSX.Element => {
+    const selectActionTsx = (): JSX.Element => {
         if (modalData) {
             if (modalData.action === FileAction.Upload) return (<Upload />);
             else if (modalData.fileMetadata) {
@@ -69,7 +70,8 @@ export function FilesPage() {
                 }
                 const previewProps: IFilePreviewProps = {
                     id: modalData.fileMetadata.id,
-                    title: modalData.fileMetadata.title
+                    title: modalData.fileMetadata.title,
+                    src: ENDPOINTS.FILE.streamWithFileId(modalData.fileMetadata.id)
                 }
                 switch (modalData.action) {
                     case FileAction.Edit:
@@ -119,7 +121,7 @@ export function FilesPage() {
                                 action: FileAction.Upload,
                                 fileMetadata: null
                             })
-                            selectActionJsx()
+                            selectActionTsx()
                             toggleModal()
                         }}>
                         Upload File
@@ -135,7 +137,7 @@ export function FilesPage() {
                     </ModalHeader>
                     <ModalBody className="row align-items-center d-flex justify-content-center m-2">
                         <div className="col">
-                            {selectActionJsx()}
+                            {selectActionTsx()}
                         </div>
                     </ModalBody>
                 </Modal>

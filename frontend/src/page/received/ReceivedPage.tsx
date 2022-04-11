@@ -4,6 +4,7 @@ import {
     Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import { RECEIVED_CHUNK_SIZE } from '../../model/Constants';
+import { ENDPOINTS } from '../../model/Server';
 import { useTypedSelector } from '../../redux/Store';
 import { FilePreview } from '../files/component/FilePreviewComponent';
 import { IFilePreviewProps } from '../files/model/FileModels';
@@ -42,7 +43,8 @@ export function ReceivedPage() {
             if (modalData.receivedMetadata) {
                 const previewProps: IFilePreviewProps = {
                     id: modalData.receivedMetadata.id,
-                    title: modalData.receivedMetadata.title
+                    title: modalData.receivedMetadata.title,
+                    src: ENDPOINTS.FILE.streamReceivedWithFileId(modalData.receivedMetadata.id)
                 }
                 switch (modalData.action) {
                     case FileAction.Preview:

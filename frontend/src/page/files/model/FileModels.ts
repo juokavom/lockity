@@ -27,7 +27,8 @@ export interface IFileModalProps {
 
 export interface IFilePreviewProps {
     id: string,
-    title: string
+    title: string,
+    src: string
 }
 
 export const FileAction = {

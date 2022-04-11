@@ -55,7 +55,9 @@ export default function LoginPage() {
                     dispatch(LocalUserActionCreators.setUser(loggedUser))
                     history.push(ROUTES.filesPage)
                 }, LOADING_TIMEOUT_MS)
-            }, () => { })
+            }, () => {
+                setLoading(false)
+             })
     };
 
     return (

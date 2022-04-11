@@ -199,7 +199,7 @@ class FileService(
         fileRepository.update(fileRecord)
     }
 
-    fun modifyUserFileSharing(user: UserRecord, fileId: String, shareCondition: Boolean) {
+    fun modifyUserFileSharing(user: UserRecord, fileId: String, shareCondition: Boolean): String? {
         val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
             ?: throw NotFoundException("File was not found")
         if (!fileRecord.user.contentEquals(user.id))
@@ -209,6 +209,7 @@ class FileService(
             if (fileRecord.link == null) {
                 fileRecord.link = UUID.randomUUID().toString()
                 fileRepository.update(fileRecord)
+                return fileRecord.link
             } else {
                 throw BadRequestException("File already has dynamic link")
             }
@@ -218,6 +219,7 @@ class FileService(
             } else {
                 fileRecord.link = null
                 fileRepository.update(fileRecord)
+                return null
             }
         }
     }
