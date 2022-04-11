@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import { RequestBuilder } from "../../model/RequestBuilder";
 import { ENDPOINTS } from "../../model/Server";
-import { LogoutAction } from "../header/HeaderComponent";
+import { LogoutAction } from "../Header/HeaderComponent";
 
 const SimpleAction = async () => {
     await new RequestBuilder()

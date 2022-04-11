@@ -16,7 +16,7 @@ import Test from '../test/TestPage';
 import Upload from '../upload/UploadPage';
 import { UsersPage } from '../users/UsersPage';
 import './styles/Main.scss';
-import Header from '../header/HeaderComponent';
+import Header from '../Header/HeaderComponent';
 
 export default function Main() {
     const dispatch = useDispatch()
