@@ -56,7 +56,7 @@ class FileService(
     fun uploadGuestFile(part: PartData.FileItem, fileSize: Long): FileLink {
         if (fileSize > GUEST_MAX_STORAGE_BYTES)
             throw BadRequestException("File size exceeds 1GB")
-        val fileRecord = uploadFile(part, fileSize)
+        val fileRecord = uploadFile(part, fileSize, part.originalFileName!!)
         fileRecord.link = UUID.randomUUID().toString()
         fileRepository.insert(fileRecord)
         return FileLink(fileRecord.link!!)
@@ -66,17 +66,36 @@ class FileService(
         val userFileSizeSum = fileRepository.userFileSizeSum(user.id!!)
         if (userFileSizeSum + fileSize > user.storageSize!!)
             throw NoPermissionException("User storage size is exceeded")
-        val fileRecord = uploadFile(part, fileSize)
+        val fileRecord = uploadFile(part, fileSize, part.originalFileName!!)
         fileRecord.user = user.id
         fileRepository.insert(fileRecord)
     }
 
-    fun uploadFile(part: PartData.FileItem, fileSize: Long): FileRecord {
-        val fileId = Misc.uuidToBin(UUID.randomUUID())
+    fun editUserFile(fileId: String, user: UserRecord, part: PartData.FileItem, fileSize: Long) {
+        val fetchedFileRecord = fileRepository.fetch(UUID.fromString(fileId))
+            ?: throw NotFoundException("File was not found")
+        if (!fetchedFileRecord.user.contentEquals(user.id))
+            throw NoPermissionException("User do not have permission to get this file metadata")
+        val userFileSizeSum = fileRepository.userFileSizeSum(user.id!!) - (fetchedFileRecord.size ?: 0)
+        if (userFileSizeSum + fileSize > user.storageSize!!)
+            throw NoPermissionException("User storage size is exceeded")
+        val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, false)
+        fileRecord.user = user.id
+        fileRepository.update(fileRecord)
+    }
+
+    fun uploadFile(
+        part: PartData.FileItem,
+        fileSize: Long,
+        fileName: String,
+        fileId: ByteArray = Misc.uuidToBin(UUID.randomUUID()),
+        mkdir: Boolean = true
+    ): FileRecord {
         val fileIdStringed = Misc.binToUuid(fileId).toString()
-        val fileName = part.originalFileName!!
         val fileFolderLocation = uploadsLocation(fileIdStringed)
-        File(fileFolderLocation).mkdir()
+        if (mkdir) {
+            File(fileFolderLocation).mkdir()
+        }
         val fileLocation = "$fileFolderLocation/$fileName"
         part.streamProvider().use { inputStream ->
             File(fileLocation).outputStream().buffered().use { outputStream ->
@@ -184,7 +203,7 @@ class FileService(
         )
     }
 
-    fun updateUserFile(user: UserRecord, fileId: String, editedFile: EditableFile) {
+    fun updateUserFileTitle(user: UserRecord, fileId: String, editedFile: EditableFile) {
         val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
             ?: throw NotFoundException("File was not found")
         if (!fileRecord.user.contentEquals(user.id))

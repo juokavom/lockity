@@ -5,18 +5,19 @@ import {
     Button, Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import { FILE_CHUNK_SIZE } from '../../model/Constants';
+import { ENDPOINTS } from '../../model/Server';
 import { useTypedSelector } from '../../redux/Store';
 import CustomPagination from '../main/components/PaginationComponent';
 import FileUploader from '../upload/components/FileUploaderComponent';
+import { File } from './component/FileComponent';
 import { FileDelete } from './component/FileDeleteComponent';
 import { FileEdit } from './component/FileEditComponent';
 import { FilePreview } from './component/FilePreviewComponent';
+import { FileRename } from './component/FileRenameComponent';
 import { FileShare } from './component/FileShareComponent';
 import { StorageStatusBar } from './component/StorageStatusBarComponent';
-import { FileAction, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps } from './model/FileModels';
+import { FileAction, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps, ModalSize } from './model/FileModels';
 import { fetchFileMetadata, fetchFileMetadataInfo } from './request/FilesRequests';
-import { File } from './component/FileComponent';
-import { ENDPOINTS } from '../../model/Server';
 
 export function FilesPage() {
     const [modalOpen, setModalOpen] = useState(false)
@@ -24,6 +25,10 @@ export function FilesPage() {
         action: string,
         fileMetadata: IFileMetadata | null
     } | null>(null)
+    const [modalSize, setModalSize] = useState<ModalSize>({
+        width: undefined,
+        height: undefined
+    })
 
     const dispatch = useDispatch()
     const fileState = useTypedSelector((state) => state.fileReducer)
@@ -76,6 +81,8 @@ export function FilesPage() {
                 switch (modalData.action) {
                     case FileAction.Edit:
                         return (<FileEdit {...modalProps} />);
+                    case FileAction.Rename:
+                        return (<FileRename {...modalProps} />);
                     case FileAction.Preview:
                         return (<FilePreview {...previewProps} />);
                     case FileAction.Share:
@@ -96,7 +103,20 @@ export function FilesPage() {
                     action: action,
                     fileMetadata: fileMetadata
                 })
+                const modalSize: ModalSize = {
+                    width: undefined,
+                    height: undefined
+                }
+                switch (action) {
+                    case FileAction.Preview:
+                        modalSize.width = "lg"
+                        break
+                    case FileAction.Edit:
+                        modalSize.width = "xl"
+                        break
+                }
                 toggleModal()
+                setModalSize(modalSize)
             }
         }
     }
@@ -121,21 +141,24 @@ export function FilesPage() {
                                 action: FileAction.Upload,
                                 fileMetadata: null
                             })
+                            setModalSize({
+                                width: undefined,
+                                height: undefined
+                            })
                             selectActionTsx()
                             toggleModal()
                         }}>
                         Upload File
                     </Button>
                 </Box>
-                <Modal className="container" size={
-                    modalData?.action === FileAction.Preview ? "lg" : ""
-                } isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                <Modal className="container" size={modalSize?.width} 
+                    isOpen={modalOpen} toggle={() => { toggleModal() }}>
                     <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
                             <p>{modalData?.action}</p>
                         </div>
                     </ModalHeader>
-                    <ModalBody className="row align-items-center d-flex justify-content-center m-2">
+                    <ModalBody className="row align-items-center d-flex justify-content-center">
                         <div className="col">
                             {selectActionTsx()}
                         </div>

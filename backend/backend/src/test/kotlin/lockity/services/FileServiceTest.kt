@@ -275,8 +275,18 @@ internal class FileServiceTest {
 
     @Test
     fun `it must upload guest file`() {
-        every { fileService.uploadFile(any(), any()) } returns FileRecord()
-        fileService.uploadGuestFile(mockk(relaxed = true), GUEST_MAX_STORAGE_BYTES - 10L)
+        val part = PartData.FileItem(
+            { "".byteInputStream().asInput() },
+            {}, headersOf(
+                HttpHeaders.ContentDisposition,
+                ContentDisposition.File.withParameter(
+                    ContentDisposition.Parameters.FileName, "fileName"
+                ).toString()
+            )
+        )
+
+        every { fileService.uploadFile(any(), any(), any()) } returns FileRecord()
+        fileService.uploadGuestFile(part, GUEST_MAX_STORAGE_BYTES - 10L)
         verify { fileRepository.insert(any()) }
     }
 
@@ -289,12 +299,21 @@ internal class FileServiceTest {
 
     @Test
     fun `it must upload user file`() {
+        val part = PartData.FileItem(
+            { "".byteInputStream().asInput() },
+            {}, headersOf(
+                HttpHeaders.ContentDisposition,
+                ContentDisposition.File.withParameter(
+                    ContentDisposition.Parameters.FileName, "fileName"
+                ).toString()
+            )
+        )
         val userRecord = UserRecord()
         userRecord.id = Misc.uuidToBin(UUID.randomUUID())
         userRecord.storageSize = 100L
         every { fileRepository.userFileSizeSum(any()) } returns 10L
-        every { fileService.uploadFile(any(), any()) } returns FileRecord()
-        fileService.uploadUserFile(userRecord, mockk(), 10L)
+        every { fileService.uploadFile(any(), any(), any()) } returns FileRecord()
+        fileService.uploadUserFile(userRecord, part, 10L)
         verify { fileRepository.insert(any()) }
     }
 
@@ -304,7 +323,7 @@ internal class FileServiceTest {
         userRecord.id = Misc.uuidToBin(UUID.randomUUID())
         userRecord.storageSize = 10L
         every { fileRepository.userFileSizeSum(any()) } returns 10L
-        every { fileService.uploadFile(any(), any()) } returns FileRecord()
+        every { fileService.uploadFile(any(), any(), any()) } returns FileRecord()
         assertFailsWith<NoPermissionException> {
             fileService.uploadUserFile(userRecord, mockk(), 10L)
         }
@@ -325,7 +344,7 @@ internal class FileServiceTest {
                 ).toString()
             )
         )
-        val uploaded = fileService.uploadFile(part, fileSize)
+        val uploaded = fileService.uploadFile(part, fileSize, part.originalFileName!!)
         val matches = (uploaded.title == fileName &&
                 uploaded.user == null &&
                 uploaded.key == null &&
@@ -528,7 +547,7 @@ internal class FileServiceTest {
         userRecord: UserRecord, shouldFail: Boolean
     ) {
         every { fileRepository.fetch(any()) } returns fileRecord
-        fun test() = fileService.updateUserFile(
+        fun test() = fileService.updateUserFileTitle(
             userRecord,
             UUID.randomUUID().toString(),
             editedFile

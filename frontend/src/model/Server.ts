@@ -15,8 +15,13 @@ const prod: IURL = {
 
 export const LANDING_URL = "https://lockity.akramas.com/"
 export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
-export const SUPPORTED_FILE_TYPES = ['mp4', 'mp3', 'jpg', 'jpeg', 'png']
 export const MAX_STORAGE_SIZE = 15000000000
+
+export const SUPPORTED_VIDEO_TYPES = ['mp4']
+export const SUPPORTED_AUDIO_TYPES = ['mp3']
+export const SUPPORTED_IMAGE_TYPES = ['jpg', 'jpeg', 'png']
+export const SUPPORTED_TEXT_TYPES = []
+export const SUPPORTED_PREVIEW_TYPES = SUPPORTED_AUDIO_TYPES.concat(SUPPORTED_VIDEO_TYPES, SUPPORTED_IMAGE_TYPES)
 
 export const URL: IURL = process.env.NODE_ENV === "production" ? prod : dev
 
@@ -35,6 +40,7 @@ export namespace ENDPOINTS {
         export const metadata = file + '/metadata'
 
         export const fileId = (id: string) => file + '/file-id/' + id
+        export const fileTitleWithId = (id: string) => file + '/title/file-id/' + id
         export const streamWithFileId = (id: string) => fileId(id) + '/stream'
         export const downloadWithFileId = (id: string) => fileId(id) + '/download'
         export const streamReceivedWithFileId = (id: string) =>

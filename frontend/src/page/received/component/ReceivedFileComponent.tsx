@@ -2,7 +2,7 @@ import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { IconButton } from '@mui/material';
-import { ENDPOINTS, SUPPORTED_FILE_TYPES } from '../../../model/Server';
+import { ENDPOINTS, SUPPORTED_PREVIEW_TYPES } from '../../../model/Server';
 import { useTypedSelector } from '../../../redux/Store';
 import { formatBytes } from '../../files/model/FileModels';
 import { FileAction, IReceivedFileProps } from '../model/ReceivedModels';
@@ -17,7 +17,7 @@ export function ReceivedFile({ receivedMetadata, action }: IReceivedFileProps) {
                 {formatBytes(receivedMetadata.size)}
             </div>
             <div className="col-auto">
-                {format && SUPPORTED_FILE_TYPES.includes(format) ?
+                {format && SUPPORTED_PREVIEW_TYPES.includes(format) ?
                     <IconButton onClick={() => action(FileAction.Preview)}>
                         <VisibilityOutlinedIcon />
                     </IconButton> :

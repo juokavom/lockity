@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_VIDEO_TYPES } from "../../../model/Server";
 import { IFilePreviewProps } from "../model/FileModels";
 import { fileNameTsx } from "../model/FileNameTsx";
 
@@ -21,14 +22,14 @@ export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element 
         <img style={{ maxWidth: "100%" }} alt={title} src={src} />
     );
 
-    let selected = null
+    let selected: JSX.Element | null = null
 
     if (format) {
-        if (format === "mp4") {
+        if (SUPPORTED_VIDEO_TYPES.includes(format)) {
             selected = videoJsx()
-        } else if (format === "mp3") {
+        } else if (SUPPORTED_AUDIO_TYPES.includes(format)) {
             selected = audioJsx()
-        } else if (["png", "jpg", "jpeg"].includes(format)) {
+        } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
             selected = pictureJsx()
         }
     }
