@@ -5,7 +5,7 @@ import {
     Button, Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import { FILE_CHUNK_SIZE } from '../../model/Constants';
-import { ENDPOINTS } from '../../model/Server';
+import { ENDPOINTS, SUPPORTED_IMAGE_TYPES } from '../../model/Server';
 import { useTypedSelector } from '../../redux/Store';
 import CustomPagination from '../main/components/PaginationComponent';
 import FileUploader from '../upload/components/FileUploaderComponent';
@@ -16,7 +16,7 @@ import { FilePreview } from './component/FilePreviewComponent';
 import { FileRename } from './component/FileRenameComponent';
 import { FileShare } from './component/FileShareComponent';
 import { StorageStatusBar } from './component/StorageStatusBarComponent';
-import { FileAction, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps, ModalSize } from './model/FileModels';
+import { FileAction, fileTitleToFormat, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps, ModalSize } from './model/FileModels';
 import { fetchFileMetadata, fetchFileMetadataInfo } from './request/FilesRequests';
 
 export function FilesPage() {
@@ -112,7 +112,8 @@ export function FilesPage() {
                         modalSize.width = "lg"
                         break
                     case FileAction.Edit:
-                        modalSize.width = "xl"
+                        modalSize.width = SUPPORTED_IMAGE_TYPES
+                            .includes(fileTitleToFormat(fileMetadata.title)) ? "xl" : "lg"
                         break
                 }
                 toggleModal()

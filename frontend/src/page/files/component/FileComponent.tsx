@@ -1,7 +1,7 @@
 import { IconButton } from "@mui/material";
 import { ENDPOINTS, SUPPORTED_PREVIEW_TYPES } from "../../../model/Server";
 import { useTypedSelector } from "../../../redux/Store";
-import { FileAction, formatBytes, IFileProps } from "../model/FileModels";
+import { FileAction, fileTitleToFormat, formatBytes, IFileProps } from "../model/FileModels";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
@@ -11,7 +11,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import ContentCutOutlinedIcon from '@mui/icons-material/ContentCutOutlined';
 
 export const File = ({ fileMetadata, action }: IFileProps) => {
-    const format = fileMetadata.title.split('.').pop();
+    const format = fileTitleToFormat(fileMetadata.title);
     const windowState = useTypedSelector((state) => state.windowReducer)
 
     const buttons = (

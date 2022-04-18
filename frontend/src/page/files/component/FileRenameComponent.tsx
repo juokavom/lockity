@@ -4,10 +4,10 @@ import { toast } from "react-toastify"
 import { Button } from "reactstrap"
 import { DefaultToastOptions, RequestBuilder } from "../../../model/RequestBuilder"
 import { ENDPOINTS } from "../../../model/Server"
-import { IFileModalProps } from "../model/FileModels"
+import { fileTitleToFormat, IFileModalProps } from "../model/FileModels"
 
 export const FileRename = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
-    const [format] = useState("." + fileMetadata.title.split('.').pop());
+    const [format] = useState("." + fileTitleToFormat(fileMetadata.title));
     const [newTitle, setTitle] = useState(fileMetadata.title.replace(format, ''));
 
     const validateForm = () => {
