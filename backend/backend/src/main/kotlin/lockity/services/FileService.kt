@@ -81,6 +81,7 @@ class FileService(
             throw NoPermissionException("User storage size is exceeded")
         val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, false)
         fileRecord.user = user.id
+        fileRecord.link = fetchedFileRecord.link
         fileRepository.update(fileRecord)
     }
 
