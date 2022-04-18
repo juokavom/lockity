@@ -274,11 +274,11 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
                         let obs = offlineCtx.createBufferSource();
                         // @ts-ignore
                         obs.buffer = wavesurferRef.current.backend.buffer;
-                        let gain = offlineCtx.createGain();                        
+                        let gain = offlineCtx.createGain();
                         // @ts-ignore
                         gain.gain.value = wavesurferRef.current.getVolume();
                         // @ts-ignore
-                        const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => { 
+                        const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => {
                             // @ts-ignore
                             const filter = offlineCtx.createBiquadFilter();
                             filter.type = "peaking"
@@ -297,12 +297,11 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
                             const format = "audio/" + fileTitleToFormat(fileMetadata.title)
                             const audioOffset = Math.floor(region.start * r.sampleRate)
                             const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
-                            const audioBlob = bufferToWave(r, audioOffset, audioLength, format);                             
-                            uploadEditedFileBlob(fileMetadata.id, fileMetadata.title, audioBlob, 
-                                "Your audio was edited successfully!", callback)                         
+                            const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
+                            uploadEditedFileBlob(fileMetadata.id, fileMetadata.title, audioBlob,
+                                "Your audio was edited successfully!", callback)
                         });
-                    }}
-                >
+                    }}>
                     Save
                 </Button>
             </div>
