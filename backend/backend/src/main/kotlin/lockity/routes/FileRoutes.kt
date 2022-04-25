@@ -9,6 +9,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import lockity.models.EditableFile
+import lockity.models.EditedVideoFileMetadata
 import lockity.services.FileService
 import lockity.utils.AUTHENTICATED
 import lockity.utils.jwtUser
@@ -151,6 +152,18 @@ fun Application.fileRoutes() {
                         val title = call.parameters["title"]
                             ?: throw BadRequestException("Title is not present in the parameters.")
                         call.respond(fileService.getUserFilesMetadata(currentUser, title))
+                    }
+                }
+
+                put("/video/file-id/{fileId}") {
+                    call.withErrorHandler {
+                        val fileId = call.parameters["fileId"]
+                            ?: throw BadRequestException("File id is not present in the parameters.")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        val editedVideoFile = call.receive<EditedVideoFileMetadata>()
+                        fileService.editUserVideoFile(fileId, currentUser, editedVideoFile)
+                        call.respondJSON("File is being saved successfully", HttpStatusCode.OK)
                     }
                 }
 

@@ -15,6 +15,19 @@ data class EditableFile(
 )
 
 @Serializable
+data class trimTime(
+    val start: Double,
+    val end: Double
+)
+
+@Serializable
+data class EditedVideoFileMetadata(
+    val duration: Double,
+    val trim_times: List<trimTime>,
+    val mute: Boolean
+)
+
+@Serializable
 data class FileMetadata(
     val id: String,
     val title: String,

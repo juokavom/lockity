@@ -20,8 +20,9 @@ export const MAX_STORAGE_SIZE = 15000000000
 export const SUPPORTED_VIDEO_TYPES = ['mp4']
 export const SUPPORTED_AUDIO_TYPES = ['mp3']
 export const SUPPORTED_IMAGE_TYPES = ['jpg', 'jpeg', 'png']
-export const SUPPORTED_TEXT_TYPES = []
-export const SUPPORTED_PREVIEW_TYPES = SUPPORTED_AUDIO_TYPES.concat(SUPPORTED_VIDEO_TYPES, SUPPORTED_IMAGE_TYPES)
+export const SUPPORTED_TEXT_TYPES = ['txt']
+export const SUPPORTED_PREVIEW_TYPES = SUPPORTED_AUDIO_TYPES.concat(
+    SUPPORTED_VIDEO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES)
 
 export const URL: IURL = process.env.NODE_ENV === "production" ? prod : dev
 
@@ -41,6 +42,7 @@ export namespace ENDPOINTS {
 
         export const fileId = (id: string) => file + '/file-id/' + id
         export const fileTitleWithId = (id: string) => file + '/title/file-id/' + id
+        export const fileVideoWithId = (id: string) => file + '/video/file-id/' + id
         export const streamWithFileId = (id: string) => fileId(id) + '/stream'
         export const downloadWithFileId = (id: string) => fileId(id) + '/download'
         export const streamReceivedWithFileId = (id: string) =>

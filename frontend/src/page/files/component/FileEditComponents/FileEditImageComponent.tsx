@@ -2,17 +2,19 @@ import ImageEditor from '@toast-ui/react-image-editor'
 import React, { useEffect, useRef, useState } from 'react'
 import { Button } from 'reactstrap'
 import 'tui-image-editor/dist/tui-image-editor.css'
-import { ENDPOINTS } from '../../../model/Server'
-import { dataURItoBlob, fetchToDataURL, IFileModalProps } from "../model/FileModels"
-import { uploadEditedFileBlob } from '../request/FilesRequests'
+import { ENDPOINTS } from '../../../../model/Server'
+import { blobToDataURL, dataURItoBlob, IFileModalProps } from "../../model/FileModels"
+import { fetchBlob, uploadEditedFileBlob } from '../../request/FilesRequests'
 
 export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
     const imageEditor = useRef<any>(null)
     const [imgContents, setImgContents] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchToDataURL(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
-            setImgContents(response)
+        fetchBlob(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
+            blobToDataURL(response, (dataUrlResponse) => {
+                setImgContents(dataUrlResponse)
+            })
         })
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -54,7 +56,6 @@ export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.
                             //@ts-ignore
                             const fileDataUrl = imageEditor.current.getInstance().toDataURL()
                             const filePayload = dataURItoBlob(fileDataUrl)
-                            console.log(filePayload)
                             uploadEditedFileBlob(fileMetadata.id, fileMetadata.title, filePayload, 
                                 "Your image was edited successfully!", callback)
                         }}

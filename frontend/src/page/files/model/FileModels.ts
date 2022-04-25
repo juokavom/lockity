@@ -25,6 +25,24 @@ export interface IFileModalProps {
     callback: (success: boolean) => void
 }
 
+export interface IFileVideoEditorProps {
+    url: string,
+    saveVideo: (metadata: any) => any
+    timings: any[],
+    updateState: (st: any, cb: any) => {}
+}
+
+export interface trim_time {
+    start: number,
+    end: number
+}
+
+export interface IVideoSave {
+    duration: number,
+    trim_times: trim_time[],
+    mute: boolean
+}
+
 export interface IFilePreviewProps {
     id: string,
     title: string,
@@ -63,21 +81,6 @@ export function formatBytes(bytes: number, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-export const fetchToDataURL = (url: string, callback: (response: any) => void) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = () => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            callback(reader.result);
-        }
-        reader.readAsDataURL(xhr.response);
-    };
-    xhr.open('GET', url);
-    xhr.responseType = 'blob';
-    xhr.withCredentials = true;
-    xhr.send();
-}
-
 // Source: https://stackoverflow.com/questions/12168909/blob-from-dataurl
 export const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(',')[1]);
@@ -90,6 +93,7 @@ export const dataURItoBlob = (dataURI: string) => {
     const blob = new Blob([ab], { type: mimeString });
     return blob;
 }
+
 // Source: https://stackoverflow.com/questions/23150333/html5-javascript-dataurl-to-blob-blob-to-dataurl
 export const blobToDataURL = (blob, callback) => {
     var a = new FileReader();

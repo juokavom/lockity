@@ -79,3 +79,28 @@ export const uploadEditedFileBlob = (fileId: string, title: string, filePayload:
     xhr.withCredentials = true;
     xhr.send(formData);
 }
+
+export const fetchBlob = (url: string, callback: (response: any) => void) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = (ev: Event) => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            var status = xhr.status;
+            if (String(status).charAt(0) === '2') {
+                callback(xhr.response)
+            } else {
+                if (status === 401) {
+                    localStorage.removeItem(User.storagename)
+                    window.location.replace(ROUTES.login)
+                } else {
+                    const response = JSON.parse(xhr.response)
+                    toast.error('Fetch failed! ' + response.message, DefaultToastOptions)
+                }
+                callback(xhr.response)
+            }
+        }
+    }
+    xhr.open('GET', url);
+    xhr.responseType = 'blob';
+    xhr.withCredentials = true;
+    xhr.send();
+}

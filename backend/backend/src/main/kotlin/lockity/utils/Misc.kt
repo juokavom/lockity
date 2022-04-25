@@ -58,7 +58,7 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
     } catch (e: java.time.format.DateTimeParseException) {
         this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.io.IOException) {
-        this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
+         this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
     }  catch (e: AccountLockedException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.Locked)
     } catch (e: BadRequestException) {

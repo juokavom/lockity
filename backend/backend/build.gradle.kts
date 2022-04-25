@@ -29,6 +29,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktor_version")
     implementation("io.insert-koin:koin-ktor:3.1.2")
     implementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    implementation("net.bramp.ffmpeg:ffmpeg:0.7.0")
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("io.insert-koin:koin-test:3.1.2")

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import 'tui-image-editor/dist/tui-image-editor.css'
-import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_VIDEO_TYPES } from '../../../model/Server';
+import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from '../../../model/Server';
 import { fileTitleToFormat, IFileModalProps } from "../model/FileModels"
 import { fileNameTsx } from '../model/FileNameTsx';
-import { FileEditAudio } from './FileEditAudioComponent';
-import { FileEditImage } from './FileEditImageComponent';
+import { FileEditAudio } from './FileEditComponents/FileEditAudioComponent';
+import { FileEditImage } from './FileEditComponents/FileEditImageComponent';
+import { FileEditText } from './FileEditComponents/FileEditTextComponent';
+import { FileEditVideo } from './FileEditComponents/FileEditVideoComponent';
 
 export const FileEdit = (modalProps: IFileModalProps): JSX.Element => {
     const [format] = useState(fileTitleToFormat(modalProps.fileMetadata.title));
@@ -13,11 +15,13 @@ export const FileEdit = (modalProps: IFileModalProps): JSX.Element => {
 
     if (format) {
         if (SUPPORTED_VIDEO_TYPES.includes(format)) {
-            // selected = videoJsx()
+            selected = (<FileEditVideo {...modalProps} />)
         } else if (SUPPORTED_AUDIO_TYPES.includes(format)) {
             selected = (<FileEditAudio {...modalProps} />)
         } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
             selected = (<FileEditImage {...modalProps} />)
+        } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
+            selected = (<FileEditText {...modalProps} />)
         }
     }
 

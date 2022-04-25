@@ -10,13 +10,16 @@ import lockity.repositories.SharedAccessRepository
 import lockity.utils.CONFIG
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import lockity.utils.Misc
-import java.io.File
-import java.io.InputStream
-import java.io.OutputStream
+import net.bramp.ffmpeg.FFmpeg
+import net.bramp.ffmpeg.FFmpegExecutor
+import net.bramp.ffmpeg.FFprobe
+import net.bramp.ffmpeg.builder.FFmpegBuilder
+import java.io.*
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
 import javax.security.auth.login.AccountLockedException
+
 
 class FileService(
     configurationService: ConfigurationService,
@@ -69,6 +72,48 @@ class FileService(
         val fileRecord = uploadFile(part, fileSize, part.originalFileName!!)
         fileRecord.user = user.id
         fileRepository.insert(fileRecord)
+    }
+
+    fun editUserVideoFile(fileId: String, user: UserRecord, editedVideoFile: EditedVideoFileMetadata) {
+        val fetchedFileRecord = fileRepository.fetch(UUID.fromString(fileId))
+            ?: throw NotFoundException("File was not found")
+        if (!fetchedFileRecord.user.contentEquals(user.id))
+            throw NoPermissionException("User do not have permission to get this file metadata")
+        println("================================Process started================================")
+        val rt = Runtime.getRuntime()
+        try {
+            val idStringified = Misc.binToUuid(fetchedFileRecord.id!!).toString()
+            val commandString = "C:\\ffmpeg\\bin\\ffmpeg.exe -i \"${uploadsLocation(idStringified)}/${fetchedFileRecord.title!!}\" -ss 00:00:15 -to 00:00:35 -c copy \"${uploadsLocation(idStringified)}/part2.mp4\""
+            println(commandString)
+            val p = rt.exec(commandString)
+//            val p = rt.exec("ls -al")
+            val br = BufferedReader(InputStreamReader(p.inputStream))
+            var s: String
+            while (br.readLine().also { s = it } != null) println("line: $s")
+            p.waitFor()
+            println("exit: " + p.exitValue())
+            p.destroy()
+        } catch (e: Exception) {
+            println(e)
+        }
+//        val ffmpeg = FFmpeg("ffmpeg")
+//        val ffprobe = FFprobe("ffprobe")
+//
+//        val builder = FFmpegBuilder()
+//            .setInput(uploadsLocation(fetchedFileRecord.title!!)) // Filename, or a FFmpegProbeResult
+//            .overrideOutputFiles(true) // Override the output if it exists
+//            .setComplexFilter("")
+//            .addOutput("output.mp4") // Filename for the destination
+//            .setFormat("mp4") // Format is inferred from filename, or can be set
+//            .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL) // Allow FFmpeg to use experimental specs
+//            .done()
+//
+//        val executor = FFmpegExecutor(ffmpeg, ffprobe)
+//
+//        executor.createJob(builder).run()
+
+        println("================================Process ended================================")
+//        fileRepository.update(fileRecord)
     }
 
     fun editUserFile(fileId: String, user: UserRecord, part: PartData.FileItem, fileSize: Long) {
