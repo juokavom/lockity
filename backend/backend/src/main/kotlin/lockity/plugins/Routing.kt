@@ -58,6 +58,7 @@ fun Application.configureRouting() {
         userRoutes()
         sharedRoutes()
         fileRoutes()
+        apiRoutes()
         testRoutes()
     }
 }

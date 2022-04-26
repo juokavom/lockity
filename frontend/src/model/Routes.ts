@@ -9,6 +9,7 @@ export namespace ROUTES {
     export const filesPage = '/files'
     export const receivedPage = '/received'
     export const sharedPage = '/shared'
+    export const APIPage = '/api'
     
     export const sendNewsletter = '/send-newsletter'
     export const users = '/users'

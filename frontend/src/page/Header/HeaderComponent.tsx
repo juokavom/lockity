@@ -67,7 +67,7 @@ export default function Header() {
 
     const emptyNavLinkMap = (): Map<string, string> => {
         const navLinkMap = new Map<string, string>();
-        [ROUTES.filesPage, ROUTES.receivedPage, ROUTES.sharedPage, ROUTES.sendNewsletter, ROUTES.users]
+        [ROUTES.filesPage, ROUTES.receivedPage, ROUTES.sharedPage, ROUTES.APIPage, ROUTES.users]
             .forEach((route: string) => navLinkMap.set(route, "text-color-toggler"))
         return navLinkMap;
     }
@@ -129,6 +129,11 @@ export default function Header() {
                             <NavItem>
                                 <NavLink className="nav-link" to={ROUTES.sharedPage} >
                                     <p className={navlinkClasses.get(ROUTES.sharedPage)}>Shared Files</p>
+                                </NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink className="nav-link" to={ROUTES.APIPage} >
+                                    <p className={navlinkClasses.get(ROUTES.APIPage)}>API</p>
                                 </NavLink>
                             </NavItem>
                             {localUserState.isAdmin &&

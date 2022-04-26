@@ -17,6 +17,7 @@ import Upload from '../upload/UploadPage';
 import { UsersPage } from '../users/UsersPage';
 import './styles/Main.scss';
 import Header from '../Header/HeaderComponent';
+import { APIPage } from '../api/APIPage';
 
 export default function Main() {
     const dispatch = useDispatch()
@@ -57,6 +58,7 @@ export default function Main() {
                                     <Route exact path={ROUTES.filesPage} component={() => <FilesPage />} />
                                     <Route exact path={ROUTES.receivedPage} component={() => <ReceivedPage />} />
                                     <Route exact path={ROUTES.sharedPage} component={() => <SharedPage />} />
+                                    <Route exact path={ROUTES.APIPage} component={() => <APIPage />} />
 
                                     {localUserState.isAdmin &&
                                         <Route exact path={ROUTES.users} component={() => <UsersPage />} />

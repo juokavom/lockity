@@ -147,8 +147,8 @@ class UserService(
                 role = roleRepository.roleUUID(creatableUser.role),
                 registered = creatableUser.registered,
                 lastActive = creatableUser.lastActive,
-                confirmed = if (creatableUser.confirmed) "1".toByte() else "0".toByte(),
-                subscribed = if (creatableUser.subscribed) "1".toByte() else "0".toByte(),
+                confirmed = (if (creatableUser.confirmed) "1" else "0").toByte(),
+                subscribed = (if (creatableUser.subscribed) "1" else "0").toByte(),
                 storageSize = creatableUser.storageSize
             )
         )

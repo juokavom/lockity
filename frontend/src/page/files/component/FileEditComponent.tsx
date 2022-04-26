@@ -12,9 +12,7 @@ export const FileEdit = (modalProps: IFileModalProps): JSX.Element => {
     let selected: JSX.Element | null = null
 
     if (format) {
-        if (SUPPORTED_VIDEO_TYPES.includes(format)) {
-            // selected = videoJsx()
-        } else if (SUPPORTED_AUDIO_TYPES.includes(format)) {
+        if (SUPPORTED_AUDIO_TYPES.includes(format)) {
             selected = (<FileEditAudio {...modalProps} />)
         } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
             selected = (<FileEditImage {...modalProps} />)

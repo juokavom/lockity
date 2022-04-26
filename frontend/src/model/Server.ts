@@ -22,6 +22,7 @@ export const SUPPORTED_AUDIO_TYPES = ['mp3']
 export const SUPPORTED_IMAGE_TYPES = ['jpg', 'jpeg', 'png']
 export const SUPPORTED_TEXT_TYPES = []
 export const SUPPORTED_PREVIEW_TYPES = SUPPORTED_AUDIO_TYPES.concat(SUPPORTED_VIDEO_TYPES, SUPPORTED_IMAGE_TYPES)
+export const SUPPORTED_EDITING_TYPES = SUPPORTED_AUDIO_TYPES.concat(SUPPORTED_IMAGE_TYPES)
 
 export const URL: IURL = process.env.NODE_ENV === "production" ? prod : dev
 
@@ -84,5 +85,14 @@ export namespace ENDPOINTS {
         export const getSharedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             sharedAccess + '/offset/' + offset + '/limit/' + limit
         export const getSharedMetadataCount = sharedAccess + '/count'
+    }
+
+    export namespace API {
+        export const api = endpoint + '/api'
+
+        export const tokenId = (id: string) => api + '/api-id/' + id
+        export const getAPIDataWithOffsetAndLimit = (offset: number, limit: number) =>
+            api + '/offset/' + offset + '/limit/' + limit
+        export const getAPICount = api + '/count'
     }
 }

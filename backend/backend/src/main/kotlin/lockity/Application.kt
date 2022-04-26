@@ -19,6 +19,7 @@ fun Application.main() {
                 single { FileRepository(get()) }
                 single { SharedAccessRepository(get()) }
                 single { UserRepository(get()) }
+                single { APIRepository(get()) }
 
                 // Services
                 single { ConfigurationService(environment) }
@@ -28,6 +29,7 @@ fun Application.main() {
                 single { FileService(get(), get(), get()) }
                 single { SharedAccessService(get(), get(), get()) }
                 single { UserService(get(), get(), get(), get(), get(), get(), get()) }
+                single { APIService(get()) }
             }
         )
     }

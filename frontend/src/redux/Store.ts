@@ -1,6 +1,7 @@
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
 import thunk from "redux-thunk";
+import { APIReducer } from "../page/api/redux/APIReducer";
 import { FileReducer } from "../page/files/redux/FileReducer";
 import { ReceivedReducer } from "../page/received/redux/ReceivedReducer";
 import { SharedReducer } from "../page/shared/redux/SharedReducer";
@@ -19,7 +20,8 @@ const reducers = combineReducers({
   userReducer: UserReducer,
   localUserReducer: LocalUserReducer,
   windowReducer: WindowReducer,
-  loadingReducer: LoadingReducer
+  loadingReducer: LoadingReducer,
+  apiReducer: APIReducer
 })
 
 export type MasterState = ReturnType<typeof reducers>
