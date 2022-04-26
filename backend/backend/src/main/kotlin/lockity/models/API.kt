@@ -48,3 +48,8 @@ data class TokenData(
 data class APICount(
     val apiCount: Int
 )
+
+@Serializable
+data class SendableToken(
+    val token: String
+)

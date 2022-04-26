@@ -118,10 +118,10 @@ class FileService(
         )
     }
 
-    fun getUserFile(fileId: String, user: UserRecord): File {
+    fun getUserFile(fileId: String, userId: ByteArray): File {
         val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
             ?: throw NotFoundException("File was not found")
-        if (!fileRecord.user.contentEquals(user.id))
+        if (!fileRecord.user.contentEquals(userId))
             throw NoPermissionException("User do not have permission to get this file")
         return File(fileRecord.location!! + "/" + fileRecord.title!!)
     }
@@ -144,10 +144,10 @@ class FileService(
         return File(fileRecord.location!! + "/" + fileRecord.title!!)
     }
 
-    fun getUserFilesMetadata(user: UserRecord, offset: Int, limit: Int): List<FileMetadata> {
+    fun getUserFilesMetadata(userId: ByteArray, offset: Int, limit: Int): List<FileMetadata> {
         if (limit > 20) throw BadRequestException("Maximum limit(20) is exceeded.")
         return fileRepository.fetchUserFilesWithOffsetAndLimit(
-            userUuid = Misc.binToUuid(user.id!!),
+            userUuid = Misc.binToUuid(userId),
             offset = offset,
             limit = limit
         ).map {
@@ -244,10 +244,10 @@ class FileService(
         }
     }
 
-    fun deleteFile(user: UserRecord, fileId: String) {
+    fun deleteFile(userId: ByteArray, fileId: String) {
         val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
             ?: throw NotFoundException("File was not found")
-        if (!fileRecord.user.contentEquals(user.id))
+        if (!fileRecord.user.contentEquals(userId))
             throw NoPermissionException("User do not have permission to get this file metadata")
         if (!deletePhysicalFile(fileRecord.id!!))
             throw AccountLockedException("Unable to delete physical files")

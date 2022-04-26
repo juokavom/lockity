@@ -346,9 +346,9 @@ internal class FileServiceTest {
     fun `it must get user file`(fileRecord: FileRecord?, userRecord: UserRecord, shouldFail: Boolean) {
         every { fileRepository.fetch(any()) } returns fileRecord
         if (shouldFail) assertFailsWith<Exception> {
-            fileService.getUserFile(UUID.randomUUID().toString(), userRecord)
+            fileService.getUserFile(UUID.randomUUID().toString(), userRecord.id!!)
         } else {
-            val gottenFile = fileService.getUserFile(UUID.randomUUID().toString(), userRecord)
+            val gottenFile = fileService.getUserFile(UUID.randomUUID().toString(), userRecord.id!!)
             assert(
                 gottenFile.path.contains(fileRecord!!.location!!) &&
                         gottenFile.path.contains(fileRecord.title!!)
@@ -406,7 +406,7 @@ internal class FileServiceTest {
         }
         val userRecord = UserRecord()
         userRecord.id = Misc.uuidToBin(UUID.randomUUID())
-        fun test() = fileService.getUserFilesMetadata(userRecord, 0, limit)
+        fun test() = fileService.getUserFilesMetadata(userRecord.id!!, 0, limit)
         if (shouldFail) assertFailsWith<Exception> {
             test()
         } else {
@@ -576,7 +576,7 @@ internal class FileServiceTest {
             fileService.deletePhysicalFile(any())
         } returns physicalDeletionStatus
         fun test() = fileService.deleteFile(
-            userRecord,
+            userRecord.id!!,
             UUID.randomUUID().toString()
         )
         if (shouldFail) assertFailsWith<Exception> {

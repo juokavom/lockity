@@ -44,7 +44,7 @@ fun Application.fileRoutes() {
                         val currentUser = call.jwtUser()
                             ?: throw BadRequestException("User not found")
                         fileService.uploadUserFile(currentUser, part, fileSize)
-                        call.respondJSON("User file uploaded successfully", HttpStatusCode.OK)
+                        call.respondJSON("User file uploaded successfully", HttpStatusCode.Created)
                     }
                 }
 
@@ -54,7 +54,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("File id is not present in the parameters.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("No permission to stream the file")
-                        call.respondFile(fileService.getUserFile(fileId, currentUser))
+                        call.respondFile(fileService.getUserFile(fileId, currentUser.id!!))
                     }
                 }
 
@@ -64,7 +64,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("File id is not present in the parameters.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("No permission to download the file")
-                        val file = fileService.getUserFile(fileId, currentUser)
+                        val file = fileService.getUserFile(fileId, currentUser.id!!)
                         call.response.header(
                             HttpHeaders.ContentDisposition,
                             ContentDisposition.Attachment.withParameter(
@@ -112,7 +112,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("Offset is not present in the parameters or in bad format.")
                         val limit = call.parameters["limit"]?.toIntOrNull()
                             ?: throw BadRequestException("Limit is not present in the parameters or in bad format.")
-                        call.respond(fileService.getUserFilesMetadata(currentUser, offset, limit))
+                        call.respond(fileService.getUserFilesMetadata(currentUser.id!!, offset, limit))
                     }
                 }
 
@@ -204,7 +204,7 @@ fun Application.fileRoutes() {
                             ?: throw BadRequestException("File id is not present in the parameters.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to get this file metadata")
-                        fileService.deleteFile(currentUser, fileId)
+                        fileService.deleteFile(currentUser.id!!, fileId)
                         call.respondJSON("File deleted successfully", HttpStatusCode.OK)
                     }
                 }

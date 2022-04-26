@@ -3,17 +3,36 @@ package lockity.services
 import database.schema.tables.records.APIRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.features.*
+import io.ktor.http.content.*
 import lockity.models.*
 import lockity.repositories.APIRepository
+import lockity.repositories.UserRepository
 import lockity.utils.Misc
+import java.io.File
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
-import javax.security.auth.login.AccountLockedException
 
 class APIService(
     private val apiRepository: APIRepository,
+    private val fileService: FileService,
+    private val userRepository: UserRepository
 ) {
+    fun validateToken(fetchedToken: APIRecord, permission: APIPermissions) {
+        if (fetchedToken.validFrom!! > LocalDateTime.now() || fetchedToken.validTo!! < LocalDateTime.now()) {
+            throw NoPermissionException("Token is not valid")
+        }
+        val isAuthorized = when (permission) {
+            APIPermissions.CREATE -> fetchedToken.canCreate
+            APIPermissions.READ -> fetchedToken.canRead
+            APIPermissions.UPDATE -> fetchedToken.canUpdate
+            APIPermissions.DELETE -> fetchedToken.canDelete
+        } == "1".toByte()
+        if (!isAuthorized) {
+            throw  NoPermissionException("Token has no authorized ${permission.name} action")
+        }
+    }
+
     fun createToken(creatableToken: CreatableToken, user: UserRecord): String {
         creatableToken.isValuesValid()
         val apiRecord = APIRecord(
@@ -52,5 +71,53 @@ class APIService(
         if (!apiRecord.user.contentEquals(user.id))
             throw NoPermissionException("User do not have permission to delete this api metadata")
         apiRepository.delete(apiRecord.id!!)
+    }
+
+    fun getTokenFilesMetadata(sendableToken: SendableToken, offset: Int, limit: Int): List<FileMetadata> {
+        val fetchedToken = apiRepository.fetchByToken(sendableToken.token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.READ)
+        return fileService.getUserFilesMetadata(fetchedToken.user!!, offset, limit)
+    }
+
+    fun getTokenFilesMetadataInfo(sendableToken: SendableToken): FileMetadataInfo {
+        val fetchedToken = apiRepository.fetchByToken(sendableToken.token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.READ)
+        val fetchedUser = userRepository.fetch(Misc.binToUuid(fetchedToken.user!!))
+            ?: throw NotFoundException("User was not found")
+        return fileService.getUserFilesMetadataInfo(fetchedUser)
+    }
+
+    fun getTokenFile(fileId: String, sendableToken: SendableToken): File {
+        val fetchedToken = apiRepository.fetchByToken(sendableToken.token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.READ)
+        return fileService.getUserFile(fileId, fetchedToken.user!!)
+    }
+
+    fun uploadTokenFile(token: String, part: PartData.FileItem, fileSize: Long) {
+        val fetchedToken = apiRepository.fetchByToken(token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.CREATE)
+        val fetchedUser = userRepository.fetch(Misc.binToUuid(fetchedToken.user!!))
+            ?: throw NotFoundException("User was not found")
+        fileService.uploadUserFile(fetchedUser, part, fileSize)
+    }
+
+    fun replaceTokenFile(fileId: String, token: String, part: PartData.FileItem, fileSize: Long) {
+        val fetchedToken = apiRepository.fetchByToken(token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.UPDATE)
+        val fetchedUser = userRepository.fetch(Misc.binToUuid(fetchedToken.user!!))
+            ?: throw NotFoundException("User was not found")
+        fileService.editUserFile(fileId, fetchedUser, part, fileSize)
+    }
+
+    fun deleteTokenFile(sendableToken: SendableToken, fileId: String) {
+        val fetchedToken = apiRepository.fetchByToken(sendableToken.token)
+            ?: throw NotFoundException("Token was not found")
+        validateToken(fetchedToken, APIPermissions.DELETE)
+        fileService.deleteFile(fetchedToken.user!!, fileId)
     }
 }

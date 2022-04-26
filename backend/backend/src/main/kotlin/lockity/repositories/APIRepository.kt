@@ -22,6 +22,11 @@ class APIRepository(
         .where(APITable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
+    fun fetchByToken(token: String): APIRecord? = databaseService.dsl
+        .selectFrom(APITable)
+        .where(APITable.Token.eq(token))
+        .fetchOne()
+
     fun delete(apiId: ByteArray) = databaseService.dsl
         .deleteFrom(APITable)
         .where(APITable.Id.eq(apiId))

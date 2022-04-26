@@ -29,7 +29,7 @@ fun Application.main() {
                 single { FileService(get(), get(), get()) }
                 single { SharedAccessService(get(), get(), get()) }
                 single { UserService(get(), get(), get(), get(), get(), get(), get()) }
-                single { APIService(get()) }
+                single { APIService(get(), get(), get()) }
             }
         )
     }
