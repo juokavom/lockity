@@ -2,13 +2,11 @@ package lockity.services
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import database.schema.tables.records.ConfirmationLinkRecord
+import database.schema.tables.records.ForgotPasswordLinkRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.features.*
 import lockity.models.*
-import lockity.repositories.ConfirmationLinkRepository
-import lockity.repositories.FileRepository
-import lockity.repositories.RoleRepository
-import lockity.repositories.UserRepository
+import lockity.repositories.*
 import lockity.utils.*
 import java.time.LocalDateTime
 import java.util.*
@@ -18,6 +16,7 @@ import javax.security.auth.login.AccountLockedException
 class UserService(
     private val configurationService: ConfigurationService,
     private val confirmationLinkRepository: ConfirmationLinkRepository,
+    private val forgotLinkRepository: ForgotLinkRepository,
     private val emailService: EmailService,
     private val roleRepository: RoleRepository,
     private val userRepository: UserRepository,
@@ -75,7 +74,7 @@ class UserService(
                 storageSize = DEFAULT_STORAGE_BYTES
             )
         )
-        val confirmationLink = generateConfirmationLink(userId)
+        val confirmationLink = generateLink(userId)
         confirmationLinkRepository.insertLink(confirmationLink)
         emailService.sendEmail(
             registrableUser.email,
@@ -93,11 +92,46 @@ class UserService(
                 if (user.confirmed == "1".toByte()) throw BadRequestException("User already confirmed")
                 user.confirmed = "1".toByte()
                 userRepository.updateUser(user)
+                confirmationLinkRepository.delete(linkData.confirmationLink.id!!)
             }
         } ?: throw NotFoundException("Confirmation link does not exist.")
     }
 
-    private fun generateConfirmationLink(userBinId: ByteArray) = ConfirmationLinkRecord(
+    fun resetPassword(email: Email) {
+        email.isValuesValid()
+        if (!emailService.isEmailValid(email.email))
+            throw BadRequestException("Email is not in correct format.")
+        val fetchedUser = userRepository.fetchByEmail(email.email)
+            ?: throw NotFoundException("User was not found")
+        val passwordResetLink = generateLink(fetchedUser.id!!)
+        val passwordLinkRecord = ForgotPasswordLinkRecord(
+            id = passwordResetLink.id,
+            user = passwordResetLink.user,
+            link = passwordResetLink.link,
+            validUntil = passwordResetLink.validUntil,
+        )
+        forgotLinkRepository.insertLink(passwordLinkRecord)
+        emailService.sendEmail(
+            fetchedUser.email!!,
+            "Password reset in Lockity",
+            emailService.resetPasswordTemplate(passwordLinkRecord)
+        )
+    }
+
+    fun confirmResetedPassword(resetedPassword: ResetedPassword) {
+        resetedPassword.isValuesValid()
+        val linkData = forgotLinkRepository
+            .fetchForgotPasswordLinkAndUserRecordMapByLink(resetedPassword.link)
+        linkData?.forgotPasswordLink?.let {
+            linkData.user.let { user ->
+                user.password = bcryptPassword(resetedPassword.password)
+                userRepository.updateUser(user)
+                forgotLinkRepository.delete(linkData.forgotPasswordLink.id!!)
+            }
+        } ?: throw NotFoundException("Password reset link does not exist.")
+    }
+
+    private fun generateLink(userBinId: ByteArray) = ConfirmationLinkRecord(
         id = Misc.uuidToBin(UUID.randomUUID()),
         user = userBinId,
         link = UUID.randomUUID().toString(),
@@ -236,5 +270,4 @@ class UserService(
             )
         )
     }
-
 }

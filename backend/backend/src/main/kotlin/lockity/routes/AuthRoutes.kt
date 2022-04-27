@@ -47,5 +47,22 @@ fun Application.authRoutes() {
                 call.respondJSON("Successful confirmation", HttpStatusCode.OK)
             }
         }
+
+        route("/forgot-password") {
+            post {
+                call.withErrorHandler {
+                    userService.resetPassword(call.receive())
+                    call.respondJSON("Password reset initiated. Check your email for further information.",
+                        HttpStatusCode.OK)
+                }
+            }
+
+            post("/confirm") {
+                call.withErrorHandler {
+                    userService.confirmResetedPassword(call.receive())
+                    call.respondJSON("Password changed successfully.", HttpStatusCode.OK)
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package lockity.services
 
 import database.schema.tables.records.ConfirmationLinkRecord
+import database.schema.tables.records.ForgotPasswordLinkRecord
 import lockity.utils.CONFIG
 import org.apache.commons.mail.DefaultAuthenticator
 import org.apache.commons.mail.SimpleEmail
@@ -31,6 +32,27 @@ class EmailService(
                         Please confirm your registration by clicking the following
                         <a href="$link">link</a>. 
                         (Or paste it browser: $link). See you!
+                 </p>
+             </body>
+       </html>
+       """.trimIndent()
+
+    fun resetPasswordTemplate(
+        forgotPasswordLink: ForgotPasswordLinkRecord,
+        link: String? = "${configurationService.configValue(CONFIG.CORS_SCHEME)}://" +
+                "${configurationService.configValue(CONFIG.CORS_HOST)}/reset/${forgotPasswordLink.link}"
+    ) = """
+       <html>
+             <head>
+             </head>
+             <body>
+                 <p>
+                        Please restore your password by clicking the following
+                        <a href="$link">link</a>. 
+                        (Or paste it browser: $link). Link is valid until 
+                        ${forgotPasswordLink.validUntil?.format(
+                            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                        )}.See you!
                  </p>
              </body>
        </html>

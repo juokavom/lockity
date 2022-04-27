@@ -18,6 +18,7 @@ import { UsersPage } from '../users/UsersPage';
 import './styles/Main.scss';
 import Header from '../Header/HeaderComponent';
 import { APIPage } from '../api/APIPage';
+import RestorePasswordPage from './components/RestorePasswordPage';
 
 export default function Main() {
     const dispatch = useDispatch()
@@ -34,10 +35,11 @@ export default function Main() {
         return (
             <div>
                 <Switch>
-                    <Route path="/confirm/:id" component={ConfirmAccount} />
+                    <Route path={ROUTES.confirm + "/:id"} component={ConfirmAccount} />
                     <Route exact path={ROUTES.login} component={() => <Login />} />
                     <Route exact path={ROUTES.upload} component={() => <Upload />} />
                     <Route path={ROUTES.download + "/:id"} component={Download} />
+                    <Route path={ROUTES.reset + "/:id"} component={RestorePasswordPage} />
                     <Route exact path={ROUTES.test} component={() => <Test />} />
                     <Redirect to={ROUTES.upload} />
                 </Switch>

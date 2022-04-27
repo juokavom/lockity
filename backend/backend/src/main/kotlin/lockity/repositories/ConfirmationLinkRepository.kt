@@ -2,6 +2,7 @@ package lockity.repositories
 
 import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.references.ConfirmationLinkTable
+import database.schema.tables.references.FileTable
 import database.schema.tables.references.UserTable
 import lockity.models.ConfirmationLinkAndUser
 import lockity.services.DatabaseService
@@ -11,6 +12,11 @@ class ConfirmationLinkRepository(
 ) {
     fun insertLink(confirmationLinkRecord: ConfirmationLinkRecord) = databaseService.dsl
         .batchInsert(confirmationLinkRecord)
+        .execute()
+
+    fun delete(linkId: ByteArray) = databaseService.dsl
+        .deleteFrom(ConfirmationLinkTable)
+        .where(ConfirmationLinkTable.Id.eq(linkId))
         .execute()
 
     fun fetchConfirmationLinkAndUserRecordMapByLink(link: String): ConfirmationLinkAndUser? = databaseService.dsl

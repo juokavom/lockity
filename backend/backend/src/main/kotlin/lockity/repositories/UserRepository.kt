@@ -54,6 +54,11 @@ class UserRepository(
         .where(UserTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
+    fun fetchByEmail(email: String): UserRecord? = databaseService.dsl
+        .selectFrom(UserTable)
+        .where(UserTable.Email.eq(email))
+        .fetchOne()
+
     fun fetchWithEmailLike(emailLike: String): List<UserRecord> = databaseService.dsl
         .selectFrom(UserTable)
         .where(UserTable.Email.like(emailLike))

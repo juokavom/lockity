@@ -5,6 +5,8 @@ export namespace ROUTES {
     export const upload = '/upload'
     export const download = '/download'
     export const test = '/test'
+    export const confirm = '/confirm'
+    export const reset = '/reset'
 
     export const filesPage = '/files'
     export const receivedPage = '/received'

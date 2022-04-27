@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Box, FormControl, IconButton, Input, InputLabel } from "@mui/material";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { useState } from "react";
@@ -13,7 +14,8 @@ export function Register({ callback }: { callback: (success: boolean) => void })
     const [surname, setSurname] = useState<string | null>(null);
     const [email, setEmail] = useState<string | null>(null);
     const [password, setPassword] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);    
+    const [showPassword, setShowPassword] = useState(false)
 
     const validateForm = () => {
         return email != null && email.length > 0 && password != null && password.length > 0;
@@ -44,7 +46,7 @@ export function Register({ callback }: { callback: (success: boolean) => void })
                 }, LOADING_TIMEOUT_MS)
             }, () => {
                 setLoading(false)
-             })
+            })
     };
 
     if (loading) {
@@ -63,6 +65,7 @@ export function Register({ callback }: { callback: (success: boolean) => void })
                         name="name"
                         autoComplete="name"
                         variant="standard"
+                        defaultValue={name}
                         onChange={(e: any) => setName(e.target.value)}
                     />
                     <TextField
@@ -73,6 +76,7 @@ export function Register({ callback }: { callback: (success: boolean) => void })
                         name="surname"
                         autoComplete="surname"
                         variant="standard"
+                        defaultValue={surname}
                         onChange={(e: any) => setSurname(e.target.value)}
                     />
                     <TextField
@@ -84,20 +88,31 @@ export function Register({ callback }: { callback: (success: boolean) => void })
                         name="email"
                         autoComplete="email"
                         variant="standard"
+                        defaultValue={email}
                         onChange={(e: any) => setEmail(e.target.value)}
                     />
-                    <TextField
+                    <FormControl
                         margin="normal"
-                        required
                         fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="password"
                         variant="standard"
-                        onChange={(e: any) => setPassword(e.target.value)}
-                    />
+                        required
+                    >
+                        <InputLabel htmlFor="password">Password</InputLabel>
+                        <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            onChange={(e: any) => setPassword(e.target.value)}
+                            defaultValue={password}
+                            endAdornment={
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                            }
+                        />
+                    </FormControl>
                     <Button
                         type="submit"
                         fullWidth

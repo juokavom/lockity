@@ -16,6 +16,7 @@ fun Application.main() {
                 // Repositories
                 single { RoleRepository(get()) }
                 single { ConfirmationLinkRepository(get()) }
+                single { ForgotLinkRepository(get()) }
                 single { FileRepository(get()) }
                 single { SharedAccessRepository(get()) }
                 single { UserRepository(get()) }
@@ -28,7 +29,7 @@ fun Application.main() {
                 single { DatabaseService(get()) }
                 single { FileService(get(), get(), get()) }
                 single { SharedAccessService(get(), get(), get()) }
-                single { UserService(get(), get(), get(), get(), get(), get(), get()) }
+                single { UserService(get(), get(), get(), get(), get(), get(), get(), get()) }
                 single { APIService(get(), get(), get()) }
             }
         )

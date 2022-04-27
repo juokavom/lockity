@@ -34,6 +34,8 @@ export namespace ENDPOINTS {
         export const logout = endpoint + '/logout'
         export const register = endpoint + '/register'
         export const registerConfirm = register + '/confirm'
+        export const forgotPassword = endpoint + '/forgot-password'
+        export const forgotPasswordConfirm = forgotPassword + '/confirm'
     }
 
     export namespace FILE {
