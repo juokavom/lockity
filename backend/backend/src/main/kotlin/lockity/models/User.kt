@@ -41,7 +41,7 @@ data class FrontendUser(
 @Serializable
 data class UserForSharing(
     val id: String,
-    val email: String
+    val publicName: String
 )
 
 @Serializable

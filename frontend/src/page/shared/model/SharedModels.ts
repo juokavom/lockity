@@ -22,5 +22,5 @@ export interface IFileMetadataForSharing {
 
 export interface IUserForSharing {
     id: string,
-    email: string
+    publicName: string
 }

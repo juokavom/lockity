@@ -159,13 +159,19 @@ class UserService(
         )
     }
 
-    fun getUsers(user: UserRecord, email: String): List<UserForSharing> = userRepository.fetchWithEmailLike(
-        emailLike = "$email%"
-    ).filter { it.email != user.email }.map {
-        UserForSharing(
-            id = Misc.binToUuid(it.id!!).toString(),
-            email = it.email!!
-        )
+    fun getUsers(user: UserRecord, username: String): List<UserForSharing> {
+        return if (username != ".") {
+            userRepository.fetchWithUsernameLike(
+                usernameLike = "$username%"
+            ).filter { it.email != user.email }.map {
+                UserForSharing(
+                    id = Misc.binToUuid(it.id!!).toString(),
+                    publicName = getUserPublicName(it.id!!, it.username!!)
+                )
+            }
+        } else {
+            listOf()
+        }
     }
 
     fun getUserCount() = UserCount(

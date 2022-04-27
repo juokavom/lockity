@@ -5,7 +5,7 @@ import { Button } from "reactstrap";
 import { DefaultToastOptions, RequestBuilder } from "../../../model/RequestBuilder";
 import { ENDPOINTS } from "../../../model/Server";
 import { IShareModalProps, IUserForSharing } from "../model/SharedModels";
-import { FetchUsersWithEmailsLike } from "../request/SharedRequests";
+import { FetchUsersWithUsernamesLike } from "../request/SharedRequests";
 
 export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.Element {
     const [users, setUsers] = useState<IUserForSharing[]>([]);
@@ -27,6 +27,7 @@ export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.E
             .withMethod('PUT')
             .withDefaults()
             .withBody({
+                fileId: shareMetadata?.id,
                 userId: selectedUser?.id
             })
             .send((response: any) => {
@@ -54,7 +55,7 @@ export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.E
                         disablePortal
                         onChange={(event, value) => setSelectedUser(value)}
                         id="user"
-                        getOptionLabel={(option: IUserForSharing) => option.email}
+                        getOptionLabel={(option: IUserForSharing) => option.publicName}
                         options={users}
                         sx={{ mt: 3, width: 300 }}
                         defaultValue={shareMetadata.user}
@@ -63,7 +64,7 @@ export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.E
                                 placeholder="Start typing for users to load"
                                 label="User"
                                 variant="standard"
-                                onChange={(e: any) => FetchUsersWithEmailsLike(e.target.value, (users) => {
+                                onChange={(e: any) => FetchUsersWithUsernamesLike(e.target.value, (users) => {
                                     setUsers(users)
                                 })}
                             />

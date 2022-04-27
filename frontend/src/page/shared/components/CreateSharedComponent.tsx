@@ -5,7 +5,7 @@ import { Button } from "reactstrap";
 import { DefaultToastOptions, RequestBuilder } from "../../../model/RequestBuilder";
 import { ENDPOINTS } from "../../../model/Server";
 import { IFileMetadataForSharing, IUserForSharing } from "../model/SharedModels";
-import { FetchUsersWithEmailsLike, FetchWithTitlesLike } from "../request/SharedRequests";
+import { FetchUsersWithUsernamesLike, FetchWithTitlesLike } from "../request/SharedRequests";
 
 export function CreateShared({ callback }: any): JSX.Element {
     const [files, setFiles] = useState<IFileMetadataForSharing[]>([]);
@@ -66,7 +66,7 @@ export function CreateShared({ callback }: any): JSX.Element {
                         disablePortal
                         onChange={(event, value) => setSelectedUser(value)}
                         id="user"
-                        getOptionLabel={(option: IUserForSharing) => option.email}
+                        getOptionLabel={(option: IUserForSharing) => option.publicName}
                         options={users}
                         sx={{ mt: 3, width: 300 }}
                         renderInput={(params) =>
@@ -74,7 +74,7 @@ export function CreateShared({ callback }: any): JSX.Element {
                                 placeholder="Start typing for users to load"
                                 label="User"
                                 variant="standard"
-                                onChange={(e: any) => FetchUsersWithEmailsLike(e.target.value, (users) => {
+                                onChange={(e: any) => FetchUsersWithUsernamesLike(e.target.value, (users) => {
                                     setUsers(users)
                                 })}
                             />

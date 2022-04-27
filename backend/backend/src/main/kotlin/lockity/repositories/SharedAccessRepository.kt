@@ -6,6 +6,7 @@ import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
 import lockity.models.*
 import lockity.services.DatabaseService
+import lockity.services.UserService
 import lockity.utils.Misc
 import java.util.*
 
@@ -52,7 +53,7 @@ class SharedAccessRepository(
                     ),
                     user = UserForSharing(
                         id = Misc.binToUuid(it[UserTable.Id]!!).toString(),
-                        email = it[UserTable.Email]!!
+                        publicName = UserService.getUserPublicName(it[UserTable.Id]!!, it[UserTable.Username]!!)
                     )
                 )
             }

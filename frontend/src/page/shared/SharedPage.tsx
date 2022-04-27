@@ -67,7 +67,7 @@ export function SharedPage() {
     const SharedFileRow = (shareMeta: ISharedMetadata) => (
         <tr>
             <td>{shareMeta.file.title}</td>
-            <td>{shareMeta.user.email}</td>
+            <td>{shareMeta.user.publicName}</td>
             <td style={{ textAlign: "center" }}>
                 <Button
                     color="primary"

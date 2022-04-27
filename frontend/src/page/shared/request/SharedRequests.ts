@@ -20,10 +20,10 @@ export const FetchWithTitlesLike = async (title: string, setFiles: (files: IFile
     }
 }
 
-export const FetchUsersWithEmailsLike = async (email: string, setUsers: (users: IUserForSharing[]) => void) => {
-    if (email !== "") {
+export const FetchUsersWithUsernamesLike = async (username: string, setUsers: (users: IUserForSharing[]) => void) => {
+    if (username !== "") {
         await new RequestBuilder()
-            .withUrl(ENDPOINTS.USER.getUserWithEmailLike(email))
+            .withUrl(ENDPOINTS.USER.getUserWithUsernameLike(username))
             .withMethod('GET')
             .withDefaults()
             .send((response: any) => {

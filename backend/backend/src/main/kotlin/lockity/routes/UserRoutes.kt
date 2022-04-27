@@ -99,13 +99,13 @@ fun Application.userRoutes() {
                     }
                 }
 
-                get("/email-starts-with/{email}") {
+                get("/username-starts-with/{username}") {
                     call.withErrorHandler {
-                        val email = call.parameters["email"]
-                            ?: throw BadRequestException("Email is not present in the parameters.")
+                        val username = call.parameters["username"]
+                            ?: throw BadRequestException("Username is not present in the parameters.")
                         val currentUser = call.jwtUser()
                             ?: throw NoPermissionException("User do not have permission to modify this file metadata")
-                        call.respond(userService.getUsers(currentUser, email))
+                        call.respond(userService.getUsers(currentUser, username))
                     }
                 }
             }

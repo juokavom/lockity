@@ -25,7 +25,7 @@ export function DeleteShared({ shareMetadata, callback }: IShareModalProps): JSX
             </div>
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="col-auto">
-                    <p style={{ textAlign: "center" }}><i>{shareMetadata.file.title} & {shareMetadata.user.email}</i></p>
+                    <p style={{ textAlign: "center" }}><i>{shareMetadata.file.title} & {shareMetadata.user.publicName}</i></p>
                 </div>
             </div>
             <div className="row align-items-center d-flex justify-content-center"

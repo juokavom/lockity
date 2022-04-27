@@ -74,7 +74,7 @@ export namespace ENDPOINTS {
 
         export const userId = (id: string) => user + '/' + id
         export const userIdSelf = (id: string) => userId(id) + '/self'
-        export const getUserWithEmailLike = (email: string) => user + '/email-starts-with/' + email
+        export const getUserWithUsernameLike = (email: string) => user + '/username-starts-with/' + email
         export const getUserDataWithOffsetAndLimit = (offset: number, limit: number) =>
             user + '/offset/' + offset + '/limit/' + limit
         export const getUserCount = user + '/count'
