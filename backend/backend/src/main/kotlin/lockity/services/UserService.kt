@@ -45,6 +45,7 @@ class UserService(
                     return FrontendUser(
                         id = Misc.binToUuid(userRecord.id!!).toString(),
                         email = userRecord.email!!,
+                        username = userRecord.username!!,
                         role = roleRepository.fetch(userRecord.role!!)!!.name!!
                     )
                 }
@@ -62,6 +63,7 @@ class UserService(
         userRepository.insertUser(
             UserRecord(
                 id = userId,
+                username = registrableUser.username,
                 name = registrableUser.name,
                 surname = registrableUser.surname,
                 email = registrableUser.email,
@@ -174,6 +176,7 @@ class UserService(
         userRepository.insertUser(
             UserRecord(
                 id = userId,
+                username = creatableUser.username,
                 name = creatableUser.name,
                 surname = creatableUser.surname,
                 email = creatableUser.email,
@@ -201,6 +204,7 @@ class UserService(
         userRepository.updateUser(
             UserRecord(
                 id = userRecord.id,
+                username = editableUser.username,
                 name = editableUser.name,
                 surname = editableUser.surname,
                 email = editableUser.email,
@@ -231,6 +235,7 @@ class UserService(
             throw NoPermissionException("User do not have permission to get this user data")
         return UserData(
             id = Misc.binToUuid(user.id!!).toString(),
+            username = user.username!!,
             name = user.name,
             surname = user.surname,
             email = user.email!!,
@@ -256,6 +261,7 @@ class UserService(
         userRepository.updateUser(
             UserRecord(
                 id = user.id,
+                username = editedSelf.username,
                 name = editedSelf.name,
                 surname = editedSelf.surname,
                 email = editedSelf.email,

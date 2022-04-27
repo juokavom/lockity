@@ -111,8 +111,8 @@ export default function Header() {
                     </div>
                 </ModalBody>
             </Modal>
-            <Navbar dark expand="lg" >
-                <div className="row center-horizontally" style={{ width: "100%" }}>
+            <Navbar dark expand="lg">
+                <div style={{ width: "100%", maxWidth: "600px" }}>
                     <NavbarToggler onClick={() => setNavOpen(!isNavOpen)} style={{ width: "200px" }} />
                     <Collapse isOpen={isNavOpen} navbar>
                         <Nav navbar className="center-vertically">
@@ -157,34 +157,35 @@ export default function Header() {
                     </Collapse>
                 </div>
                 {!windowState.smallView &&
-                    <>
+                    <div className="d-flex align-items-center justify-content-end">
                         <div style={{ display: "inline-block" }}>
                             <p style={{ whiteSpace: "pre" }}><b>{hello},&nbsp;</b></p>
                         </div>
-                        <div style={{ display: "inline-block" }}>
-                            <p><i><b>{localUserState.user?.email}&nbsp;</b></i></p>
+                        <div style={{ display: "inline-block", maxWidth: "200px", marginRight: 10 }}>
+                            <p style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
+                                <i><b>{localUserState.user?.username}&nbsp;</b></i></p>
                         </div>
                         <div style={{ display: "inline-block" }}>
+                            <Dropdown
+                                isOpen={isDropdowOpen}
+                                onMouseOver={() => setDropdownOpen(true)}
+                                onMouseLeave={() => setDropdownOpen(false)}
+                                toggle={() => { }}
+                            >
+                                <DropdownToggle outline>
+                                    <PersonOutlineIcon />
+                                </DropdownToggle>
+                                <DropdownMenu >
+                                    <DropdownItem onClick={() => openModal()}>
+                                        My settings
+                                    </DropdownItem>
+                                    <DropdownItem onClick={async () => await LogoutAction()}>
+                                        Logout
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
                         </div>
-                        <Dropdown
-                            isOpen={isDropdowOpen}
-                            onMouseOver={() => setDropdownOpen(true)}
-                            onMouseLeave={() => setDropdownOpen(false)}
-                            toggle={() => { }}
-                        >
-                            <DropdownToggle outline>
-                                <PersonOutlineIcon />
-                            </DropdownToggle>
-                            <DropdownMenu >
-                                <DropdownItem onClick={() => openModal()}>
-                                    My settings
-                                </DropdownItem>
-                                <DropdownItem onClick={async () => await LogoutAction()}>
-                                    Logout
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-                    </>
+                    </div>
                 }
             </Navbar>
         </div>

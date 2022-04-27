@@ -67,6 +67,8 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
         this.respondJSON(e.message.toString(), HttpStatusCode.NotFound)
     } catch (e: NoPermissionException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.Forbidden)
+    } catch (e: Exception) {
+        this.respondJSON("Something wrong in our end", HttpStatusCode.InternalServerError)
     }
 }
 

@@ -16,6 +16,7 @@ export function CreateUser({ callback }: any): JSX.Element {
     const [showPassword, setShowPassword] = useState(false)
 
     const [user, setUser] = useState<{
+        username: string | null,
         name: string | null,
         surname: string | null,
         email: string | null,
@@ -27,6 +28,7 @@ export function CreateUser({ callback }: any): JSX.Element {
         subscribed: boolean,
         storageSize: number | null
     }>({
+        username: null,
         name: null,
         surname: null,
         email: null,
@@ -41,6 +43,7 @@ export function CreateUser({ callback }: any): JSX.Element {
 
     const validateForm = () => {
         return user != null &&
+            user.username !== null && user.username !== "" &&
             user.email !== null && user.email !== "" &&
             user.password !== null && user.password !== "" &&
             user.role !== null && user.role !== "" &&
@@ -66,6 +69,18 @@ export function CreateUser({ callback }: any): JSX.Element {
 
     return (
         <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Username"
+                label="Username"
+                type="Username"
+                name="Username"
+                autoComplete="Username"
+                variant="standard"
+                onChange={(e: any) => setUser({ ...user, username: e.target.value })}
+            />
             <TextField
                 margin="normal"
                 required

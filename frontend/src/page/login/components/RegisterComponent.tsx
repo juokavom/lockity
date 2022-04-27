@@ -12,13 +12,15 @@ import { LoadingSpinner } from "../../main/components/LoadingSpinnerComponent";
 export function Register({ callback }: { callback: (success: boolean) => void }) {
     const [name, setName] = useState<string | null>(null);
     const [surname, setSurname] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
     const [email, setEmail] = useState<string | null>(null);
     const [password, setPassword] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);    
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false)
 
     const validateForm = () => {
-        return email != null && email.length > 0 && password != null && password.length > 0;
+        return username != null && username.length > 0 && email != null
+            && email.length > 0 && password != null && password.length > 0;
     }
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
@@ -33,6 +35,7 @@ export function Register({ callback }: { callback: (success: boolean) => void })
             .withMethod('POST')
             .withDefaults()
             .withBody({
+                username: username,
                 name: name,
                 surname: surname,
                 email: email,
@@ -57,6 +60,18 @@ export function Register({ callback }: { callback: (success: boolean) => void })
         return (
             <div>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <TextField
+                        required
+                        margin="normal"
+                        fullWidth
+                        id="Username"
+                        label="Username"
+                        name="Username"
+                        autoComplete="Username"
+                        variant="standard"
+                        defaultValue={username}
+                        onChange={(e: any) => setUsername(e.target.value)}
+                    />
                     <TextField
                         margin="normal"
                         fullWidth

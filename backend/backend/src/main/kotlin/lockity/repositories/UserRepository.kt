@@ -99,6 +99,7 @@ class UserRepository(
             .map {
                 UserData(
                     id = Misc.binToUuid(it[UserTable.Id]!!).toString(),
+                    username = it[UserTable.Username]!!,
                     name = it[UserTable.Name],
                     surname = it[UserTable.Surname],
                     email = it[UserTable.Email]!!,

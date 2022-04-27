@@ -16,6 +16,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
 
     const [user, setUser] = useState<{
         name: string | null,
+        username: string | null,
         surname: string | null,
         email: string | null,
         password: string | null,
@@ -27,6 +28,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
         storageSize: number | null
     }>({
         name: userData!.name,
+        username: userData!.username,
         surname: userData!.surname,
         email: userData!.email,
         password: "",
@@ -40,8 +42,10 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
 
     const validateForm = () => {
         return user != null &&
+            user.username != null && user.username !== "" &&
             user.email != null && user.email !== "" &&
             user.registered != null && (
+                user.username !== userData!.username ||
                 user.email !== userData!.email ||
                 user.name !== userData!.name ||
                 user.surname !== userData!.surname ||
@@ -61,6 +65,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
             .withMethod('PUT')
             .withDefaults()
             .withBody({
+                username: user.username,
                 name: user.name,
                 surname: user.surname,
                 email: user.email,
@@ -76,6 +81,19 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
 
     return (
         <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Username"
+                label="Username"
+                type="Username"
+                name="Username"
+                autoComplete="Username"
+                variant="standard"
+                defaultValue={userData!.username}
+                onChange={(e: any) => setUser({ ...user, username: e.target.value })}
+            />
             <TextField
                 margin="normal"
                 required

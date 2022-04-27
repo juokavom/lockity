@@ -17,6 +17,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
     const [showPassword, setShowPassword] = useState(false)
 
     const [user, setUser] = useState<{
+        username: string | null,
         name: string | null,
         surname: string | null,
         email: string | null,
@@ -28,6 +29,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
         subscribed: boolean,
         storageSize: number | null
     }>({
+        username: userData.username,
         name: userData.name,
         surname: userData.surname,
         email: userData.email,
@@ -43,8 +45,10 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
     const validateForm = () => {
         return user != null &&
             user.email != null && user.email !== "" &&
+            user.username != null && user.username !== "" &&
             user.role != null && user.role !== "" &&
             user.registered != null && (
+                user.username !== userData.username ||
                 user.email !== userData.email ||
                 user.name !== userData.name ||
                 user.surname !== userData.surname ||
@@ -77,6 +81,19 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
 
     return (
         <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Username"
+                label="Username"
+                type="Username"
+                name="Username"
+                autoComplete="Username"
+                variant="standard"
+                defaultValue={userData.username}
+                onChange={(e: any) => setUser({ ...user, username: e.target.value })}
+            />
             <TextField
                 margin="normal"
                 required
@@ -142,7 +159,6 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                 <Select
                     id="Role"
                     label="Role"
-                    value={user.role}
                     defaultValue={userData.role}
                     onChange={(e: any) => setUser({ ...user, role: e.target.value })}
                 >
@@ -186,7 +202,6 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                 id="storageSize"
                 label="Storage size (bytes)"
                 type="number"
-                value={user.storageSize}
                 defaultValue={userData.storageSize}
                 onChange={(e: any) => {
                     let number = parseInt(e.target.value)

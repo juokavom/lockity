@@ -12,6 +12,7 @@ export namespace User {
     export interface FrontendUser {
         id: string;
         email: string;
+        username: string;
         role: Role;
     }
 }
