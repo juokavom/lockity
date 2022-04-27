@@ -23,5 +23,6 @@ export interface IUserData {
     lastActive: Date | null,
     confirmed: boolean,
     subscribed: boolean,
-    storageSize: number
+    storageSize: number,
+    publicName: string
 }

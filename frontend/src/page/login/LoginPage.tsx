@@ -61,7 +61,6 @@ export default function LoginPage() {
             .send((loggedUser: User.FrontendUser) => {
                 setTimeout(() => {
                     setLoading(false)
-                    localStorage.setItem(User.storagename, JSON.stringify(loggedUser))
                     dispatch(LocalUserActionCreators.setUser(loggedUser))
                     history.push(ROUTES.filesPage)
                 }, LOADING_TIMEOUT_MS)

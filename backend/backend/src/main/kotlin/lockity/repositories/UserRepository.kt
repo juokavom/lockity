@@ -5,6 +5,9 @@ import database.schema.tables.references.RoleTable
 import database.schema.tables.references.UserTable
 import lockity.models.UserData
 import lockity.services.DatabaseService
+import lockity.services.FileService
+import lockity.services.UserService
+import lockity.services.UserService.Companion.getUserPublicName
 import lockity.utils.Misc
 import lockity.utils.USER
 import java.time.LocalDateTime
@@ -108,7 +111,8 @@ class UserRepository(
                     lastActive =  it[UserTable.LastActive],
                     confirmed =  it[UserTable.Confirmed]!! == "1".toByte(),
                     subscribed =  it[UserTable.Subscribed]!! == "1".toByte(),
-                    storageSize =  it[UserTable.StorageSize]!!
+                    storageSize =  it[UserTable.StorageSize]!!,
+                    publicName = getUserPublicName(it[UserTable.Id]!!, it[UserTable.Username]!!)
                 )
             }
             .toList()

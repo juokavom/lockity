@@ -29,6 +29,12 @@ class UserService(
     private fun bcryptPassword(password: String) =
         BCrypt.withDefaults().hashToString(12, password.toCharArray())
 
+    companion object {
+        fun getUserPublicName(id: ByteArray, username: String): String {
+            val uuid = Misc.binToUuid(id)
+            return "$username (${uuid.toString().substring(0, 6)})"
+        }
+    }
 
     fun loginUser(signInUser: SignInAbleUser): FrontendUser {
         userRepository.fetchLoginUserMap(signInUser.email)?.let { dbUser ->
@@ -46,6 +52,7 @@ class UserService(
                         id = Misc.binToUuid(userRecord.id!!).toString(),
                         email = userRecord.email!!,
                         username = userRecord.username!!,
+                        publicName = getUserPublicName(userRecord.id!!, userRecord.username!!),
                         role = roleRepository.fetch(userRecord.role!!)!!.name!!
                     )
                 }
@@ -244,7 +251,8 @@ class UserService(
             lastActive = user.lastActive,
             confirmed = user.confirmed == "1".toByte(),
             subscribed = user.subscribed == "1".toByte(),
-            storageSize = user.storageSize!!
+            storageSize = user.storageSize!!,
+            publicName = getUserPublicName(user.id!!, user.username!!)
         )
     }
 

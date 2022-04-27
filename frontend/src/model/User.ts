@@ -13,6 +13,7 @@ export namespace User {
         id: string;
         email: string;
         username: string;
+        publicName: string;
         role: Role;
     }
 }

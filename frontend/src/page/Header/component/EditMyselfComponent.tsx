@@ -84,6 +84,19 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
             <TextField
                 margin="normal"
                 required
+                disabled
+                fullWidth
+                id="PublicName"
+                label="Public Name"
+                type="PublicName"
+                name="PublicName"
+                autoComplete="PublicName"
+                variant="standard"
+                defaultValue={userData!.publicName}
+            />
+            <TextField
+                margin="normal"
+                required
                 fullWidth
                 id="Username"
                 label="Username"

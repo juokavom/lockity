@@ -22,7 +22,7 @@ export const LocalUserReducer = (state: ILocalUserState = {
             if (user) {
                 const isAdmin = user != null ? User.isAdmin(user.role) : false
                 const isAuthed = user != null ? User.isAuthed(user.role) : false
-
+                localStorage.setItem(User.storagename, JSON.stringify(user))
                 return {
                     ...state,
                     user: user,

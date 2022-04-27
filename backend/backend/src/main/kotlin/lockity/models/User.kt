@@ -34,6 +34,7 @@ data class FrontendUser(
     val id: String,
     val email: String,
     val username: String,
+    val publicName: String,
     val role: String
 )
 
@@ -60,7 +61,8 @@ data class UserData(
     val lastActive: LocalDateTime?,
     val confirmed: Boolean,
     val subscribed: Boolean,
-    val storageSize: Long
+    val storageSize: Long,
+    val publicName: String
 )
 
 @Serializable
