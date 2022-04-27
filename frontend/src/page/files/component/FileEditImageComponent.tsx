@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button } from 'reactstrap'
 import 'tui-image-editor/dist/tui-image-editor.css'
 import { ENDPOINTS } from '../../../model/Server'
-import { dataURItoBlob, fetchToDataURL, IFileModalProps } from "../model/FileModels"
+import { blobToDataURL, dataURItoBlob, fetchBlob, IFileModalProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
 export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
@@ -11,8 +11,10 @@ export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.
     const [imgContents, setImgContents] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchToDataURL(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
-            setImgContents(response)
+        fetchBlob(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
+            blobToDataURL(response, (dataUrlResponse) => {
+                setImgContents(dataUrlResponse)
+            })
         })
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

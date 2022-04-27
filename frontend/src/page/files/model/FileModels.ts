@@ -1,3 +1,8 @@
+import { toast } from "react-toastify"
+import { DefaultToastOptions } from "../../../model/RequestBuilder"
+import { ROUTES } from "../../../model/Routes"
+import { User } from "../../../model/User"
+
 export interface IFileMetadata {
     id: string,
     title: string,
@@ -63,15 +68,25 @@ export function formatBytes(bytes: number, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-export const fetchToDataURL = (url: string, callback: (response: any) => void) => {
+export const fetchBlob = (url: string, callback: (response: any) => void) => {
     const xhr = new XMLHttpRequest();
-    xhr.onload = () => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            callback(reader.result);
+    xhr.onreadystatechange = (ev: Event) => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            var status = xhr.status;
+            if (String(status).charAt(0) === '2') {
+                callback(xhr.response)
+            } else {
+                if (status === 401) {
+                    localStorage.removeItem(User.storagename)
+                    window.location.replace(ROUTES.login)
+                } else {
+                    const response = JSON.parse(xhr.response)
+                    toast.error('Fetch failed! ' + response.message, DefaultToastOptions)
+                }
+                callback(xhr.response)
+            }
         }
-        reader.readAsDataURL(xhr.response);
-    };
+    }
     xhr.open('GET', url);
     xhr.responseType = 'blob';
     xhr.withCredentials = true;

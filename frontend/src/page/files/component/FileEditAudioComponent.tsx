@@ -11,7 +11,7 @@ import { Region, WaveForm, WaveSurfer } from "wavesurfer-react"
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min"
 import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline.min"
 import { ENDPOINTS } from '../../../model/Server'
-import { bufferToWave, dataURItoBlob, fetchToDataURL, fileTitleToFormat, IFileModalProps, IWavesurferProps } from "../model/FileModels"
+import { bufferToWave, dataURItoBlob, fetchBlob, fileTitleToFormat, IFileModalProps, IWavesurferProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
 const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {
@@ -171,9 +171,9 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
         wavesurferRef.current = waveSurfer;
 
         if (wavesurferRef.current) {
-            fetchToDataURL(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
+            fetchBlob(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
                 // @ts-ignore
-                wavesurferRef.current.loadBlob(dataURItoBlob(response));
+                wavesurferRef.current.loadBlob(response);
             })
 
             // @ts-ignore

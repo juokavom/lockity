@@ -1,5 +1,5 @@
 import { IconButton } from "@mui/material";
-import { ENDPOINTS, SUPPORTED_PREVIEW_TYPES } from "../../../model/Server";
+import { ENDPOINTS, SUPPORTED_EDITING_TYPES, SUPPORTED_PREVIEW_TYPES } from "../../../model/Server";
 import { useTypedSelector } from "../../../redux/Store";
 import { FileAction, fileTitleToFormat, formatBytes, IFileProps } from "../model/FileModels";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -34,7 +34,7 @@ export const File = ({ fileMetadata, action }: IFileProps) => {
             </div>
             <div className="col-auto">
                 {
-                    format && SUPPORTED_PREVIEW_TYPES.includes(format) ?
+                    format && SUPPORTED_EDITING_TYPES.includes(format) ?
                         <IconButton onClick={() => action(FileAction.Edit)}>
                             <ContentCutOutlinedIcon />
                         </IconButton> :
