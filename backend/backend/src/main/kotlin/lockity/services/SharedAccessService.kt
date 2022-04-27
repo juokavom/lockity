@@ -46,7 +46,8 @@ class SharedAccessService(
         }
         if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
                 fileUuid = UUID.fromString(newAccess.fileId),
-                recipientUuid = UUID.fromString(newAccess.userId)
+                recipientUuid = UUID.fromString(newAccess.userId),
+                canEdit = if (newAccess.canEdit) "1".toByte() else "0".toByte()
             )
         ) throw BadRequestException("Shared access with the same file and recipient already exists")
 
@@ -55,6 +56,7 @@ class SharedAccessService(
                 id = Misc.uuidToBin(UUID.randomUUID()),
                 fileId = Misc.uuidToBin(UUID.fromString(newAccess.fileId)),
                 ownerId = fileOwner,
+                canEdit = if (newAccess.canEdit) "1".toByte() else "0".toByte(),
                 recipientId = Misc.uuidToBin(UUID.fromString(newAccess.userId)),
                 created = LocalDateTime.now()
             )
@@ -78,12 +80,14 @@ class SharedAccessService(
         }
         if (!sharedAccessRepository.isUniqueFileAndRecipientEntry(
                 fileUuid = Misc.binToUuid(sharedAccessRecord.fileId!!),
-                recipientUuid = UUID.fromString(editedAccess.userId)
+                recipientUuid = UUID.fromString(editedAccess.userId),
+                canEdit = if (editedAccess.canEdit) "1".toByte() else "0".toByte()
             )
         ) throw BadRequestException("Shared access with the same file and recipient already exists")
-        sharedAccessRepository.updateRecipient(
+        sharedAccessRepository.updateSharedAccess(
             sharedId = sharedAccessRecord.id!!,
-            userId = Misc.uuidToBin(recipientUUID)
+            userId = Misc.uuidToBin(recipientUUID),
+            canEdit = if (editedAccess.canEdit) "1".toByte() else "0".toByte()
         )
     }
 

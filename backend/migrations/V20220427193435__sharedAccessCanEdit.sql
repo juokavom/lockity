@@ -1,0 +1,1 @@
+ALTER TABLE `SharedAccess` ADD COLUMN canEdit BOOLEAN NOT NULL;

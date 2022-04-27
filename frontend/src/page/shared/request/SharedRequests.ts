@@ -7,8 +7,10 @@ import { LoadingActionCreators } from "../../../redux/actionCreators/LoadingActi
 import { IFileMetadataForSharing, ISharedMetadata, IUserForSharing } from "../model/SharedModels"
 import { SharedActionCreators } from "../redux/SharedActionCreators"
 
+const regex = new RegExp("^[a-zA-Z0-9]+$");
+
 export const FetchWithTitlesLike = async (title: string, setFiles: (files: IFileMetadataForSharing[]) => void) => {
-    if (title !== "") {
+    if (regex.test(title)) {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.getFileMetadataWithTitleLike(title))
             .withMethod('GET')
@@ -21,7 +23,7 @@ export const FetchWithTitlesLike = async (title: string, setFiles: (files: IFile
 }
 
 export const FetchUsersWithUsernamesLike = async (username: string, setUsers: (users: IUserForSharing[]) => void) => {
-    if (username !== "") {
+    if (regex.test(username)) {
         await new RequestBuilder()
             .withUrl(ENDPOINTS.USER.getUserWithUsernameLike(username))
             .withMethod('GET')

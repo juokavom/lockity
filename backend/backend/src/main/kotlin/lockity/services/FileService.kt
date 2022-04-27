@@ -79,7 +79,7 @@ class FileService(
         val userFileSizeSum = fileRepository.userFileSizeSum(user.id!!) - (fetchedFileRecord.size ?: 0)
         if (userFileSizeSum + fileSize > user.storageSize!!)
             throw NoPermissionException("User storage size is exceeded")
-        val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, false)
+        val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, true)
         fileRecord.user = user.id
         fileRecord.link = fetchedFileRecord.link
         fileRepository.update(fileRecord)
@@ -90,13 +90,14 @@ class FileService(
         fileSize: Long,
         fileName: String,
         fileId: ByteArray = Misc.uuidToBin(UUID.randomUUID()),
-        mkdir: Boolean = true
+        reupload: Boolean = false
     ): FileRecord {
         val fileIdStringed = Misc.binToUuid(fileId).toString()
         val fileFolderLocation = uploadsLocation(fileIdStringed)
-        if (mkdir) {
-            File(fileFolderLocation).mkdir()
+        if (reupload) {
+            deletePhysicalFile(fileId)
         }
+        File(fileFolderLocation).mkdir()
         val fileLocation = "$fileFolderLocation/$fileName"
         part.streamProvider().use { inputStream ->
             File(fileLocation).outputStream().buffered().use { outputStream ->

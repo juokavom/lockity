@@ -1,4 +1,4 @@
-import { Autocomplete, Box, TextField } from "@mui/material";
+import { Autocomplete, Box, FormControlLabel, Switch, TextField } from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { Button } from "reactstrap";
@@ -12,6 +12,7 @@ export function CreateShared({ callback }: any): JSX.Element {
     const [users, setUsers] = useState<IUserForSharing[]>([]);
     const [selectedFile, setSelectedFile] = useState<IFileMetadataForSharing | null>(null);
     const [selectedUser, setSelectedUser] = useState<IUserForSharing | null>(null);
+    const [canEdit, setCanEdit] = useState<boolean>(false);
 
     const validateForm = () => {
         return selectedFile != null && selectedUser != null;
@@ -29,7 +30,8 @@ export function CreateShared({ callback }: any): JSX.Element {
             .withDefaults()
             .withBody({
                 fileId: selectedFile?.id,
-                userId: selectedUser?.id
+                userId: selectedUser?.id,
+                canEdit: canEdit
             })
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
@@ -79,6 +81,17 @@ export function CreateShared({ callback }: any): JSX.Element {
                                 })}
                             />
                         }
+                    />
+                    <FormControlLabel
+                        sx={{ mt: 3, width: 300 }}
+                        control={
+                            <Switch
+                                checked={canEdit}
+                                onChange={(e: any) => { setCanEdit(!canEdit) }}
+                                name="canEdit"
+                            />
+                        }
+                        label="Can edit"
                     />
                 </div>
                 <div className="selected-file-wrapper">

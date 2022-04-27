@@ -63,7 +63,7 @@ export function CreateUser({ callback }: any): JSX.Element {
             .withBody(user)
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
-                // callback(true)
+                callback(true)
             }, () => callback(false))
     }
 

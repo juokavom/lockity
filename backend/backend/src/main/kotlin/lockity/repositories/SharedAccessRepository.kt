@@ -22,9 +22,10 @@ class SharedAccessRepository(
         .where(SharedAccessTable.Id.eq(Misc.uuidToBin(uuid)))
         .fetchOne()
 
-    fun updateRecipient(sharedId: ByteArray, userId: ByteArray) = databaseService.dsl
+    fun updateSharedAccess(sharedId: ByteArray, userId: ByteArray, canEdit: Byte) = databaseService.dsl
         .update(SharedAccessTable)
         .set(SharedAccessTable.RecipientId, userId)
+        .set(SharedAccessTable.CanEdit, canEdit)
         .where(SharedAccessTable.Id.eq(sharedId))
         .execute()
 
@@ -54,7 +55,8 @@ class SharedAccessRepository(
                     user = UserForSharing(
                         id = Misc.binToUuid(it[UserTable.Id]!!).toString(),
                         publicName = UserService.getUserPublicName(it[UserTable.Id]!!, it[UserTable.Username]!!)
-                    )
+                    ),
+                    canEdit = it[SharedAccessTable.CanEdit]!! == "1".toByte()
                 )
             }
             .toList()
@@ -92,12 +94,13 @@ class SharedAccessRepository(
         .where(SharedAccessTable.RecipientId.eq(userBinId))
         .fetchOne()?.value1() ?: 0
 
-    fun isUniqueFileAndRecipientEntry(fileUuid: UUID, recipientUuid: UUID): Boolean = databaseService.dsl
+    fun isUniqueFileAndRecipientEntry(fileUuid: UUID, recipientUuid: UUID, canEdit: Byte): Boolean = databaseService.dsl
         .selectCount()
         .from(SharedAccessTable)
         .where(
             SharedAccessTable.FileId.eq(Misc.uuidToBin(fileUuid))
                 .and(SharedAccessTable.RecipientId.eq(Misc.uuidToBin(recipientUuid)))
+                .and(SharedAccessTable.CanEdit.eq(canEdit))
         )
         .fetchOne()?.value1() == 0
 }

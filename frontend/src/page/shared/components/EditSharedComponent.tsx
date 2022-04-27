@@ -1,4 +1,4 @@
-import { Autocomplete, Box, TextField } from "@mui/material";
+import { Autocomplete, Box, FormControlLabel, Switch, TextField } from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { Button } from "reactstrap";
@@ -9,11 +9,11 @@ import { FetchUsersWithUsernamesLike } from "../request/SharedRequests";
 
 export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.Element {
     const [users, setUsers] = useState<IUserForSharing[]>([]);
-
+    const [canEdit, setCanEdit] = useState<boolean>(shareMetadata.canEdit);
     const [selectedUser, setSelectedUser] = useState<IUserForSharing | null>(shareMetadata.user);
 
     const validateForm = () => {
-        return selectedUser !== null && shareMetadata.user !== selectedUser;
+        return selectedUser !== null && (shareMetadata.user !== selectedUser || shareMetadata.canEdit !== canEdit);
     }
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
@@ -28,7 +28,8 @@ export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.E
             .withDefaults()
             .withBody({
                 fileId: shareMetadata?.id,
-                userId: selectedUser?.id
+                userId: selectedUser?.id,
+                canEdit: canEdit
             })
             .send((response: any) => {
                 toast.success(response.message, DefaultToastOptions)
@@ -69,6 +70,17 @@ export function EditShared({ shareMetadata, callback }: IShareModalProps): JSX.E
                                 })}
                             />
                         }
+                    />
+                    <FormControlLabel
+                        sx={{ mt: 3, width: 300 }}
+                        control={
+                            <Switch
+                                checked={canEdit}
+                                onChange={(e: any) => { setCanEdit(!canEdit) }}
+                                name="canEdit"
+                            />
+                        }
+                        label="Can edit"
                     />
                 </div>
                 <div className="selected-file-wrapper">

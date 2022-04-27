@@ -7,7 +7,8 @@ export const ShareAction = {
 export interface ISharedMetadata {
     id: string,
     file: IFileMetadataForSharing,
-    user: IUserForSharing
+    user: IUserForSharing,
+    canEdit: boolean
 }
 
 export interface IShareModalProps {
