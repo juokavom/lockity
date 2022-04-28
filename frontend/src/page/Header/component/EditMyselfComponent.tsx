@@ -86,7 +86,6 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                 }, LOADING_TIMEOUT_MS)
             }, () => {
                 setLoading(false)
-                callback(false)
             }
             )
     }
@@ -125,7 +124,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                     name="Username"
                     autoComplete="Username"
                     variant="standard"
-                    defaultValue={userData!.username}
+                    defaultValue={user.username}
                     onChange={(e: any) => setUser({ ...user, username: e.target.value })}
                 />
                 <TextField
@@ -138,7 +137,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                     name="Email"
                     autoComplete="Email"
                     variant="standard"
-                    defaultValue={userData!.email}
+                    defaultValue={user.email}
                     onChange={(e: any) => setUser({ ...user, email: e.target.value })}
                 />
                 <TextField
@@ -149,7 +148,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                     name="Name"
                     autoComplete="Name"
                     variant="standard"
-                    defaultValue={userData!.name}
+                    defaultValue={user.name}
                     onChange={(e: any) => setUser({ ...user, name: e.target.value })}
                 />
                 <TextField
@@ -160,7 +159,7 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                     name="Surname"
                     autoComplete="Surname"
                     variant="standard"
-                    defaultValue={userData!.surname}
+                    defaultValue={user.surname}
                     onChange={(e: any) => setUser({ ...user, surname: e.target.value })}
                 />
                 <FormControl

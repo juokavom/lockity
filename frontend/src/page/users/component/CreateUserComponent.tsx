@@ -98,6 +98,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     name="Username"
                     autoComplete="Username"
                     variant="standard"
+                    defaultValue={user.username}
                     onChange={(e: any) => setUser({ ...user, username: e.target.value })}
                 />
                 <TextField
@@ -110,6 +111,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     name="Email"
                     autoComplete="Email"
                     variant="standard"
+                    defaultValue={user.email}
                     onChange={(e: any) => setUser({ ...user, email: e.target.value })}
                 />
                 <TextField
@@ -120,6 +122,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     name="Name"
                     autoComplete="Name"
                     variant="standard"
+                    defaultValue={user.name}
                     onChange={(e: any) => setUser({ ...user, name: e.target.value })}
                 />
                 <TextField
@@ -130,6 +133,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     name="Surname"
                     autoComplete="Surname"
                     variant="standard"
+                    defaultValue={user.surname}
                     onChange={(e: any) => setUser({ ...user, surname: e.target.value })}
                 />
                 <FormControl
@@ -179,6 +183,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     label="Registered"
                     type="datetime-local"
                     inputProps={{ step: 1 }}
+                    defaultValue={user.registered}
                     onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
                     InputLabelProps={{
                         shrink: true,
@@ -192,6 +197,7 @@ export function CreateUser({ callback }: any): JSX.Element {
                     label="Last active"
                     type="datetime-local"
                     inputProps={{ step: 1 }}
+                    defaultValue={user.lastActive}
                     onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
                     InputLabelProps={{
                         shrink: true,

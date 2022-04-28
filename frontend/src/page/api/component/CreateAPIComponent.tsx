@@ -143,6 +143,7 @@ export function CreateAPI({ callback }: any): JSX.Element {
                         name="Title"
                         autoComplete="Title"
                         variant="standard"
+                        defaultValue={token.title}
                         onChange={(e: any) => setToken({ ...token, title: e.target.value })}
                     />
                     <Card
@@ -209,6 +210,7 @@ export function CreateAPI({ callback }: any): JSX.Element {
                         label="Valid from"
                         type="datetime-local"
                         inputProps={{ step: 1 }}
+                        defaultValue={token.validFrom}
                         onChange={(e: any) => setToken({ ...token, validFrom: e.target.value })}
                         InputLabelProps={{
                             shrink: true,
@@ -223,6 +225,7 @@ export function CreateAPI({ callback }: any): JSX.Element {
                         label="Valid to"
                         type="datetime-local"
                         inputProps={{ step: 1 }}
+                        defaultValue={token.validTo}
                         onChange={(e: any) => setToken({ ...token, validTo: e.target.value })}
                         InputLabelProps={{
                             shrink: true,

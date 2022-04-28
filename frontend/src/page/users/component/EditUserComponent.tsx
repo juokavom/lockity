@@ -87,7 +87,6 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                 }, LOADING_TIMEOUT_MS)
             }, () => {
                 setLoading(false)
-                callback(false)
             })
     }
 
@@ -99,7 +98,6 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
         );
     }
     else {
-
         return (
             <div className="container"><Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
                 <TextField
@@ -125,7 +123,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     name="Username"
                     autoComplete="Username"
                     variant="standard"
-                    defaultValue={userData.username}
+                    defaultValue={user.username}
                     onChange={(e: any) => setUser({ ...user, username: e.target.value })}
                 />
                 <TextField
@@ -138,7 +136,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     name="Email"
                     autoComplete="Email"
                     variant="standard"
-                    defaultValue={userData.email}
+                    defaultValue={user.email}
                     onChange={(e: any) => setUser({ ...user, email: e.target.value })}
                 />
                 <TextField
@@ -149,7 +147,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     name="Name"
                     autoComplete="Name"
                     variant="standard"
-                    defaultValue={userData.name}
+                    defaultValue={user.name}
                     onChange={(e: any) => setUser({ ...user, name: e.target.value })}
                 />
                 <TextField
@@ -160,7 +158,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     name="Surname"
                     autoComplete="Surname"
                     variant="standard"
-                    defaultValue={userData.surname}
+                    defaultValue={user.surname}
                     onChange={(e: any) => setUser({ ...user, surname: e.target.value })}
                 />
                 <FormControl
@@ -193,7 +191,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     <Select
                         id="Role"
                         label="Role"
-                        defaultValue={userData.role}
+                        defaultValue={user.role}
                         onChange={(e: any) => setUser({ ...user, role: e.target.value })}
                     >
                         <MenuItem value={User.Role.Registered}>{User.Role.Registered}</MenuItem>
@@ -209,7 +207,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     label="Registered"
                     type="datetime-local"
                     inputProps={{ step: 1 }}
-                    defaultValue={userData.registered}
+                    defaultValue={user.registered}
                     onChange={(e: any) => setUser({ ...user, registered: e.target.value })}
                     InputLabelProps={{
                         shrink: true,
@@ -223,7 +221,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     label="Last active"
                     type="datetime-local"
                     inputProps={{ step: 1 }}
-                    defaultValue={userData.lastActive}
+                    defaultValue={user.lastActive}
                     onChange={(e: any) => setUser({ ...user, lastActive: e.target.value })}
                     InputLabelProps={{
                         shrink: true,
@@ -300,7 +298,3 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
         );
     }
 }
-function callback(arg0: boolean) {
-    throw new Error('Function not implemented.');
-}
-
