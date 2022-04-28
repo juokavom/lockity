@@ -31,7 +31,6 @@ p {
     color: rgb(206, 206, 206);
 }
 
-
 @media (max-width: 992px) {
     .text-color-toggler {
         margin-right: 0rem;
@@ -54,3 +53,14 @@ p {
     align-items: center;
     justify-content: center;
 }
+
+.btn-secondary {
+    color: #fff;
+    background-color: #0607089f;
+    border-color: #0607089f;
+  }
+  .btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary.active, .open>.dropdown-toggle.btn-secondary {
+    color: #fff;
+    background-color: #6069729f;
+    border-color: #6069729f;
+  }

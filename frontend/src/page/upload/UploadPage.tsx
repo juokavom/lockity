@@ -46,10 +46,9 @@ export default function UploadPage() {
                                 </p>
                                 <div className="float-login" style={{ marginTop: "1rem" }}>
                                     <Button
-                                        outline
                                         variant="contained"
                                         sx={{ mt: 3, mb: 2 }}
-                                        style={{ color: "#ebf0f" }}
+                                        className="primary"
                                         onClick={() => history.push(ROUTES.login)}>
                                         Login
                                     </Button>
@@ -84,7 +83,7 @@ export default function UploadPage() {
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2 }}
-                                style={{ color: "#ebf0f" }}
+                                className="btn-grad"
                                 onClick={() => clearHooks()}
                             >
                                 Upload another file

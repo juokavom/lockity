@@ -71,7 +71,6 @@ export function SharedPage() {
             <td style={{ textAlign: "center" }}>
                 <Button
                     color="primary"
-                    outline
                     size="sm"
                     onClick={() => {
                         setModalData({
@@ -88,7 +87,6 @@ export function SharedPage() {
             <td style={{ textAlign: "center" }}>
                 <Button
                     color="danger"
-                    outline
                     size="sm"
                     onClick={() => {
                         setModalData({
@@ -119,11 +117,11 @@ export function SharedPage() {
     return (
         <div className="container">
             <div className="row align-items-center d-flex justify-content-center" style={{ marginBottom: "1rem" }}>
-                <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
+                <Box className="col-8 col-md-6 col-lg-4 row align-items-center d-flex justify-content-center" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
                     <Button outline
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
-                        style={{ color: "#ebf0f", width: "100%" }}
+                        className="btn-grad"
                         onClick={() => {
                             setModalData({
                                 action: ShareAction.Create,

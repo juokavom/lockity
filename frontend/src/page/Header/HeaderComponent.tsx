@@ -97,6 +97,18 @@ export default function Header() {
         }
     }
 
+    const onLogout = async () => {
+        setLoading(true)
+        setTitle("Logging out...")
+        toggleModal()
+        await LogoutAction()
+    }
+
+    const onEditMyData = async () => {
+        openModal()
+        setTitle("Edit my data")
+    }
+
     return (
         <div className="header">
             <Modal className="container" size="" isOpen={modalOpen} toggle={() => { toggleModal() }}>
@@ -151,10 +163,10 @@ export default function Header() {
                             }
                             {windowState.smallView &&
                                 <>
-                                    <NavItem className="nav-link" onClick={() => openModal()}>
+                                    <NavItem className="nav-link" onClick={onEditMyData}>
                                         <p className="text-color-toggler">My settings</p>
                                     </NavItem>
-                                    <NavItem className="nav-link" onClick={async () => await LogoutAction()}>
+                                    <NavItem className="nav-link" onClick={onLogout}>
                                         <p className="text-color-toggler" >Logout</p>
                                     </NavItem>
                                 </>
@@ -178,22 +190,14 @@ export default function Header() {
                                 onMouseLeave={() => setDropdownOpen(false)}
                                 toggle={() => { }}
                             >
-                                <DropdownToggle outline>
+                                <DropdownToggle>
                                     <PersonOutlineIcon />
                                 </DropdownToggle>
                                 <DropdownMenu >
-                                    <DropdownItem onClick={() => { 
-                                        openModal()
-                                        setTitle("Edit my data")
-                                    }}>
+                                    <DropdownItem onClick={onEditMyData}>
                                         My settings
                                     </DropdownItem>
-                                    <DropdownItem onClick={async () => {
-                                        setLoading(true)
-                                        setTitle("Logging out...")
-                                        toggleModal()
-                                        await LogoutAction()
-                                    }}>
+                                    <DropdownItem onClick={onLogout}>
                                         Logout
                                     </DropdownItem>
                                 </DropdownMenu>

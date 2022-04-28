@@ -167,7 +167,7 @@ export default function LoginPage() {
                                     style={{ color: "#ebf0f" }}
                                     onClick={() => history.push(ROUTES.upload)}
                                 >
-                                    Proceed to upload page
+                                    Upload without registration
                                 </Button>
                             </Box>
                         </>

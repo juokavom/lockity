@@ -19,8 +19,6 @@ class RefreshToken(configuration: Configuration) {
     }
 
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
-        // TODO: Change
-        TimeUnit.SECONDS.sleep(1);
         context.call.request.cookies[JWT_COOKIE_NAME]?.let {
             if (jwtService.isValidToken(it)) {
                 val jwtUserId = jwtService.getJwtUserId(it)

@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from 'reactstrap';
@@ -5,6 +6,7 @@ import { RequestBuilder } from '../../model/RequestBuilder';
 import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';
 import { Copyright } from '../login/components/CopyrightComponent';
+import { LoadingSpinner } from '../main/components/LoadingSpinnerComponent';
 
 export default function DownloadPage({ match }: any) {
     const [fileData, setFileData] = useState<{
@@ -13,16 +15,20 @@ export default function DownloadPage({ match }: any) {
     } | null>(null)
     const id = match.params.id
     const history = useHistory();
+    const [loading, setLoading] = useState(false);
 
     const FetchFileData = async () => {
+        setLoading(true)
         await new RequestBuilder()
             .withUrl(ENDPOINTS.FILE.fetchDynlinkId(id))
             .withMethod('GET')
             .withDefaults()
             .send((response: any) => {
                 setFileData(response)
+                setLoading(false)
             },
                 () => {
+                    setLoading(false)
                     history.push(ROUTES.upload)
                 }
             )
@@ -58,7 +64,10 @@ export default function DownloadPage({ match }: any) {
                         </div>
                     </div>
                     {
-                        fileData &&
+                        loading && <LoadingSpinner />
+                    }
+                    {
+                        !loading && fileData &&
                         <div className="border-box">
                             <h1>Download file</h1>
                             <div className="col-12 col-md-10 col-xl-10">
@@ -70,9 +79,9 @@ export default function DownloadPage({ match }: any) {
                                     Download
                                 </button>
                             </div>
+                            <br />
                             <button
-                                style={{ marginTop: "2rem" }}
-                                className="upload-button"
+                                className="btn-grad"
                                 onClick={() => { history.push(ROUTES.upload) }}
                             >
                                 Upload another file

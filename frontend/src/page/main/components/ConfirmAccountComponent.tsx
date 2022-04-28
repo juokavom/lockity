@@ -33,26 +33,27 @@ export function ConfirmAccount({ match }: any) {
             })
     };
 
-    return (<div className="container">
-        <div className="row align-items-center d-flex justify-content-center">
-            <Box component="form"
-                style={{ maxWidth: "400px", minHeight: "200px", backgroundColor: 'white', borderRadius: 10 }}
-                noValidate sx={{ m: 2 }}
-                className="row align-items-center d-flex justify-content-center"
+    return (
+        <div className="container">
+            <div className="row align-items-center d-flex justify-content-center">
+                <Box component="form"
+                    style={{ maxWidth: "400px", minHeight: "200px", backgroundColor: 'white', borderRadius: 10 }}
+                    noValidate sx={{ m: 2 }}
+                    className="row align-items-center d-flex justify-content-center"
                 >
-                {loading && <LoadingSpinner />}
-                {!loading &&
-                    <Button
-                        style={{width: 200}}
-                        type="submit"
-                        variant="contained"
-                        onClick={() => ConfirmAction()}
-                    >
-                        Confirm registration
-                    </Button>
-                }
-            </Box>
+                    {loading && <LoadingSpinner />}
+                    {!loading &&
+                        <Button
+                            style={{ width: 200 }}
+                            type="submit"
+                            variant="contained"
+                            onClick={() => ConfirmAction()}
+                        >
+                            Confirm registration
+                        </Button>
+                    }
+                </Box>
+            </div>
         </div>
-    </div>
     );
 }

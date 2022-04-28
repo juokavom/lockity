@@ -80,11 +80,11 @@ export function FilesPage() {
                 }
                 const fileEditProps: IFileEditProps = {
                     fileId: modalData.fileMetadata.id,
-                    fileTitle:  modalData.fileMetadata.title,
+                    fileTitle: modalData.fileMetadata.title,
                     src: ENDPOINTS.FILE.streamWithFileId(modalData.fileMetadata.id),
                     uploadSrc: ENDPOINTS.FILE.fileId(modalData.fileMetadata.id),
                     callback: modalCallback
-                }                
+                }
                 switch (modalData.action) {
                     case FileAction.Edit:
                         return (<FileEdit {...fileEditProps} />);
@@ -132,7 +132,10 @@ export function FilesPage() {
     return (
         <div className="container">
             <div className="row align-items-center d-flex justify-content-center">
-                <Box className="col-8 col-md-6 col-lg-4" component="form" noValidate onSubmit={() => { }} sx={{ mt: 1 }}>
+                <Box
+                    className="col-8 col-md-6 col-lg-4 row align-items-center d-flex justify-content-center"
+                    component="form" noValidate
+                    onSubmit={() => { }} sx={{ mt: 1 }}>
                     {
                         fileState.fileMetadataInfo?.storageData &&
                         <div>
@@ -140,10 +143,10 @@ export function FilesPage() {
                             <br />
                         </div>
                     }
-                    <Button outline
+                    <Button
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
-                        style={{ color: "#ebf0f", width: "100%" }}
+                        className="btn-grad"
                         onClick={() => {
                             setModalData({
                                 action: FileAction.Upload,
@@ -159,7 +162,7 @@ export function FilesPage() {
                         Upload File
                     </Button>
                 </Box>
-                <Modal className="container" size={modalSize?.width} 
+                <Modal className="container" size={modalSize?.width}
                     isOpen={modalOpen} toggle={() => { toggleModal() }}>
                     <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">

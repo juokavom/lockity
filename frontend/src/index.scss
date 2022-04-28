@@ -116,6 +116,27 @@ code {
 
 $color: #0cf;
 
+
+.btn-grad {
+   margin: 10px;
+   padding: 5px 60px;
+   text-align: center;
+   text-transform: uppercase;
+   transition: all 1s;
+   background-size: 200% auto;
+   color: white;            
+   box-shadow: 0 0 20px #eee;
+   border-radius: 10px;
+   display: block;
+   background-image: linear-gradient(to right, #1FA2FF 0%, #61e3fa  51%, #5eb6f5  100%);
+ }
+
+ .btn-grad:hover {
+   background-image: linear-gradient(to right, #184a6e 0%, #377d89  51%, #115a8e  100%);
+   color: #fff;
+   text-decoration: none;
+ }
+
 .upload-button {
   display: inline-block;
   padding: 0.75rem 1.25rem;
@@ -136,7 +157,7 @@ $color: #0cf;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: $color;
+    background-color: darken($color, 20%);
     border-radius: 10rem;
     z-index: -2;
   }
@@ -146,9 +167,9 @@ $color: #0cf;
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 0%;
+    width: 100%;
     height: 100%;
-    background-color: darken($color, 20%);
+    background-color: $color;
     transition: all 0.3s;
     border-radius: 10rem;
     z-index: -1;
@@ -158,7 +179,7 @@ $color: #0cf;
     color: #fff;
 
     &:before {
-      width: 100%;
+      background-color: darken($color, 20%);
     }
   }
 }
@@ -283,4 +304,37 @@ $color: #0cf;
   border-radius: 1em;
   margin-top: 2rem;
   padding: 0.75rem;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #71b0e8;
+  border-color: #71b0e8;
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+  color: #fff;
+  background-color: #305cc3;
+  border-color: #305cc3;
+}
+
+.btn-secondary {
+  color: #fff;
+  background-color: #7c7d7e;
+  border-color: #7c7d7e;
+}
+.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary.active, .open>.dropdown-toggle.btn-secondary {
+  color: #fff;
+  background-color: #464747;
+  border-color: #464747;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #f38181;
+  border-color: #f38181;
+}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active, .open>.dropdown-toggle.btn-danger {
+  color: #fff;
+  background-color: #c42121;
+  border-color: #c42121;
 }
