@@ -39,7 +39,8 @@ data class ReceivedFileMetadata(
     val id: String,
     val title: String,
     val size: Long,
-    val ownerEmail: String
+    val ownerPublicName: String,
+    val canEdit: Boolean
 )
 
 @Serializable

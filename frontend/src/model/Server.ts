@@ -46,10 +46,12 @@ export namespace ENDPOINTS {
         export const fileTitleWithId = (id: string) => file + '/title/file-id/' + id
         export const streamWithFileId = (id: string) => fileId(id) + '/stream'
         export const downloadWithFileId = (id: string) => fileId(id) + '/download'
+        export const fileWithReceivedId = (id: string) =>
+            file + '/received/receive-id/' + id
         export const streamReceivedWithFileId = (id: string) =>
-            file + '/received/receive-id/' + id + '/stream'
+            fileWithReceivedId(id) + '/stream'
         export const downloadReceivedWithFileId = (id: string) =>
-            file + '/received/receive-id/' + id + '/download'
+            fileWithReceivedId(id) + '/download'
         export const shareConditionWithFileId = (id: string, condition: boolean) =>
             fileId(id) + '/share/' + condition
         export const fileAnonymous = file + '/anonymous'
@@ -62,7 +64,7 @@ export namespace ENDPOINTS {
         export const getReceivedMetadataWithOffsetAndLimit = (offset: number, limit: number) =>
             file + '/received/metadata/offset/' + offset + '/limit/' + limit
         export const getReceivedMetadataCount = file + '/received/metadata/count'
-        
+
         export const dynlinkId = (id: string) => file + '/dynlink-id/' + id
 
         export const downloadDynlinkId = (id: string) => dynlinkId(id) + '/download'
@@ -79,7 +81,7 @@ export namespace ENDPOINTS {
             user + '/offset/' + offset + '/limit/' + limit
         export const getUserCount = user + '/count'
     }
-    
+
     export namespace SHARED {
         export const sharedAccess = endpoint + '/shared-access'
 

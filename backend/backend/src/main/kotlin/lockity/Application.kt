@@ -27,7 +27,7 @@ fun Application.main() {
                 single { JwtService(get()) }
                 single { EmailService(get()) }
                 single { DatabaseService(get()) }
-                single { FileService(get(), get(), get()) }
+                single { FileService(get(), get(), get(), get()) }
                 single { SharedAccessService(get(), get(), get()) }
                 single { UserService(get(), get(), get(), get(), get(), get(), get(), get()) }
                 single { APIService(get(), get(), get()) }

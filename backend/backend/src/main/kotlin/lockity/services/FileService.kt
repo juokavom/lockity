@@ -7,6 +7,7 @@ import io.ktor.http.content.*
 import lockity.models.*
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
+import lockity.repositories.UserRepository
 import lockity.utils.CONFIG
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import lockity.utils.Misc
@@ -21,7 +22,8 @@ import javax.security.auth.login.AccountLockedException
 class FileService(
     configurationService: ConfigurationService,
     private val fileRepository: FileRepository,
-    private val sharedAccessRepository: SharedAccessRepository
+    private val sharedAccessRepository: SharedAccessRepository,
+    private val userRepository: UserRepository
 ) {
     private val storagePath = configurationService.configValue(CONFIG.FILEPATH_STORAGE)
     private val uploadsPath = configurationService.configValue(CONFIG.FILEPATH_UPLOADS)
@@ -81,6 +83,30 @@ class FileService(
             throw NoPermissionException("User storage size is exceeded")
         val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, true)
         fileRecord.user = user.id
+        fileRecord.link = fetchedFileRecord.link
+        fileRepository.update(fileRecord)
+    }
+
+    fun editUserReceivedFile(receiveId: String, user: UserRecord, part: PartData.FileItem, fileSize: Long) {
+        val sharedAccessRecord = sharedAccessRepository.fetch(UUID.fromString(receiveId))
+            ?: throw NotFoundException("Shared access was not found")
+        if (sharedAccessRecord.canEdit != "1".toByte()) {
+            throw NoPermissionException("User cannot modify no edit access")
+        }
+        val fetchedFileRecord = fileRepository.fetch(Misc.binToUuid(sharedAccessRecord.fileId!!))
+            ?: throw NotFoundException("File was not found")
+        if (!fetchedFileRecord.user.contentEquals(sharedAccessRecord.ownerId) ||
+            !user.id.contentEquals(sharedAccessRecord.recipientId)
+        ) {
+            throw NoPermissionException("User do not have permission to get this file metadata")
+        }
+        val ownerUser = userRepository.fetch(Misc.binToUuid(sharedAccessRecord.ownerId!!)) ?:
+            throw NotFoundException("File owner was not found")
+        val ownerFileSizeSum = fileRepository.userFileSizeSum(sharedAccessRecord.ownerId!!) - (fetchedFileRecord.size ?: 0)
+        if (ownerFileSizeSum + fileSize > ownerUser.storageSize!!)
+            throw NoPermissionException("User storage size is exceeded")
+        val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, true)
+        fileRecord.user = ownerUser.id
         fileRecord.link = fetchedFileRecord.link
         fileRepository.update(fileRecord)
     }

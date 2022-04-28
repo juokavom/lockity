@@ -7,9 +7,11 @@ export interface IReceivedMetadata {
     id: string,
     title: string,
     size: number,
-    ownerEmail: string
+    ownerPublicName: string,
+    canEdit: boolean
 }
 
 export const FileAction = {
-    Preview: "Preview file"
+    Preview: "Preview file",
+    Edit: "Edit file"
 }

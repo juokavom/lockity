@@ -6,6 +6,7 @@ import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
 import lockity.models.*
 import lockity.services.DatabaseService
+import lockity.services.FileService
 import lockity.services.UserService
 import lockity.utils.Misc
 import java.util.*
@@ -83,7 +84,8 @@ class SharedAccessRepository(
                     id = Misc.binToUuid(it[SharedAccessTable.Id]!!).toString(),
                     title = it[FileTable.Title]!!,
                     size = it[FileTable.Size]!!,
-                    ownerEmail = it[UserTable.Email]!!
+                    ownerPublicName = UserService.getUserPublicName(it[UserTable.Id]!!, it[UserTable.Username]!!),
+                    canEdit = it[SharedAccessTable.CanEdit]!! == "1".toByte()
                 )
             }
             .toList()

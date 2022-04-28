@@ -104,6 +104,22 @@ fun Application.fileRoutes() {
                     }
                 }
 
+                put("/received/receive-id/{receiveId}") {
+                    call.withErrorHandler {
+                        val fileSize = call.request.headers["Content-Length"]!!.toLong()
+                        val part = call.receiveMultipart().readPart()
+                            ?: throw BadRequestException("File not attached")
+                        if (part !is PartData.FileItem)
+                            throw BadRequestException("Multipart data is not file type")
+                        val receiveId = call.parameters["receiveId"]
+                            ?: throw BadRequestException("Receive id is not present in the parameters.")
+                        val currentUser = call.jwtUser()
+                            ?: throw NoPermissionException("User do not have permission to get this file metadata")
+                        fileService.editUserReceivedFile(receiveId, currentUser, part, fileSize)
+                        call.respondJSON("File updated successfully", HttpStatusCode.OK)
+                    }
+                }
+
                 get("/metadata/offset/{offset}/limit/{limit}") {
                     call.withErrorHandler {
                         val currentUser = call.jwtUser()

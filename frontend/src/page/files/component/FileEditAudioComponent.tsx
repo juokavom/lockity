@@ -11,7 +11,7 @@ import { Region, WaveForm, WaveSurfer } from "wavesurfer-react"
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min"
 import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline.min"
 import { ENDPOINTS } from '../../../model/Server'
-import { bufferToWave, dataURItoBlob, fetchBlob, fileTitleToFormat, IFileModalProps, IWavesurferProps } from "../model/FileModels"
+import { bufferToWave, dataURItoBlob, fetchBlob, fileTitleToFormat, IFileEditProps, IFileModalProps, IWavesurferProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
 const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {
@@ -80,7 +80,7 @@ const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {
     );
 }
 
-export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
+export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: IFileEditProps): JSX.Element => {
     const [isPlaying, setIsPlaying] = useState(false)
     const [filtersData, setFiltersData] = useState<JSX.Element[]>([])
     const [volumeData, setVolumeData] = useState<JSX.Element | null>()
@@ -171,7 +171,7 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
         wavesurferRef.current = waveSurfer;
 
         if (wavesurferRef.current) {
-            fetchBlob(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
+            fetchBlob(src, (response) => {
                 // @ts-ignore
                 wavesurferRef.current.loadBlob(response);
             })
@@ -183,7 +183,7 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
                 window.dispatchEvent(new Event('resize'));
             });
         }
-    }, [fileMetadata.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fileId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (wavesurferRef.current !== null) {
@@ -270,11 +270,18 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
                     sx={{ mt: 3, mb: 2 }}
                     onClick={async () => {
                         // @ts-ignore
-                        let offlineCtx = new OfflineAudioContext(wavesurferRef.current.backend.buffer.numberOfChannels, wavesurferRef.current.backend.buffer.length, wavesurferRef.current.backend.buffer.sampleRate);
-                        let obs = offlineCtx.createBufferSource();
+                        const offlineCtx = new OfflineAudioContext(
+                            // @ts-ignore
+                            wavesurferRef.current.backend.buffer.numberOfChannels,
+                            // @ts-ignore
+                            wavesurferRef.current.backend.buffer.length,
+                            // @ts-ignore
+                            wavesurferRef.current.backend.buffer.sampleRate
+                        );
+                        const obs = offlineCtx.createBufferSource();
                         // @ts-ignore
                         obs.buffer = wavesurferRef.current.backend.buffer;
-                        let gain = offlineCtx.createGain();
+                        const gain = offlineCtx.createGain();
                         // @ts-ignore
                         gain.gain.value = wavesurferRef.current.getVolume();
                         // @ts-ignore
@@ -294,11 +301,11 @@ export const FileEditAudio = ({ fileMetadata, callback }: IFileModalProps): JSX.
                         filters[filters.length - 1].connect(gain).connect(offlineCtx.destination)
                         obs.start();
                         await offlineCtx.startRendering().then(r => {
-                            const format = "audio/" + fileTitleToFormat(fileMetadata.title)
+                            const format = "audio/" + fileTitleToFormat(fileTitle)
                             const audioOffset = Math.floor(region.start * r.sampleRate)
                             const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
                             const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
-                            uploadEditedFileBlob(fileMetadata.id, fileMetadata.title, audioBlob,
+                            uploadEditedFileBlob(uploadSrc, fileId, fileTitle, audioBlob,
                                 "Your audio was edited successfully!", callback)
                         });
                     }}>

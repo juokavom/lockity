@@ -30,6 +30,14 @@ export interface IFileModalProps {
     callback: (success: boolean) => void
 }
 
+export interface IFileEditProps {
+    fileId: string,
+    fileTitle: string,
+    src: string,
+    uploadSrc: string,
+    callback: (success: boolean) => void
+}
+
 export interface IFilePreviewProps {
     id: string,
     title: string,

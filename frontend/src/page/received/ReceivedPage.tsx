@@ -4,10 +4,11 @@ import {
     Modal, ModalBody, ModalHeader
 } from 'reactstrap';
 import { RECEIVED_CHUNK_SIZE } from '../../model/Constants';
-import { ENDPOINTS } from '../../model/Server';
+import { ENDPOINTS, SUPPORTED_IMAGE_TYPES } from '../../model/Server';
 import { useTypedSelector } from '../../redux/Store';
+import { FileEdit } from '../files/component/FileEditComponent';
 import { FilePreview } from '../files/component/FilePreviewComponent';
-import { IFilePreviewProps } from '../files/model/FileModels';
+import { fileTitleToFormat, IFileEditProps, IFilePreviewProps, ModalSize } from '../files/model/FileModels';
 import CustomPagination from '../main/components/PaginationComponent';
 import { ReceivedFile } from './component/ReceivedFileComponent';
 import { FileAction, IReceivedFileProps, IReceivedMetadata } from './model/ReceivedModels';
@@ -19,6 +20,10 @@ export function ReceivedPage() {
         action: string,
         receivedMetadata: IReceivedMetadata | null
     } | null>(null)
+    const [modalSize, setModalSize] = useState<ModalSize>({
+        width: undefined,
+        height: undefined
+    })
 
     const dispatch = useDispatch()
     const receivedState = useTypedSelector((state) => state.receivedReducer)
@@ -38,6 +43,13 @@ export function ReceivedPage() {
         setModalOpen(!modalOpen)
     }
 
+    const modalCallback = (success: boolean) => {
+        setModalOpen(false)
+        if (success) {
+            fetchData()
+        }
+    }
+
     const selectActionJsx = (): JSX.Element => {
         if (modalData) {
             if (modalData.receivedMetadata) {
@@ -46,9 +58,18 @@ export function ReceivedPage() {
                     title: modalData.receivedMetadata.title,
                     src: ENDPOINTS.FILE.streamReceivedWithFileId(modalData.receivedMetadata.id)
                 }
+                const fileEditProps: IFileEditProps = {
+                    fileId: modalData.receivedMetadata.id,
+                    fileTitle: modalData.receivedMetadata.title,
+                    src: ENDPOINTS.FILE.streamReceivedWithFileId(modalData.receivedMetadata.id),
+                    uploadSrc: ENDPOINTS.FILE.fileWithReceivedId(modalData.receivedMetadata.id),
+                    callback: modalCallback
+                }
                 switch (modalData.action) {
                     case FileAction.Preview:
                         return (<FilePreview {...previewProps} />);
+                    case FileAction.Edit:
+                        return (<FileEdit {...fileEditProps} />);
                 }
             }
         }
@@ -63,7 +84,21 @@ export function ReceivedPage() {
                     action: action,
                     receivedMetadata: receivedMetadata
                 })
+                const modalSize: ModalSize = {
+                    width: undefined,
+                    height: undefined
+                }
+                switch (action) {
+                    case FileAction.Preview:
+                        modalSize.width = "lg"
+                        break
+                    case FileAction.Edit:
+                        modalSize.width = SUPPORTED_IMAGE_TYPES
+                            .includes(fileTitleToFormat(receivedMetadata.title)) ? "xl" : "lg"
+                        break
+                }
                 toggleModal()
+                setModalSize(modalSize)
             }
         }
     }
@@ -71,9 +106,8 @@ export function ReceivedPage() {
     return (
         <div className="container">
             <div className="row align-items-center d-flex justify-content-center">
-                <Modal className="container" size={
-                    modalData?.action === FileAction.Preview ? "lg" : ""
-                } isOpen={modalOpen} toggle={() => { toggleModal() }}>
+                <Modal className="container" size={modalSize?.width}
+                    isOpen={modalOpen} toggle={() => { toggleModal() }}>
                     <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                         <div className="d-flex justify-content-center">
                             <p>{modalData?.action}</p>

@@ -11,6 +11,7 @@ import io.mockk.*
 import lockity.models.*
 import lockity.repositories.FileRepository
 import lockity.repositories.SharedAccessRepository
+import lockity.repositories.UserRepository
 import lockity.utils.GUEST_MAX_STORAGE_BYTES
 import lockity.utils.Misc
 import org.junit.jupiter.api.AfterEach
@@ -33,16 +34,19 @@ internal class FileServiceTest {
     private lateinit var fileRepository: FileRepository
     private lateinit var sharedAccessRepository: SharedAccessRepository
     private lateinit var fileService: FileService
+    private lateinit var userRepository: UserRepository
 
     @BeforeEach
     fun setUp() {
         fileRepository = mockk(relaxed = true)
         sharedAccessRepository = mockk(relaxed = true)
+        userRepository = mockk(relaxed = true)
         fileService = spyk(
             FileService(
                 mockk(relaxed = true),
                 fileRepository,
-                sharedAccessRepository
+                sharedAccessRepository,
+                userRepository
             )
         )
     }
@@ -151,7 +155,8 @@ internal class FileServiceTest {
                             id = UUID.randomUUID().toString(),
                             title = "test",
                             size = 205L,
-                            ownerEmail = UUID.randomUUID().toString()
+                            ownerPublicName = UUID.randomUUID().toString(),
+                            canEdit = false
                         )
                     ),
                     15,
@@ -480,7 +485,7 @@ internal class FileServiceTest {
                 assert(
                     gottenMetadata[i].title == receivedRecordList[i].title &&
                             gottenMetadata[i].size == receivedRecordList[i].size &&
-                            gottenMetadata[i].ownerEmail == receivedRecordList[i].ownerEmail
+                            gottenMetadata[i].ownerPublicName == receivedRecordList[i].ownerPublicName
                 )
             }
         }

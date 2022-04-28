@@ -1,24 +1,24 @@
 import React, { useState } from 'react'
 import 'tui-image-editor/dist/tui-image-editor.css'
 import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from '../../../model/Server';
-import { fileTitleToFormat, IFileModalProps } from "../model/FileModels"
+import { fileTitleToFormat, IFileEditProps, IFileModalProps } from "../model/FileModels"
 import { fileNameTsx } from '../model/FileNameTsx';
 import { FileEditAudio } from './FileEditAudioComponent';
 import { FileEditImage } from './FileEditImageComponent';
 import { FileEditText } from './FileEditTextComponent';
 
-export const FileEdit = (modalProps: IFileModalProps): JSX.Element => {
-    const [format] = useState(fileTitleToFormat(modalProps.fileMetadata.title));
+export const FileEdit = (fileEditProps: IFileEditProps): JSX.Element => {
+    const [format] = useState(fileTitleToFormat(fileEditProps.fileTitle));
 
     let selected: JSX.Element | null = null
 
     if (format) {
         if (SUPPORTED_AUDIO_TYPES.includes(format)) {
-            selected = (<FileEditAudio {...modalProps} />)
+            selected = (<FileEditAudio {...fileEditProps} />)
         } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
-            selected = (<FileEditImage {...modalProps} />)        
+            selected = (<FileEditImage {...fileEditProps} />)        
         } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
-                selected = (<FileEditText {...modalProps} />)
+                selected = (<FileEditText {...fileEditProps} />)
         }
     }
 
@@ -27,7 +27,7 @@ export const FileEdit = (modalProps: IFileModalProps): JSX.Element => {
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="row align-items-end d-flex justify-content-center">
                     <div className="col-auto">
-                        {fileNameTsx(modalProps.fileMetadata.title)}
+                        {fileNameTsx(fileEditProps.fileTitle)}
                     </div>
                 </div>
                 <div className="row align-items-end d-flex justify-content-center">

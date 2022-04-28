@@ -1,8 +1,9 @@
+import ContentCutOutlinedIcon from '@mui/icons-material/ContentCutOutlined';
 import GetAppOutlinedIcon from '@mui/icons-material/GetAppOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { IconButton } from '@mui/material';
-import { ENDPOINTS, SUPPORTED_PREVIEW_TYPES } from '../../../model/Server';
+import { ENDPOINTS, SUPPORTED_EDITING_TYPES, SUPPORTED_PREVIEW_TYPES } from '../../../model/Server';
 import { useTypedSelector } from '../../../redux/Store';
 import { formatBytes } from '../../files/model/FileModels';
 import { FileAction, IReceivedFileProps } from '../model/ReceivedModels';
@@ -27,6 +28,17 @@ export function ReceivedFile({ receivedMetadata, action }: IReceivedFileProps) {
                 }
             </div>
             <div className="col-auto">
+                {
+                    format && SUPPORTED_EDITING_TYPES.includes(format) && receivedMetadata.canEdit ?
+                        <IconButton onClick={() => action(FileAction.Edit)}>
+                            <ContentCutOutlinedIcon />
+                        </IconButton> :
+                        <IconButton disabled  >
+                            <ContentCutOutlinedIcon />
+                        </IconButton>
+                }
+            </div>
+            <div className="col-auto">
                 <IconButton href={ENDPOINTS.FILE.downloadReceivedWithFileId(receivedMetadata.id)}>
                     <GetAppOutlinedIcon />
                 </IconButton>
@@ -38,11 +50,11 @@ export function ReceivedFile({ receivedMetadata, action }: IReceivedFileProps) {
     return (
         <div className="file container" >
             <div className="row align-items-center d-flex justify-content-center">
-                <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
-                    <p className="ellipse-text" style={{ maxWidth: "350px" }}>{receivedMetadata.title}</p>
+                <div className="col col-lg-3 ellipse-text d-flex justify-content-center">
+                    <p className="ellipse-text">{receivedMetadata.title}</p>
                 </div>
-                <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
-                    <p className="ellipse-text" style={{ maxWidth: "150px" }}>{receivedMetadata.ownerEmail}</p>
+                <div className="col col-lg-3 ellipse-text d-flex justify-content-center">
+                    <p className="ellipse-text">{receivedMetadata.ownerPublicName}</p>
                 </div>
                 {!windowState.smallView && buttons}
             </div>

@@ -16,7 +16,7 @@ import { FilePreview } from './component/FilePreviewComponent';
 import { FileRename } from './component/FileRenameComponent';
 import { FileShare } from './component/FileShareComponent';
 import { StorageStatusBar } from './component/StorageStatusBarComponent';
-import { FileAction, fileTitleToFormat, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps, ModalSize } from './model/FileModels';
+import { FileAction, fileTitleToFormat, IFileEditProps, IFileMetadata, IFileModalProps, IFilePreviewProps, IFileProps, ModalSize } from './model/FileModels';
 import { fetchFileMetadata, fetchFileMetadataInfo } from './request/FilesRequests';
 
 export function FilesPage() {
@@ -78,9 +78,16 @@ export function FilesPage() {
                     title: modalData.fileMetadata.title,
                     src: ENDPOINTS.FILE.streamWithFileId(modalData.fileMetadata.id)
                 }
+                const fileEditProps: IFileEditProps = {
+                    fileId: modalData.fileMetadata.id,
+                    fileTitle:  modalData.fileMetadata.title,
+                    src: ENDPOINTS.FILE.streamWithFileId(modalData.fileMetadata.id),
+                    uploadSrc: ENDPOINTS.FILE.fileId(modalData.fileMetadata.id),
+                    callback: modalCallback
+                }                
                 switch (modalData.action) {
                     case FileAction.Edit:
-                        return (<FileEdit {...modalProps} />);
+                        return (<FileEdit {...fileEditProps} />);
                     case FileAction.Rename:
                         return (<FileRename {...modalProps} />);
                     case FileAction.Preview:

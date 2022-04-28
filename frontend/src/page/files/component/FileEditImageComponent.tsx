@@ -3,15 +3,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button } from 'reactstrap'
 import 'tui-image-editor/dist/tui-image-editor.css'
 import { ENDPOINTS } from '../../../model/Server'
-import { blobToDataURL, dataURItoBlob, fetchBlob, IFileModalProps } from "../model/FileModels"
+import { blobToDataURL, dataURItoBlob, fetchBlob, IFileEditProps, IFileModalProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
-export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.Element => {
+export const FileEditImage = ({ fileId, fileTitle, src, uploadSrc, callback }: IFileEditProps): JSX.Element => {
     const imageEditor = useRef<any>(null)
     const [imgContents, setImgContents] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchBlob(ENDPOINTS.FILE.streamWithFileId(fileMetadata.id), (response) => {
+        fetchBlob(src, (response) => {
             blobToDataURL(response, (dataUrlResponse) => {
                 setImgContents(dataUrlResponse)
             })
@@ -27,7 +27,7 @@ export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.
                         includeUI={{
                             loadImage: {
                                 path: imgContents,
-                                name: fileMetadata.title,
+                                name: fileTitle,
                             },
                             theme: {
                                 "header.display": "none"
@@ -57,7 +57,7 @@ export const FileEditImage = ({ fileMetadata, callback }: IFileModalProps): JSX.
                             const fileDataUrl = imageEditor.current.getInstance().toDataURL()
                             const filePayload = dataURItoBlob(fileDataUrl)
                             console.log(filePayload)
-                            uploadEditedFileBlob(fileMetadata.id, fileMetadata.title, filePayload, 
+                            uploadEditedFileBlob(uploadSrc, fileId, fileTitle, filePayload, 
                                 "Your image was edited successfully!", callback)
                         }}
                     >
