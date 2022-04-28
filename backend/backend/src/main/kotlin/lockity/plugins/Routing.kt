@@ -19,6 +19,7 @@ import lockity.utils.CONFIG
 import lockity.utils.installJwtVerifier
 import org.koin.ktor.ext.inject
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 fun Application.configureRouting() {
     val userRepository: UserRepository by inject()
@@ -49,7 +50,9 @@ fun Application.configureRouting() {
     installJwtVerifier()
     install(RefreshToken) {
         jwtTokenService = jwtService
-        lastActive = { id -> userRepository.updateLastActive(UUID.fromString(id)) }
+        lastActive = { id ->
+            userRepository.updateLastActive(UUID.fromString(id))
+        }
     }
     install(PartialContent)
 

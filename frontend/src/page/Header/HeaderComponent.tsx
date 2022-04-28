@@ -9,6 +9,7 @@ import { ENDPOINTS } from '../../model/Server';
 import { User } from '../../model/User';
 import { LocalUserActionCreators } from '../../redux/actionCreators/LocalUserActionCreators';
 import { useTypedSelector } from '../../redux/Store';
+import { LoadingSpinner } from '../main/components/LoadingSpinnerComponent';
 import { IUserData } from '../users/model/UsersModel';
 import { EditMyself } from './component/EditMyselfComponent';
 import { sayHello } from './model/HeaderModels';
@@ -34,6 +35,8 @@ export default function Header() {
     const [modalOpen, setModalOpen] = useState(false)
     const [userData, setUserData] = useState<IUserData | null>(null)
     const [hello] = useState(sayHello())
+    const [loading, setLoading] = useState(false);
+    const [title, setTitle] = useState<string | null>(null);
 
     const windowState = useTypedSelector((state) => state.windowReducer)
     const localUserState = useTypedSelector((state) => state.localUserReducer)
@@ -58,10 +61,12 @@ export default function Header() {
     }
 
     const openModal = async () => {
+        setLoading(true)
+        setModalOpen(true)
         fetchUserData((response) => {
             const userdata: IUserData = response
             setUserData(userdata)
-            setModalOpen(true)
+            setLoading(false)
         })
     }
 
@@ -97,12 +102,13 @@ export default function Header() {
             <Modal className="container" size="" isOpen={modalOpen} toggle={() => { toggleModal() }}>
                 <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                     <div className="d-flex justify-content-center">
-                        <p>Edit my data</p>
+                        <p>{title}</p>
                     </div>
                 </ModalHeader>
                 <ModalBody className="row align-items-center d-flex justify-content-center m-2">
                     <div className="col">
-                        {userData &&
+                        {loading && <LoadingSpinner />}
+                        {!loading && userData &&
                             <EditMyself {...{
                                 userData: userData,
                                 callback: modalCallback
@@ -176,10 +182,18 @@ export default function Header() {
                                     <PersonOutlineIcon />
                                 </DropdownToggle>
                                 <DropdownMenu >
-                                    <DropdownItem onClick={() => openModal()}>
+                                    <DropdownItem onClick={() => { 
+                                        openModal()
+                                        setTitle("Edit my data")
+                                    }}>
                                         My settings
                                     </DropdownItem>
-                                    <DropdownItem onClick={async () => await LogoutAction()}>
+                                    <DropdownItem onClick={async () => {
+                                        setLoading(true)
+                                        setTitle("Logging out...")
+                                        toggleModal()
+                                        await LogoutAction()
+                                    }}>
                                         Logout
                                     </DropdownItem>
                                 </DropdownMenu>

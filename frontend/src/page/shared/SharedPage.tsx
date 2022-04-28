@@ -19,7 +19,7 @@ export function SharedPage() {
         action: string,
         shareMetadata: ISharedMetadata | null
     } | null>(null)
-
+    
     const dispatch = useDispatch()
     const sharedState = useTypedSelector((state) => state.sharedReducer)
 

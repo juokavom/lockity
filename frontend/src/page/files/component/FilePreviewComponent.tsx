@@ -1,12 +1,14 @@
 import { TextareaAutosize } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ENDPOINTS, SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from "../../../model/Server";
-import { fetchBlob, IFilePreviewProps } from "../model/FileModels";
+import { LoadingSpinner } from "../../main/components/LoadingSpinnerComponent";
+import { blobToDataURL, fetchBlob, IFilePreviewProps } from "../model/FileModels";
 import { fileNameTsx } from "../model/FileNameTsx";
 
 export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element => {
-    const [format] = useState(title.split('.').pop());    
-    const [txtContents, setTxtContents] = useState<string | undefined>(undefined)
+    const [format] = useState(title.split('.').pop());
+    const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState<JSX.Element | null>(null);
 
     const videoJsx = () => (
         <video style={{ maxWidth: "100%" }} controls controlsList="nodownload">
@@ -20,40 +22,52 @@ export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element 
         </audio>
     );
 
-    const pictureJsx = () => (
-        <img style={{ maxWidth: "100%" }} alt={title} src={src} />
+    const pictureJsx = (url: string) => (
+        <img style={{ maxWidth: "100%" }} alt={title} src={url} />
     );
 
-    const txtJsx = () => (
+    const txtJsx = (contents: string) => (
         <TextareaAutosize
             aria-label="minimum height"
             disabled
             minRows={3}
             maxRows={10}
             style={{ width: 400 }}
-            value={txtContents}
-            onChange={(e: any) => setTxtContents(e.target.value)}
+            value={contents}
         />
     );
 
-    let selected: JSX.Element | null = null
-
-    if (format) {
-        if (SUPPORTED_VIDEO_TYPES.includes(format)) {
-            selected = videoJsx()
-        } else if (SUPPORTED_AUDIO_TYPES.includes(format)) {
-            selected = audioJsx()
-        } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
-            selected = pictureJsx()
-        } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
-            fetchBlob(ENDPOINTS.FILE.streamWithFileId(id), async (response) => {
-                setTxtContents(await response.text())
-            })
-            selected = txtJsx()
+    useEffect(() => {
+        if (format) {
+            if (SUPPORTED_VIDEO_TYPES.includes(format)) {
+                setSelected(videoJsx())
+            } else if (SUPPORTED_AUDIO_TYPES.includes(format)) {
+                setSelected(audioJsx())
+            } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
+                setLoading(true)
+                fetchBlob(src, async (response) => {
+                    blobToDataURL((response), (url: string) => {
+                        setSelected(pictureJsx(url))
+                        setLoading(false)
+                    })
+                })
+            } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
+                setLoading(true)
+                fetchBlob(src, async (response) => {  
+                    setSelected(txtJsx(await response.text()))
+                    setLoading(false)
+                })
+            }
         }
-    }
+    }, [])
 
-    if (selected != null) {
+    if (loading) {
+        return (
+            <div className='container'>
+                <LoadingSpinner />
+            </div>
+        );
+    } else if (selected != null) {
         return (
             <div className="row align-items-end d-flex justify-content-center">
                 <div className="row align-items-end d-flex justify-content-center">

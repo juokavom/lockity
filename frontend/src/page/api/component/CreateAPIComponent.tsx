@@ -6,8 +6,10 @@ import { toast } from 'react-toastify';
 import {
     Button, UncontrolledTooltip
 } from 'reactstrap';
+import { LOADING_TIMEOUT_MS } from '../../../model/Constants';
 import { DefaultToastOptions, RequestBuilder } from '../../../model/RequestBuilder';
 import { ENDPOINTS } from '../../../model/Server';
+import { LoadingSpinner } from '../../main/components/LoadingSpinnerComponent';
 import { APIPermissions, numberOfChecked } from '../model/APIModel';
 
 export function CreateAPI({ callback }: any): JSX.Element {
@@ -24,6 +26,7 @@ export function CreateAPI({ callback }: any): JSX.Element {
         validFrom: null,
         validTo: null,
     });
+    const [loading, setLoading] = useState(false);
 
     const validateForm = () => {
         return token != null &&
@@ -39,15 +42,21 @@ export function CreateAPI({ callback }: any): JSX.Element {
     }
 
     const CreateTokenAction = async () => {
+        setLoading(true)
         await new RequestBuilder()
             .withUrl(ENDPOINTS.API.api)
             .withMethod('POST')
             .withDefaults()
             .withBody(token)
             .send((response: any) => {
-                toast.success(response.message, DefaultToastOptions)
-                setCreatedToken(response.token)
-            }, () => { })
+                setTimeout(() => {
+                    setLoading(false)
+                    toast.success(response.message, DefaultToastOptions)
+                    setCreatedToken(response.token)
+                }, LOADING_TIMEOUT_MS)
+            }, () => {                
+                setLoading(false)
+             })
     }
 
     function not(array: string[], element: string) {
@@ -86,7 +95,14 @@ export function CreateAPI({ callback }: any): JSX.Element {
         }
     }
 
-    if (createdToken) {
+    if (loading) {
+        return (
+            <div className="row align-items-end d-flex justify-content-center">
+                <LoadingSpinner />
+            </div>
+        );
+    }
+    else if (createdToken) {
         return (
             <div className="border-box">
                 <h3>Generated token</h3>

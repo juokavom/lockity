@@ -7,6 +7,7 @@ import lockity.services.JwtService
 import lockity.utils.JWT_COOKIE_NAME
 import lockity.utils.setResponseJwtCookieHeader
 import lockity.utils.unsetResponseJwtCookieHeader
+import java.util.concurrent.TimeUnit
 
 class RefreshToken(configuration: Configuration) {
     private val jwtService = configuration.jwtTokenService
@@ -18,6 +19,8 @@ class RefreshToken(configuration: Configuration) {
     }
 
     private fun intercept(context: PipelineContext<Unit, ApplicationCall>) {
+        // TODO: Change
+        TimeUnit.SECONDS.sleep(1);
         context.call.request.cookies[JWT_COOKIE_NAME]?.let {
             if (jwtService.isValidToken(it)) {
                 val jwtUserId = jwtService.getJwtUserId(it)

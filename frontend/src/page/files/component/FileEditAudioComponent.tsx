@@ -11,6 +11,7 @@ import { Region, WaveForm, WaveSurfer } from "wavesurfer-react"
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min"
 import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline.min"
 import { ENDPOINTS } from '../../../model/Server'
+import { LoadingSpinner } from '../../main/components/LoadingSpinnerComponent'
 import { bufferToWave, dataURItoBlob, fetchBlob, fileTitleToFormat, IFileEditProps, IFileModalProps, IWavesurferProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
@@ -82,6 +83,8 @@ const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {
 
 export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: IFileEditProps): JSX.Element => {
     const [isPlaying, setIsPlaying] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [audioContents, setAudioContents] = useState<Blob | null>(null)
     const [filtersData, setFiltersData] = useState<JSX.Element[]>([])
     const [volumeData, setVolumeData] = useState<JSX.Element | null>()
     const [region, setRegion] = useState({
@@ -171,10 +174,10 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
         wavesurferRef.current = waveSurfer;
 
         if (wavesurferRef.current) {
-            fetchBlob(src, (response) => {
+            if (audioContents) {
                 // @ts-ignore
-                wavesurferRef.current.loadBlob(response);
-            })
+                wavesurferRef.current.loadBlob(audioContents);
+            }
 
             // @ts-ignore
             wavesurferRef.current.on("ready", () => {
@@ -183,9 +186,14 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
                 window.dispatchEvent(new Event('resize'));
             });
         }
-    }, [fileId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fileId, audioContents]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
+        setLoading(true)
+        fetchBlob(src, (response) => {
+            setAudioContents(response)
+            setLoading(false)
+        })
         if (wavesurferRef.current !== null) {
             // @ts-ignore
             setIsPlaying(wavesurferRef.current.isPlaying())
@@ -240,78 +248,90 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
         </>
     );
 
-    return (
-        <div className="container" >
-            <WaveSurfer plugins={plugins} onMount={handleWSMount}>
-                <WaveForm id="waveform" hideCursor fillParent={true}
-                    cursorColor="transparent" waveColor="rgba(255, 0, 0, 0.5)"
-                    progressColor="rgba(0, 0, 255, 0.5)" responsive={true}>
-                    <Region
-                        onUpdateEnd={handleRegionUpdate}
-                        key={region.id}
-                        {...region}
-                    />
-                </WaveForm>
-            </WaveSurfer>
-            <div id="timeline" />
-            <div className="row align-items-center d-flex justify-content-center m-2">
-                {buttons}
+    if (loading) {
+        return (
+            <div className='container'>
+                <LoadingSpinner />
             </div>
-            <Stack className="row align-items-center d-flex justify-content-center m-2"
-                spacing={2} direction="row">
-                {filtersData}
-                {volumeData}
-            </Stack>
-            <div className="selected-file-wrapper">
-                <Button
-                    type="submit"
-                    variant="contained"
-                    className="upload-button"
-                    sx={{ mt: 3, mb: 2 }}
-                    onClick={async () => {
-                        // @ts-ignore
-                        const offlineCtx = new OfflineAudioContext(
+        );
+    } else {
+        return (
+            <div className="container" >
+                <WaveSurfer plugins={plugins} onMount={handleWSMount}>
+                    <WaveForm id="waveform" hideCursor fillParent={true}
+                        cursorColor="transparent" waveColor="rgba(255, 0, 0, 0.5)"
+                        progressColor="rgba(0, 0, 255, 0.5)" responsive={true}>
+                        <Region
+                            onUpdateEnd={handleRegionUpdate}
+                            key={region.id}
+                            {...region}
+                        />
+                    </WaveForm>
+                </WaveSurfer>
+                <div id="timeline" />
+                <div className="row align-items-center d-flex justify-content-center m-2">
+                    {buttons}
+                </div>
+                <Stack className="row align-items-center d-flex justify-content-center m-2"
+                    spacing={2} direction="row">
+                    {filtersData}
+                    {volumeData}
+                </Stack>
+                <div className="selected-file-wrapper">
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        className="upload-button"
+                        sx={{ mt: 3, mb: 2 }}
+                        onClick={async () => {
+                            setLoading(true)
                             // @ts-ignore
-                            wavesurferRef.current.backend.buffer.numberOfChannels,
+                            const offlineCtx = new OfflineAudioContext(
+                                // @ts-ignore
+                                wavesurferRef.current.backend.buffer.numberOfChannels,
+                                // @ts-ignore
+                                wavesurferRef.current.backend.buffer.length,
+                                // @ts-ignore
+                                wavesurferRef.current.backend.buffer.sampleRate
+                            );
+                            const obs = offlineCtx.createBufferSource();
                             // @ts-ignore
-                            wavesurferRef.current.backend.buffer.length,
+                            obs.buffer = wavesurferRef.current.backend.buffer;
+                            const gain = offlineCtx.createGain();
                             // @ts-ignore
-                            wavesurferRef.current.backend.buffer.sampleRate
-                        );
-                        const obs = offlineCtx.createBufferSource();
-                        // @ts-ignore
-                        obs.buffer = wavesurferRef.current.backend.buffer;
-                        const gain = offlineCtx.createGain();
-                        // @ts-ignore
-                        gain.gain.value = wavesurferRef.current.getVolume();
-                        // @ts-ignore
-                        const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => {
+                            gain.gain.value = wavesurferRef.current.getVolume();
                             // @ts-ignore
-                            const filter = offlineCtx.createBiquadFilter();
-                            filter.type = "peaking"
-                            filter.gain.value = appliedFilter.gain.value
-                            filter.Q.value = 1
-                            filter.frequency.value = appliedFilter.frequency.value
-                            return filter
-                        })
-                        obs.connect(filters[0])
-                        for (var i = 0; i < filters.length - 1; i++) {
-                            filters[i].connect(filters[i + 1])
-                        }
-                        filters[filters.length - 1].connect(gain).connect(offlineCtx.destination)
-                        obs.start();
-                        await offlineCtx.startRendering().then(r => {
-                            const format = "audio/" + fileTitleToFormat(fileTitle)
-                            const audioOffset = Math.floor(region.start * r.sampleRate)
-                            const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
-                            const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
-                            uploadEditedFileBlob(uploadSrc, fileId, fileTitle, audioBlob,
-                                "Your audio was edited successfully!", callback)
-                        });
-                    }}>
-                    Save
-                </Button>
+                            const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => {
+                                // @ts-ignore
+                                const filter = offlineCtx.createBiquadFilter();
+                                filter.type = "peaking"
+                                filter.gain.value = appliedFilter.gain.value
+                                filter.Q.value = 1
+                                filter.frequency.value = appliedFilter.frequency.value
+                                return filter
+                            })
+                            obs.connect(filters[0])
+                            for (var i = 0; i < filters.length - 1; i++) {
+                                filters[i].connect(filters[i + 1])
+                            }
+                            filters[filters.length - 1].connect(gain).connect(offlineCtx.destination)
+                            obs.start();
+                            await offlineCtx.startRendering().then(r => {
+                                const format = "audio/" + fileTitleToFormat(fileTitle)
+                                const audioOffset = Math.floor(region.start * r.sampleRate)
+                                const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
+                                const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
+                                uploadEditedFileBlob(uploadSrc, fileId, fileTitle, audioBlob,
+                                    "Your audio was edited successfully!", () => {
+                                        setLoading(false)
+                                        callback(true)
+                                    })
+                            });
+                        }}>
+                        Save
+                    </Button>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 }
