@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import {
     Button, Modal, ModalBody, ModalHeader
 } from 'reactstrap';
-import { API_CHUNK_SIZE, USER_CHUNK_SIZE } from '../../model/Constants';
+import { API_CHUNK_SIZE } from '../../model/Constants';
 import { useTypedSelector } from '../../redux/Store';
 import CustomPagination from '../main/components/PaginationComponent';
 import { CreateAPI } from './component/CreateAPIComponent';

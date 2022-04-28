@@ -1,6 +1,6 @@
 import { TextareaAutosize } from "@mui/material";
 import { useEffect, useState } from "react";
-import { ENDPOINTS, SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from "../../../model/Server";
+import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from "../../../model/Server";
 import { LoadingSpinner } from "../../main/components/LoadingSpinnerComponent";
 import { blobToDataURL, fetchBlob, IFilePreviewProps } from "../model/FileModels";
 import { fileNameTsx } from "../model/FileNameTsx";
@@ -53,13 +53,13 @@ export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element 
                 })
             } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
                 setLoading(true)
-                fetchBlob(src, async (response) => {  
+                fetchBlob(src, async (response) => {
                     setSelected(txtJsx(await response.text()))
                     setLoading(false)
                 })
             }
         }
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (loading) {
         return (

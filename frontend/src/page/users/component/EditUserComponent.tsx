@@ -234,7 +234,7 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     fullWidth
                     value={formattedSize.size}
                     onChange={(e: any) => {
-                        const number = e.target.value == "" ? 0 : parseInt(e.target.value)
+                        const number = e.target.value === "" ? 0 : parseInt(e.target.value)
                         let bytes = formattedSizeToBytes({ size: number, unit: formattedSize.unit })
                         if (bytes < 0) bytes = 0
                         else if (bytes > MAX_STORAGE_SIZE) bytes = MAX_STORAGE_SIZE

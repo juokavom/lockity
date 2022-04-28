@@ -1,6 +1,6 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Box, FormControl, IconButton, Input, InputLabel, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Box, FormControl, IconButton, Input, InputLabel } from '@mui/material';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
@@ -30,7 +30,7 @@ export default function RestorePasswordPage({ match }: any) {
 
     const validateForm = () => {
         return password.first != null && password.first.length > 0 &&
-            password.second != null && password.second.length > 0 && password.first == password.second;
+            password.second != null && password.second.length > 0 && password.first === password.second;
     }
 
     const ConfirmAction = async () => {

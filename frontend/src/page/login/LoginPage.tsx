@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 import { Modal, ModalBody, ModalHeader } from "reactstrap";
@@ -80,11 +80,11 @@ export default function LoginPage() {
                 <ModalBody className="row align-items-center d-flex justify-content-center m-2">
                     <div className="col">
                         {
-                            modalTitle && modalTitle == LoginModalActions.Register &&
+                            modalTitle && modalTitle === LoginModalActions.Register &&
                             <Register {...{ callback: (success: boolean) => toggleModal() }} />
                         }
                         {
-                            modalTitle && modalTitle == LoginModalActions.RestorePassword &&
+                            modalTitle && modalTitle === LoginModalActions.RestorePassword &&
                             <ForgotPassword {...{ callback: (success: boolean) => toggleModal() }} />
                         }
                     </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                                     margin="normal"
                                     fullWidth
                                     variant="standard"
-                                    required       
+                                    required
                                 >
                                     <InputLabel htmlFor="password">Password</InputLabel>
                                     <Input

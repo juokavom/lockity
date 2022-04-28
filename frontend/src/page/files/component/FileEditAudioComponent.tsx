@@ -10,9 +10,8 @@ import 'tui-image-editor/dist/tui-image-editor.css'
 import { Region, WaveForm, WaveSurfer } from "wavesurfer-react"
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min"
 import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline.min"
-import { ENDPOINTS } from '../../../model/Server'
 import { LoadingSpinner } from '../../main/components/LoadingSpinnerComponent'
-import { bufferToWave, dataURItoBlob, fetchBlob, fileTitleToFormat, IFileEditProps, IFileModalProps, IWavesurferProps } from "../model/FileModels"
+import { bufferToWave, fetchBlob, fileTitleToFormat, IFileEditProps, IWavesurferProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
 const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {

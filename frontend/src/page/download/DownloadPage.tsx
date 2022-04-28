@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from 'reactstrap';

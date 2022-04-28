@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import 'tui-image-editor/dist/tui-image-editor.css'
-import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES, SUPPORTED_VIDEO_TYPES } from '../../../model/Server';
-import { fileTitleToFormat, IFileEditProps, IFileModalProps } from "../model/FileModels"
+import React, { useState } from 'react';
+import 'tui-image-editor/dist/tui-image-editor.css';
+import { SUPPORTED_AUDIO_TYPES, SUPPORTED_IMAGE_TYPES, SUPPORTED_TEXT_TYPES } from '../../../model/Server';
+import { fileTitleToFormat, IFileEditProps } from "../model/FileModels";
 import { fileNameTsx } from '../model/FileNameTsx';
 import { FileEditAudio } from './FileEditAudioComponent';
 import { FileEditImage } from './FileEditImageComponent';
@@ -16,9 +16,9 @@ export const FileEdit = (fileEditProps: IFileEditProps): JSX.Element => {
         if (SUPPORTED_AUDIO_TYPES.includes(format)) {
             selected = (<FileEditAudio {...fileEditProps} />)
         } else if (SUPPORTED_IMAGE_TYPES.includes(format)) {
-            selected = (<FileEditImage {...fileEditProps} />)        
+            selected = (<FileEditImage {...fileEditProps} />)
         } else if (SUPPORTED_TEXT_TYPES.includes(format)) {
-                selected = (<FileEditText {...fileEditProps} />)
+            selected = (<FileEditText {...fileEditProps} />)
         }
     }
 

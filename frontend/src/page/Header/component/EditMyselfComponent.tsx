@@ -289,7 +289,3 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
         );
     }
 }
-
-function callback(arg0: boolean) {
-    throw new Error('Function not implemented.');
-}
