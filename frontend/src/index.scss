@@ -18,6 +18,38 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+.fade-in {
+  animation: fadein 1s ease-out forwards;
+  /* Safari and Chrome */
+  -webkit-animation: fadein 1s;
+}
+
+@keyframes fadein {
+  from {
+    top: 0px;
+    opacity: 0;
+  }
+
+  to {
+    top: static;
+    opacity: 1
+  }
+}
+
+@-webkit-keyframes fadein
+/* Safari and Chrome */
+  {
+  from {
+    top: 0px;
+    opacity: 0;
+  }
+
+  to {
+    top: static;
+    opacity: 1;
+  }
+}
+
 .dropzone {
   text-align: center;
   padding: 30px;
@@ -33,9 +65,10 @@ code {
   transition: opacity 0.5s;
   opacity: 1;
 }
+
 .loading-spinner.hide {
   min-height: 400px;
-  pointer-events:none;
+  pointer-events: none;
   opacity: 0;
 }
 
@@ -95,6 +128,7 @@ $color: #0cf;
   position: relative;
   overflow: hidden;
   z-index: 1;
+
   &:after {
     content: "";
     position: absolute;
@@ -106,6 +140,7 @@ $color: #0cf;
     border-radius: 10rem;
     z-index: -2;
   }
+
   &:before {
     content: "";
     position: absolute;
@@ -118,8 +153,10 @@ $color: #0cf;
     border-radius: 10rem;
     z-index: -1;
   }
+
   &:hover:enabled {
     color: #fff;
+
     &:before {
       width: 100%;
     }
@@ -130,14 +167,17 @@ $color: #0cf;
   .upload-main {
     top: 5%;
   }
+
   .upload {
     margin-bottom: 5%;
   }
 }
+
 @media (min-width: 600px) {
   .upload-main {
     top: 15%;
   }
+
   .upload {
     margin-bottom: 15%;
   }

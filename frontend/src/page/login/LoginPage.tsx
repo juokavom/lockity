@@ -90,8 +90,7 @@ export default function LoginPage() {
                     </div>
                 </ModalBody>
             </Modal>
-            <div className="backImage"></div>
-            <div className="loginspinner" >
+            <div className="loginspinner fade-in">
                 <div>
                     {loading && <LoadingSpinner />}
                     {!loading &&

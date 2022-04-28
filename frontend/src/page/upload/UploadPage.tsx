@@ -33,7 +33,7 @@ export default function UploadPage() {
     }
 
     return (
-        <div className="container upload-main">
+        <div className="container upload-main fade-in">
             <div className="row justify-content-center">
                 <div className="upload col-10 col-md-8 col-lg-6">
                     <div className="jumbotron-top">
