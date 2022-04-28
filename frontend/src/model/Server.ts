@@ -15,7 +15,7 @@ const prod: IURL = {
 
 export const LANDING_URL = "https://lockity.akramas.com/"
 export const CONTACT_EMAIL = "mailto:lockity@akramas.com"
-export const MAX_STORAGE_SIZE = 15000000000
+export const MAX_STORAGE_SIZE = 16106127360
 
 export const SUPPORTED_VIDEO_TYPES = ['mp4']
 export const SUPPORTED_AUDIO_TYPES = ['mp3']

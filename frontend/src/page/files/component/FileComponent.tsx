@@ -1,7 +1,7 @@
 import { IconButton } from "@mui/material";
 import { ENDPOINTS, SUPPORTED_EDITING_TYPES, SUPPORTED_PREVIEW_TYPES } from "../../../model/Server";
 import { useTypedSelector } from "../../../redux/Store";
-import { FileAction, fileTitleToFormat, formatBytes, IFileProps } from "../model/FileModels";
+import { bytesToFormattedSize, FileAction, fileTitleToFormat, IFileProps } from "../model/FileModels";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
@@ -13,6 +13,7 @@ import ContentCutOutlinedIcon from '@mui/icons-material/ContentCutOutlined';
 export const File = ({ fileMetadata, action }: IFileProps) => {
     const format = fileTitleToFormat(fileMetadata.title);
     const windowState = useTypedSelector((state) => state.windowReducer)
+    const formattedSize = bytesToFormattedSize(fileMetadata.size)
 
     const buttons = (
         <>
@@ -68,7 +69,7 @@ export const File = ({ fileMetadata, action }: IFileProps) => {
                     <p className="ellipse-text" style={{ maxWidth: "400px" }}>{fileMetadata.title}</p>
                 </div>
                 <div className="col-4 col-lg-2 d-flex justify-content-center">
-                    {formatBytes(fileMetadata.size)}
+                    {formattedSize.size + " " + formattedSize.unit}
                 </div>
                 {!windowState.smallView && buttons}
             </div>

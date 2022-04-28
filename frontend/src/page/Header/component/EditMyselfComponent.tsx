@@ -9,10 +9,12 @@ import { Button } from 'reactstrap';
 import { DefaultToastOptions, RequestBuilder } from '../../../model/RequestBuilder';
 import { ENDPOINTS } from '../../../model/Server';
 import { User } from '../../../model/User';
+import { bytesToFormattedSize, DataUnit } from '../../files/model/FileModels';
 import { IUserEditModalProps } from '../model/HeaderModels';
 
 export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Element {
     const [showPassword, setShowPassword] = useState(false)
+    const formattedSize = bytesToFormattedSize(userData?.storageSize)
 
     const [user, setUser] = useState<{
         name: string | null,
@@ -209,16 +211,30 @@ export function EditMyself({ userData, callback }: IUserEditModalProps): JSX.Ele
                     shrink: true,
                 }}
             />
-            <TextField
-                disabled
+            <FormControl
                 margin="normal"
                 fullWidth
                 variant="standard"
-                id="storageSize"
-                label="Storage size (bytes)"
-                type="number"
-                value={user.storageSize}
-            />
+                disabled>
+                <InputLabel htmlFor="storageSize">Storage size</InputLabel>
+                <Input
+                    id="storageSize"
+                    type="number"
+                    defaultValue={formattedSize.size}
+                    endAdornment={
+                        <Select
+                            id="Unit"
+                            label="Unit"
+                            defaultValue={formattedSize.unit}
+                        >
+                            <MenuItem value={DataUnit.B}>Byte</MenuItem>
+                            <MenuItem value={DataUnit.KB}>Kilobyte</MenuItem>
+                            <MenuItem value={DataUnit.MB}>Megabyte</MenuItem>
+                            <MenuItem value={DataUnit.GB}>Gigabyte</MenuItem>
+                        </Select>
+                    }
+                />
+            </FormControl>
             <FormControlLabel
                 disabled
                 control={

@@ -11,10 +11,12 @@ import {
 import { DefaultToastOptions, RequestBuilder } from '../../../model/RequestBuilder';
 import { ENDPOINTS, MAX_STORAGE_SIZE } from '../../../model/Server';
 import { User } from '../../../model/User';
+import { bytesToFormattedSize, DataUnit, formattedSizeToBytes } from '../../files/model/FileModels';
 import { IUserModalProps } from '../model/UsersModel';
 
 export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
     const [showPassword, setShowPassword] = useState(false)
+    const [formattedSize, setFormattedSize] = useState(bytesToFormattedSize(userData.storageSize))
 
     const [user, setUser] = useState<{
         username: string | null,
@@ -208,20 +210,40 @@ export function EditUser({ userData, callback }: IUserModalProps): JSX.Element {
                     shrink: true,
                 }}
             />
-            <TextField
-                margin="normal"
-                fullWidth
-                variant="standard"
+            <InputLabel htmlFor="storageSize">Storage size</InputLabel>
+            <Input
                 id="storageSize"
-                label="Storage size (bytes)"
                 type="number"
-                defaultValue={userData.storageSize}
+                fullWidth
+                value={formattedSize.size}
                 onChange={(e: any) => {
-                    let number = parseInt(e.target.value)
-                    if (number < 0) number = 0
-                    else if (number > MAX_STORAGE_SIZE) number = MAX_STORAGE_SIZE
-                    setUser({ ...user, storageSize: number })
+                    const number = e.target.value == "" ? 0 : parseInt(e.target.value)
+                    let bytes = formattedSizeToBytes({ size: number, unit: formattedSize.unit })
+                    if (bytes < 0) bytes = 0
+                    else if (bytes > MAX_STORAGE_SIZE) bytes = MAX_STORAGE_SIZE
+                    setUser({ ...user, storageSize: bytes })
+                    setFormattedSize(bytesToFormattedSize(bytes))
                 }}
+                endAdornment={
+                    <Select
+                        id="Unit"
+                        label="Unit"
+                        variant="standard"
+                        value={formattedSize.unit}
+                        onChange={(e: any) => {
+                            let bytes = formattedSizeToBytes({ size: formattedSize.size, unit: e.target.value })
+                            if (bytes < 0) bytes = 0
+                            else if (bytes > MAX_STORAGE_SIZE) bytes = MAX_STORAGE_SIZE
+                            setUser({ ...user, storageSize: bytes })
+                            setFormattedSize(bytesToFormattedSize(bytes))
+                        }}
+                    >
+                        <MenuItem value={DataUnit.B}>Byte</MenuItem>
+                        <MenuItem value={DataUnit.KB}>Kilobyte</MenuItem>
+                        <MenuItem value={DataUnit.MB}>Megabyte</MenuItem>
+                        <MenuItem value={DataUnit.GB}>Gigabyte</MenuItem>
+                    </Select>
+                }
             />
             <FormControlLabel
                 control={

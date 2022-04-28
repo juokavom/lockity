@@ -5,17 +5,18 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { IconButton } from '@mui/material';
 import { ENDPOINTS, SUPPORTED_EDITING_TYPES, SUPPORTED_PREVIEW_TYPES } from '../../../model/Server';
 import { useTypedSelector } from '../../../redux/Store';
-import { formatBytes } from '../../files/model/FileModels';
+import { bytesToFormattedSize } from '../../files/model/FileModels';
 import { FileAction, IReceivedFileProps } from '../model/ReceivedModels';
 
 export function ReceivedFile({ receivedMetadata, action }: IReceivedFileProps) {
     const format = receivedMetadata.title.split('.').pop();
     const windowState = useTypedSelector((state) => state.windowReducer)
+    const formattedSize = bytesToFormattedSize(receivedMetadata.size)
 
     const buttons = (
         <>
             <div className="col-4 col-lg-2 d-flex justify-content-center">
-                {formatBytes(receivedMetadata.size)}
+                {formattedSize.size + " " + formattedSize.unit}
             </div>
             <div className="col-auto">
                 {format && SUPPORTED_PREVIEW_TYPES.includes(format) ?

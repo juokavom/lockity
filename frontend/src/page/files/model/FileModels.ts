@@ -67,13 +67,36 @@ export const fileTitleToFormat = (title: string): string => {
     return format ? format : ""
 }
 
-export function formatBytes(bytes: number, decimals = 2) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
+export enum DataUnit {
+    B = "B",
+    KB = "KB",
+    MB = "MB",
+    GB = "GB"
+}
+
+export interface IFormattedSize {
+    size: number,
+    unit: DataUnit
+}
+
+const K = 1024;
+const DATA_UNITS = [DataUnit.B, DataUnit.KB, DataUnit.MB, DataUnit.GB];
+
+export const bytesToFormattedSize = (bytes: number | undefined, decimals = 2): IFormattedSize => {
+    if (bytes === undefined || bytes === 0) return {
+        size: 0,
+        unit: DataUnit.B
+    };
     const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    const i = Math.floor(Math.log(bytes) / Math.log(K));
+    return {
+        size: parseFloat((bytes / Math.pow(K, i)).toFixed(dm)),
+        unit: DATA_UNITS[i]
+    }
+}
+
+export const formattedSizeToBytes = (formattedSize: IFormattedSize) => {
+    return formattedSize.size * Math.pow(K, DATA_UNITS.indexOf(formattedSize.unit))
 }
 
 export const fetchBlob = (url: string, callback: (response: any) => void) => {
