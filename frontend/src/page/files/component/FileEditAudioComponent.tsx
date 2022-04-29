@@ -283,6 +283,7 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
                         className="upload-button"
                         sx={{ mt: 3, mb: 2 }}
                         onClick={async () => {
+                            stop()
                             setLoading(true)
                             // @ts-ignore
                             const offlineCtx = new OfflineAudioContext(
