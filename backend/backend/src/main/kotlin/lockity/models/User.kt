@@ -8,6 +8,7 @@ import kotlinx.serialization.UseSerializers
 import lockity.plugins.JsonLocalDateTimeSerializer
 import lockity.utils.MAX_STORAGE_BYTES
 import lockity.utils.ROLE
+import lockity.utils.inputValid
 import java.time.LocalDateTime
 
 @Serializable
@@ -26,7 +27,10 @@ data class RegistrableUser(
 )
 
 fun RegistrableUser.isValuesValid() {
-    if (username == "" || email == "" || password == "") throw BadRequestException("Username, email and password cannot be empty.")
+    if (username == "" || email == "" || password == ""
+        || !username.inputValid() || !name.inputValid() || !surname.inputValid()
+        || !email.inputValid()
+    ) throw BadRequestException("Username, email, name, surname or password failed validation.")
 }
 
 @Serializable
@@ -66,7 +70,7 @@ data class UserData(
 )
 
 @Serializable
-data class CreatableUser(
+data class User(
     var username: String,
     var name: String?,
     var surname: String?,
@@ -80,31 +84,19 @@ data class CreatableUser(
     var storageSize: Long
 )
 
-
-fun CreatableUser.isValuesValid() {
-    if (username == "" || email == "" || password == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN) || storageSize > MAX_STORAGE_BYTES)
-        throw BadRequestException("Username, email, password, role or storage size failed validation.")
+fun User.isCreateValuesValid() {
+    if (password == "") throw BadRequestException("Password failed validation.")
+    isEditValuesValid()
 }
 
-@Serializable
-data class EditableUser(
-    var username: String,
-    var name: String?,
-    var surname: String?,
-    var email: String,
-    var password: String,
-    var role: String,
-    var registered: LocalDateTime,
-    var lastActive: LocalDateTime?,
-    var confirmed: Boolean,
-    var subscribed: Boolean,
-    var storageSize: Long
-)
-
-
-fun EditableUser.isValuesValid() {
-    if (username == "" || email == "" || (role != ROLE.REGISTERED && role != ROLE.ADMIN) || storageSize > MAX_STORAGE_BYTES)
-        throw BadRequestException("Username, email, role or storage size failed validation.")
+fun User.isEditValuesValid() {
+    if (username == "" || email == "" ||
+        (role != ROLE.REGISTERED && role != ROLE.ADMIN)
+        || storageSize > MAX_STORAGE_BYTES
+        || !username.inputValid() || !name.inputValid() || !surname.inputValid()
+        || !email.inputValid() || !role.inputValid()
+    )
+        throw BadRequestException("Username, name, surname, email, role or storage size failed validation.")
 }
 
 @Serializable
@@ -118,5 +110,7 @@ data class EditableUserSelf(
 )
 
 fun EditableUserSelf.isValuesValid() {
-    if (username == "" || email == "") throw BadRequestException("Email and username cannot be empty.")
+    if (username == "" || email == "" || !username.inputValid()
+        || !name.inputValid() || !surname.inputValid() || !email.inputValid()
+    ) throw BadRequestException("Email, username, name or surname failed validation.")
 }

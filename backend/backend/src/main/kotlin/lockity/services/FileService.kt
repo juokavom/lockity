@@ -245,6 +245,7 @@ class FileService(
     }
 
     fun updateUserFileTitle(user: UserRecord, fileId: String, editedFile: EditableFile) {
+        editedFile.isValuesValid()
         val fileRecord = fileRepository.fetch(UUID.fromString(fileId))
             ?: throw NotFoundException("File was not found")
         if (!fileRecord.user.contentEquals(user.id))

@@ -4,9 +4,6 @@ import com.mysql.cj.jdbc.MysqlDataSource
 import lockity.utils.CONFIG
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
-import java.nio.ByteBuffer
-import java.util.*
-
 
 class DatabaseService(
     private val configurationService: ConfigurationService

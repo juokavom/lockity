@@ -12,7 +12,6 @@ import Footer from './components/FooterComponent';
 import Login from '../login/LoginPage';
 import { ReceivedPage } from '../received/ReceivedPage';
 import { SharedPage } from '../shared/SharedPage';
-import Test from '../test/TestPage';
 import Upload from '../upload/UploadPage';
 import { UsersPage } from '../users/UsersPage';
 import './styles/Main.scss';
@@ -40,7 +39,6 @@ export default function Main() {
                     <Route exact path={ROUTES.upload} component={() => <Upload />} />
                     <Route path={ROUTES.download + "/:id"} component={Download} />
                     <Route path={ROUTES.reset + "/:id"} component={RestorePasswordPage} />
-                    <Route exact path={ROUTES.test} component={() => <Test />} />
                     <Redirect to={ROUTES.upload} />
                 </Switch>
             </div>
@@ -55,8 +53,6 @@ export default function Main() {
                         {!loadingState.loading &&
                             <div className="route-holder">
                                 <Switch>
-                                    <Route exact path={ROUTES.test} component={() => <Test />} />
-
                                     <Route exact path={ROUTES.filesPage} component={() => <FilesPage />} />
                                     <Route exact path={ROUTES.receivedPage} component={() => <ReceivedPage />} />
                                     <Route exact path={ROUTES.sharedPage} component={() => <SharedPage />} />

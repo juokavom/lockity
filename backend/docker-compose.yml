@@ -15,20 +15,6 @@ services:
       MYSQL_PASSWORD: project
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
-  mysql_test:
-    image: mariadb:latest
-    ports:
-      - "3398:3306"
-    container_name: lockity_mysql_test
-    volumes:
-      - '.docker/conf.d/mysql.cnf:/etc/mysql/conf.d/docker.cnf:ro'
-    environment:
-      MYSQL_DATABASE: lockity
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: project
-      MYSQL_PASSWORD: project
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
   mailhog:
     image: mailhog/mailhog
     container_name: lockity_mailhog

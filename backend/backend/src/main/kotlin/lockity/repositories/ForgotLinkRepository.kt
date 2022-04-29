@@ -1,7 +1,6 @@
 package lockity.repositories
 
 import database.schema.tables.records.ForgotPasswordLinkRecord
-import database.schema.tables.references.ConfirmationLinkTable
 import database.schema.tables.references.ForgotPasswordLinkTable
 import database.schema.tables.references.UserTable
 import lockity.models.ForgotPasswordLinkAndUser

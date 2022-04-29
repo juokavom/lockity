@@ -15,7 +15,8 @@ data class UploadableSharedAccess(
 )
 
 fun UploadableSharedAccess.isValuesValid() {
-    if (fileId == "" || userId == "") throw BadRequestException("File and user cannot be empty.")
+    if (fileId == "" || userId == "")
+        throw BadRequestException("File and user cannot be empty.")
 }
 
 @Serializable
@@ -30,5 +31,3 @@ data class SharedAccess(
     val user: UserForSharing,
     val canEdit: Boolean
 )
-
-

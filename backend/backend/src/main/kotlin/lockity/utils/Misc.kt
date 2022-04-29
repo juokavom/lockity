@@ -59,7 +59,7 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
         this.respondJSON(badRequestParameters, HttpStatusCode.BadRequest)
     } catch (e: java.io.IOException) {
         this.respondJSON("File not attached correctly", HttpStatusCode.BadRequest)
-    }  catch (e: AccountLockedException) {
+    } catch (e: AccountLockedException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.Locked)
     } catch (e: BadRequestException) {
         this.respondJSON(e.message.toString(), HttpStatusCode.BadRequest)
@@ -75,6 +75,8 @@ suspend fun ApplicationCall.withErrorHandler(block: suspend () -> Unit) {
 suspend fun ApplicationCall.respondJSON(message: String, httpStatusCode: HttpStatusCode, title: String? = "message") {
     this.respondText("{\"$title\":\"$message\"}", ContentType.Application.Json, httpStatusCode)
 }
+
+fun String?.inputValid() = this?.let { it.length < 240 } ?: true
 
 fun ApplicationCall.jwtUser(): UserRecord? {
     val userRepository: UserRepository by inject()

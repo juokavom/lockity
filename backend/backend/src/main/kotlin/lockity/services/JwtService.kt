@@ -4,18 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.SignatureVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
-import database.schema.tables.records.UserRecord
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.http.*
-import io.ktor.http.auth.*
-import io.ktor.response.*
-import kotlinx.coroutines.runBlocking
-import lockity.repositories.RoleRepository
-import lockity.repositories.UserRepository
-import lockity.utils.*
-import org.koin.ktor.ext.inject
+import lockity.utils.CONFIG
+import lockity.utils.USER
 import java.util.*
 
 class JwtService(

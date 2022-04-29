@@ -6,6 +6,7 @@ import io.ktor.features.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import lockity.plugins.JsonLocalDateTimeSerializer
+import lockity.utils.inputValid
 import java.time.LocalDateTime
 
 @Serializable
@@ -17,7 +18,7 @@ data class CreatableToken(
 )
 
 fun CreatableToken.isValuesValid() {
-    if (title == "" || permissions.isEmpty() || validFrom > validTo)
+    if (title == "" || permissions.isEmpty() || validFrom > validTo || !title.inputValid())
         throw BadRequestException("Token title, permissions or valid dates failed validation.")
 }
 

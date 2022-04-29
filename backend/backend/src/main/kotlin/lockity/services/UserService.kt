@@ -178,8 +178,8 @@ class UserService(
         userCount = userRepository.fetchUsersCount()
     )
 
-    fun createUser(creatableUser: CreatableUser) {
-        creatableUser.isValuesValid()
+    fun createUser(creatableUser: User) {
+        creatableUser.isCreateValuesValid()
         if (!emailService.isEmailValid(creatableUser.email))
             throw BadRequestException("Email is not in correct format.")
         if (!userRepository.isEmailUnique(creatableUser.email))
@@ -205,11 +205,11 @@ class UserService(
 
     }
 
-    fun editUser(userId: String, editableUser: EditableUser) {
+    fun editUser(userId: String, editableUser: User) {
         val userUUID = UUID.fromString(userId)
         val userRecord = userRepository.fetch(userUUID)
             ?: throw NotFoundException("User was not found")
-        editableUser.isValuesValid()
+        editableUser.isEditValuesValid()
         if (!emailService.isEmailValid(editableUser.email))
             throw BadRequestException("Email is not in correct format.")
         if (!userRepository.isAnyoneElseEmailUnique(userUUID, editableUser.email))

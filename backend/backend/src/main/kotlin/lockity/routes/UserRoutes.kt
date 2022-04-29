@@ -7,8 +7,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import lockity.models.EditableUser
-import lockity.services.DatabaseService
+import lockity.models.User
 import lockity.services.UserService
 import lockity.utils.*
 import org.koin.ktor.ext.inject
@@ -50,7 +49,7 @@ fun Application.userRoutes() {
                     call.withErrorHandler {
                         val userId = call.parameters["userId"]
                             ?: throw BadRequestException("User id is not present in the parameters.")
-                        val editedUser = call.receive<EditableUser>()
+                        val editedUser = call.receive<User>()
                         userService.editUser(userId, editedUser)
                         call.respondJSON(
                             "User edited successfully.",

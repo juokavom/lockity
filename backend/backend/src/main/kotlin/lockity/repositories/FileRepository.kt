@@ -93,5 +93,4 @@ class FileRepository(
         .where(FileTable.User.eq(userBinId).and(FileTable.Title.like(titleLike)))
         .fetchArray()
         .toList()
-
 }

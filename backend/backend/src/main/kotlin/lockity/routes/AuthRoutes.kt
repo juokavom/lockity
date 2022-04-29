@@ -52,8 +52,10 @@ fun Application.authRoutes() {
             post {
                 call.withErrorHandler {
                     userService.resetPassword(call.receive())
-                    call.respondJSON("Password reset initiated. Check your email for further information.",
-                        HttpStatusCode.OK)
+                    call.respondJSON(
+                        "Password reset initiated. Check your email for further information.",
+                        HttpStatusCode.OK
+                    )
                 }
             }
 

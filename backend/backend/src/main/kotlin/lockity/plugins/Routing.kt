@@ -2,9 +2,7 @@ package lockity.plugins
 
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.gson.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.request.*
 import io.ktor.routing.*
@@ -19,7 +17,6 @@ import lockity.utils.CONFIG
 import lockity.utils.installJwtVerifier
 import org.koin.ktor.ext.inject
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 fun Application.configureRouting() {
     val userRepository: UserRepository by inject()
@@ -62,7 +59,6 @@ fun Application.configureRouting() {
         sharedRoutes()
         fileRoutes()
         apiRoutes()
-        testRoutes()
     }
 }
 

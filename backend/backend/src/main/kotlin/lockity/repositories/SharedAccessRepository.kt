@@ -4,9 +4,11 @@ import database.schema.tables.records.SharedAccessRecord
 import database.schema.tables.references.FileTable
 import database.schema.tables.references.SharedAccessTable
 import database.schema.tables.references.UserTable
-import lockity.models.*
+import lockity.models.FileMetadataForSharing
+import lockity.models.ReceivedFileMetadata
+import lockity.models.SharedAccess
+import lockity.models.UserForSharing
 import lockity.services.DatabaseService
-import lockity.services.FileService
 import lockity.services.UserService
 import lockity.utils.Misc
 import java.util.*

@@ -5,6 +5,7 @@ import database.schema.tables.records.ForgotPasswordLinkRecord
 import database.schema.tables.records.UserRecord
 import io.ktor.features.*
 import kotlinx.serialization.Serializable
+import lockity.utils.inputValid
 
 @Serializable
 data class ConfirmableLink(
@@ -26,7 +27,8 @@ data class Email(
 )
 
 fun Email.isValuesValid() {
-    if(email == "") throw BadRequestException("Email cannot be empty.")
+    if(email == "" || !email.inputValid())
+        throw BadRequestException("Email failed validation.")
 }
 
 data class ForgotPasswordLinkAndUser(
@@ -41,5 +43,6 @@ data class ResetedPassword(
 )
 
 fun ResetedPassword.isValuesValid() {
-    if(link == "" || password == "") throw BadRequestException("Link and password cannot be empty.")
+    if(link == "" || password == "" || !password.inputValid())
+        throw BadRequestException("Link and password failed validation.")
 }

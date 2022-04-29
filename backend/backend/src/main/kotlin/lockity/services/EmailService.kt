@@ -50,9 +50,11 @@ class EmailService(
                         Please restore your password by clicking the following
                         <a href="$link">link</a>. 
                         (Or paste it browser: $link). Link is valid until 
-                        ${forgotPasswordLink.validUntil?.format(
-                            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                        )}.See you!
+                        ${
+        forgotPasswordLink.validUntil?.format(
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        )
+    }.See you!
                  </p>
              </body>
        </html>

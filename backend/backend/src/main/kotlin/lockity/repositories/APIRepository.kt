@@ -1,9 +1,7 @@
 package lockity.repositories
 
 import database.schema.tables.records.APIRecord
-import database.schema.tables.records.FileRecord
 import database.schema.tables.references.APITable
-import database.schema.tables.references.FileTable
 import lockity.models.APIPermissions
 import lockity.models.TokenData
 import lockity.services.DatabaseService

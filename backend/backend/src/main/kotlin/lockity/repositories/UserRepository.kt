@@ -5,8 +5,6 @@ import database.schema.tables.references.RoleTable
 import database.schema.tables.references.UserTable
 import lockity.models.UserData
 import lockity.services.DatabaseService
-import lockity.services.FileService
-import lockity.services.UserService
 import lockity.services.UserService.Companion.getUserPublicName
 import lockity.utils.Misc
 import lockity.utils.USER
@@ -107,11 +105,11 @@ class UserRepository(
                     surname = it[UserTable.Surname],
                     email = it[UserTable.Email]!!,
                     role = it[RoleTable.Name]!!,
-                    registered =  it[UserTable.Registered]!!,
-                    lastActive =  it[UserTable.LastActive],
-                    confirmed =  it[UserTable.Confirmed]!! == "1".toByte(),
-                    subscribed =  it[UserTable.Subscribed]!! == "1".toByte(),
-                    storageSize =  it[UserTable.StorageSize]!!,
+                    registered = it[UserTable.Registered]!!,
+                    lastActive = it[UserTable.LastActive],
+                    confirmed = it[UserTable.Confirmed]!! == "1".toByte(),
+                    subscribed = it[UserTable.Subscribed]!! == "1".toByte(),
+                    storageSize = it[UserTable.StorageSize]!!,
                     publicName = getUserPublicName(it[UserTable.Id]!!, it[UserTable.Username]!!)
                 )
             }

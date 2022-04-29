@@ -2,7 +2,6 @@ package lockity.repositories
 
 import database.schema.tables.records.ConfirmationLinkRecord
 import database.schema.tables.references.ConfirmationLinkTable
-import database.schema.tables.references.FileTable
 import database.schema.tables.references.UserTable
 import lockity.models.ConfirmationLinkAndUser
 import lockity.services.DatabaseService

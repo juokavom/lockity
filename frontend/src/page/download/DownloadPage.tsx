@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from 'reactstrap';
-import { __String } from 'typescript';
 import { RequestBuilder } from '../../model/RequestBuilder';
 import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';

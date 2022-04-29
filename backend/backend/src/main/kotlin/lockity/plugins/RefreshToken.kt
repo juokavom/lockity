@@ -7,7 +7,6 @@ import lockity.services.JwtService
 import lockity.utils.JWT_COOKIE_NAME
 import lockity.utils.setResponseJwtCookieHeader
 import lockity.utils.unsetResponseJwtCookieHeader
-import java.util.concurrent.TimeUnit
 
 class RefreshToken(configuration: Configuration) {
     private val jwtService = configuration.jwtTokenService

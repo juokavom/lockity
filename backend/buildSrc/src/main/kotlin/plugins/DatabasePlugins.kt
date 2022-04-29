@@ -18,9 +18,6 @@ class DatabasePlugins : Plugin<Project> {
         val databaseConfig = DatabaseConfig(groovy.util.ConfigSlurper().parse(
             File("$rootDir/backend/src/main/resources/application.conf").toURI().toURL()
         )["database"] as groovy.util.ConfigObject)
-        val testDatabaseConfig = DatabaseConfig(groovy.util.ConfigSlurper().parse(
-            File("$rootDir/backend/src/main/resources/application.conf").toURI().toURL()
-        )["testDatabase"] as groovy.util.ConfigObject)
 
         val migrationPackage = "$rootDir/migrations"
         val migrations = listOf(
@@ -44,14 +41,6 @@ class DatabasePlugins : Plugin<Project> {
                     setGroup("database")
                     applyConfig(databaseConfig, migrations)
                 }
-                register<FlywayCleanTask>("TestDatabaseClean") {
-                    setGroup("database")
-                    applyConfig(testDatabaseConfig, migrations)
-                }
-                register<FlywayMigrateTask>("TestDatabaseMigrate") {
-                    setGroup("database")
-                    applyConfig(testDatabaseConfig, migrations)
-                }
                 register("GenerateMigration") {
                     group = "database"
                     doLast {
@@ -67,14 +56,6 @@ class DatabasePlugins : Plugin<Project> {
 
                     doLast {
                         generateJooq(jooqDir, databaseConfig)
-                    }
-                }
-                register("TestGenerateJooq") {
-                    group = "database"
-                    dependsOn("TestDatabaseMigrate")
-
-                    doLast {
-                        generateJooq(jooqDir, testDatabaseConfig)
                     }
                 }
                 named("compileKotlin") {

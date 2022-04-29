@@ -1,11 +1,12 @@
 @file:UseSerializers(JsonLocalDateTimeSerializer::class)
 package lockity.models
 
+import io.ktor.features.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import lockity.plugins.JsonLocalDateTimeSerializer
+import lockity.utils.inputValid
 import java.time.LocalDateTime
-
 
 @Serializable
 data class StorageData(
@@ -17,6 +18,11 @@ data class StorageData(
 data class EditableFile(
     val title: String
 )
+
+fun EditableFile.isValuesValid() {
+    if (title == "" || !title.inputValid())
+        throw BadRequestException("Title failed validation.")
+}
 
 @Serializable
 data class FileMetadata(
