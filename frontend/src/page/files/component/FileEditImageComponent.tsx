@@ -66,7 +66,6 @@ export const FileEditImage = ({ fileId, fileTitle, src, uploadSrc, callback }: I
                             //@ts-ignore
                             const fileDataUrl = imageEditor.current.getInstance().toDataURL()
                             const filePayload = dataURItoBlob(fileDataUrl)
-                            console.log(filePayload)
                             uploadEditedFileBlob(uploadSrc, fileId, fileTitle, filePayload,
                                 "Your image was edited successfully!", () => {
                                     setLoading(false)
