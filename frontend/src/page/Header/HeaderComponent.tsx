@@ -15,20 +15,6 @@ import { EditMyself } from './component/EditMyselfComponent';
 import { sayHello } from './model/HeaderModels';
 import './styles/Header.scss';
 
-export const LogoutAction = async () => {
-    await new RequestBuilder()
-        .withUrl(ENDPOINTS.AUTH.logout)
-        .withMethod('POST')
-        .withDefaults()
-        .send((response: any) => {
-            localStorage.removeItem(User.storagename)
-            window.location.replace(ROUTES.login)
-        }, () => {
-            localStorage.removeItem(User.storagename)
-            window.location.replace(ROUTES.login)
-        })
-};
-
 export default function Header() {
     const [isNavOpen, setNavOpen] = useState(false);
     const [isDropdowOpen, setDropdownOpen] = useState(false);
@@ -60,15 +46,23 @@ export default function Header() {
         }
     }
 
-    const openModal = async () => {
-        setLoading(true)
-        setModalOpen(true)
-        fetchUserData((response) => {
-            const userdata: IUserData = response
-            setUserData(userdata)
-            setLoading(false)
-        })
-    }
+    const LogoutAction = async () => {
+        await new RequestBuilder()
+            .withUrl(ENDPOINTS.AUTH.logout)
+            .withMethod('POST')
+            .withDefaults()
+            .send((response: any) => {
+                setLoading(false)
+                setModalOpen(false)
+                localStorage.removeItem(User.storagename)
+                window.location.replace(ROUTES.login)
+            }, () => {
+                setLoading(false)
+                setModalOpen(false)
+                localStorage.removeItem(User.storagename)
+                window.location.replace(ROUTES.login)
+            })
+    };
 
     const emptyNavLinkMap = (): Map<string, string> => {
         const navLinkMap = new Map<string, string>();
@@ -100,19 +94,25 @@ export default function Header() {
     const onLogout = async () => {
         setLoading(true)
         setTitle("Logging out...")
-        toggleModal()
+        setModalOpen(true)
         await LogoutAction()
     }
 
-    const onEditMyData = async () => {
-        openModal()
+    const onEditMyData = async () => {        
         setTitle("Edit my data")
+        setLoading(true)
+        setModalOpen(true)
+        fetchUserData((response) => {
+            const userdata: IUserData = response
+            setUserData(userdata)
+            setLoading(false)
+        })
     }
 
     return (
         <div className="header">
-            <Modal className="container" size="" isOpen={modalOpen} toggle={() => { toggleModal() }}>
-                <ModalHeader toggle={() => { toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
+            <Modal className="container" size="" isOpen={modalOpen} toggle={() => { if (!loading) toggleModal() }}>
+                <ModalHeader toggle={() => { if (!loading) toggleModal() }} cssModule={{ 'modal-title': 'w-100 text-center' }}>
                     <div className="d-flex justify-content-center">
                         <p>{title}</p>
                     </div>
