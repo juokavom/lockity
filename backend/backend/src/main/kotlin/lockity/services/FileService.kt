@@ -20,7 +20,7 @@ import javax.naming.NoPermissionException
 import javax.security.auth.login.AccountLockedException
 
 class FileService(
-    configurationService: ConfigurationService,
+    private val configurationService: ConfigurationService,
     private val fileRepository: FileRepository,
     private val sharedAccessRepository: SharedAccessRepository,
     private val userRepository: UserRepository
@@ -61,7 +61,14 @@ class FileService(
         val fileRecord = uploadFile(part, fileSize, part.originalFileName!!)
         fileRecord.link = UUID.randomUUID().toString()
         fileRepository.insert(fileRecord)
-        return FileLink(fileRecord.link!!)
+        return FileLink(
+            link = fileRecord.link!!,
+            validUntil = fileRecord.uploaded?.plusDays(
+                configurationService.configValue(
+                    CONFIG.CRON_ANONYMOUS_EXPIRY_DAYS
+                ).toLong()
+            )
+        )
     }
 
     fun uploadUserFile(user: UserRecord, part: PartData.FileItem, fileSize: Long) {
@@ -100,9 +107,10 @@ class FileService(
         ) {
             throw NoPermissionException("User do not have permission to get this file metadata")
         }
-        val ownerUser = userRepository.fetch(Misc.binToUuid(sharedAccessRecord.ownerId!!)) ?:
-            throw NotFoundException("File owner was not found")
-        val ownerFileSizeSum = fileRepository.userFileSizeSum(sharedAccessRecord.ownerId!!) - (fetchedFileRecord.size ?: 0)
+        val ownerUser = userRepository.fetch(Misc.binToUuid(sharedAccessRecord.ownerId!!))
+            ?: throw NotFoundException("File owner was not found")
+        val ownerFileSizeSum =
+            fileRepository.userFileSizeSum(sharedAccessRecord.ownerId!!) - (fetchedFileRecord.size ?: 0)
         if (ownerFileSizeSum + fileSize > ownerUser.storageSize!!)
             throw NoPermissionException("User storage size is exceeded")
         val fileRecord = uploadFile(part, fileSize, fetchedFileRecord.title!!, fetchedFileRecord.id!!, true)
@@ -227,7 +235,12 @@ class FileService(
             throw NoPermissionException("File is not shared")
         return FileTitleLink(
             title = fileRecord.title!!,
-            link = fileRecord.link!!
+            link = fileRecord.link!!,
+            validUntil = fileRecord.uploaded?.plusDays(
+                configurationService.configValue(
+                    CONFIG.CRON_ANONYMOUS_EXPIRY_DAYS
+                ).toLong()
+            )
         )
     }
 

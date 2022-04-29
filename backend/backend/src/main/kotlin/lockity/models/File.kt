@@ -1,6 +1,10 @@
+@file:UseSerializers(JsonLocalDateTimeSerializer::class)
 package lockity.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import lockity.plugins.JsonLocalDateTimeSerializer
+import java.time.LocalDateTime
 
 
 @Serializable
@@ -50,11 +54,13 @@ data class ReceivedFileMetadataCount(
 
 @Serializable
 data class FileLink(
-    val link: String
+    val link: String,
+    val validUntil: LocalDateTime?
 )
 
 @Serializable
 data class FileTitleLink(
     val title: String,
-    val link: String
+    val link: String,
+    val validUntil: LocalDateTime?
 )

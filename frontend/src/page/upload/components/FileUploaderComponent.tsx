@@ -57,6 +57,7 @@ export default function FileUploader(props: FileUploaderProps) {
                         const response = JSON.parse(xhr.response)
                         props.onUpload({
                             link: response.link,
+                            validUntil: response.validUntil,
                             fileName: file[0].name
                         })
                     }

@@ -65,7 +65,8 @@ export default function UploadPage() {
                         <div className="border-box">
                             <h1>Sharing link</h1>
                             <div className="col-12 col-md-10 col-xl-10">
-                                <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5><br />
+                                <h5 className="ellipse-text"><i>({fileMeta?.fileName})</i></h5>
+                                <p className="ellipse-text"><i>File is available until {new Date(fileMeta?.validUntil).toISOString().split('T')[0]}</i></p><br />
                                 <div id="fileLink" className="dropzone selected-file" style={{
                                     cursor: "default",
                                     overflowWrap: "break-word"

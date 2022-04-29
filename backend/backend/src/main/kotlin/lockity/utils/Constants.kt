@@ -36,6 +36,9 @@ object CONFIG {
     const val CORS_SUBDOMAIN = "cors.subDomain"
 
     const val LINK_EXPIRY_MINUTES = "link.expiryMinutes"
+
+    const val CRON_INTERVAL_TIME_MINUTES = "cron.intervalTimeMinutes"
+    const val CRON_ANONYMOUS_EXPIRY_DAYS = "cron.anonymousExpiryDays"
 }
 
 object USER {

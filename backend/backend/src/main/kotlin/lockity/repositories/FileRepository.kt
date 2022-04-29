@@ -5,6 +5,7 @@ import database.schema.tables.references.FileTable
 import lockity.services.DatabaseService
 import lockity.utils.Misc
 import org.jooq.impl.DSL
+import java.time.LocalDateTime
 import java.util.*
 
 class FileRepository(
@@ -40,6 +41,12 @@ class FileRepository(
         .selectFrom(FileTable)
         .where(FileTable.User.eq(Misc.uuidToBin(userUuid)))
         .orderBy(FileTable.Uploaded.desc())
+        .fetchArray()
+        .toList()
+
+    fun fetchExpiredAnonymousFiles(expiryDate: LocalDateTime): List<FileRecord> = databaseService.dsl
+        .selectFrom(FileTable)
+        .where(FileTable.User.isNull.and(FileTable.Uploaded.lessThan(expiryDate)))
         .fetchArray()
         .toList()
 

@@ -117,8 +117,11 @@ internal class FileServiceTest {
 
         @JvmStatic
         fun getDynamicLinkFileParamsProvider(): List<Arguments> {
-            val fileWithDynLink = mockk<FileRecord>(relaxed = true)
+            val fileWithDynLink = FileRecord()
+            fileWithDynLink.title = "title"
+            fileWithDynLink.location = "location"
             fileWithDynLink.link = "link"
+            fileWithDynLink.uploaded = null
             return listOf<Arguments>(
                 Arguments.of(null, true),
                 Arguments.of(FileRecord(), true),
@@ -520,7 +523,8 @@ internal class FileServiceTest {
                 actual = test(),
                 expected = FileTitleLink(
                     title = fileRecord!!.title!!,
-                    link = fileRecord.link!!
+                    link = fileRecord.link!!,
+                    validUntil = null
                 )
             )
         }

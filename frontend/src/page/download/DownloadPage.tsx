@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from 'reactstrap';
+import { __String } from 'typescript';
 import { RequestBuilder } from '../../model/RequestBuilder';
 import { ROUTES } from '../../model/Routes';
 import { ENDPOINTS } from '../../model/Server';
@@ -10,7 +11,8 @@ import { LoadingSpinner } from '../main/components/LoadingSpinnerComponent';
 export default function DownloadPage({ match }: any) {
     const [fileData, setFileData] = useState<{
         title: string,
-        link: string
+        link: string,
+        validUntil: string
     } | null>(null)
     const id = match.params.id
     const history = useHistory();
@@ -70,7 +72,8 @@ export default function DownloadPage({ match }: any) {
                         <div className="border-box">
                             <h1>Download file</h1>
                             <div className="col-12 col-md-10 col-xl-10">
-                                <h5 className="ellipse-text"><i>({fileData.title})</i></h5><br />
+                                <h5 className="ellipse-text"><i>({fileData.title})</i></h5>
+                                <p className="ellipse-text"><i>File is available until {new Date(fileData?.validUntil).toISOString().split('T')[0]}</i></p><br />
                                 <button
                                     className="upload-button"
                                     onClick={() => { window.location.replace(ENDPOINTS.FILE.downloadDynlinkId(fileData.link)) }}
