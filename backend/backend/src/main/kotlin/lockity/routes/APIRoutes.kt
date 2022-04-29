@@ -162,4 +162,3 @@ fun Application.apiRoutes() {
         }
     }
 }
-

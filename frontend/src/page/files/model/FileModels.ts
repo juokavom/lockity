@@ -124,7 +124,8 @@ export const fetchBlob = (url: string, callback: (response: any) => void) => {
     xhr.send();
 }
 
-// Source: https://stackoverflow.com/questions/12168909/blob-from-dataurl
+// Šis metodas panaudotas iš interneto šaltinių
+// Šaltinis: https://stackoverflow.com/questions/12168909/blob-from-dataurl
 export const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
@@ -136,7 +137,9 @@ export const dataURItoBlob = (dataURI: string) => {
     const blob = new Blob([ab], { type: mimeString });
     return blob;
 }
-// Source: https://stackoverflow.com/questions/23150333/html5-javascript-dataurl-to-blob-blob-to-dataurl
+
+// Šis metodas panaudotas iš interneto šaltinių
+// Šaltinis: https://stackoverflow.com/questions/23150333/html5-javascript-dataurl-to-blob-blob-to-dataurl
 export const blobToDataURL = (blob, callback) => {
     var a = new FileReader();
     a.onload = function(e) {
@@ -146,7 +149,8 @@ export const blobToDataURL = (blob, callback) => {
     a.readAsDataURL(blob);
 }
 
-// Source: https://stackoverflow.com/questions/60079764/how-to-export-wavesurfer-js-as-audio-file
+// Šis metodas panaudotas iš interneto šaltinių
+// Šaltinis: https://stackoverflow.com/questions/60079764/how-to-export-wavesurfer-js-as-audio-file
 export const bufferToWave = (abuffer, offset, len, format) => {
     var numOfChan = abuffer.numberOfChannels,
         length = len * numOfChan * 2 + 44,
