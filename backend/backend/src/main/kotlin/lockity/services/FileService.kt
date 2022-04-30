@@ -133,8 +133,9 @@ class FileService(
         }
         File(fileFolderLocation).mkdir()
         val fileLocation = "$fileFolderLocation/$fileName"
+        val file = File(fileLocation)
         part.streamProvider().use { inputStream ->
-            File(fileLocation).outputStream().buffered().use { outputStream ->
+            file.outputStream().buffered().use { outputStream ->
                 copyTo(inputStream, outputStream)
             }
         }
@@ -142,7 +143,7 @@ class FileService(
 
         return FileRecord(
             id = fileId,
-            title = fileName,
+            title = file.name,
             location = fileFolderLocation,
             user = null,
             key = null,
