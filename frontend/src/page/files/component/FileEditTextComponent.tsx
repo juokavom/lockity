@@ -7,7 +7,7 @@ import { fetchBlob, IFileEditProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
 export const FileEditText = ({ fileId, fileTitle, src, uploadPUTSrc, uploadPOSTSrc, callback }: IFileEditProps): JSX.Element => {
-    const [txtContents, setTxtContents] = useState<string | null>(null)
+    const [txtContents, setTxtContents] = useState<string>("")
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -24,13 +24,13 @@ export const FileEditText = ({ fileId, fileTitle, src, uploadPUTSrc, uploadPOSTS
                 <LoadingSpinner />
             </div>
         );
-    } else if (txtContents) {
+    } else {
         return (
             <div className='container'>
                 <TextareaAutosize
                     aria-label="minimum height"
                     minRows={3}
-                    maxRows={10}
+                    maxRows={20}
                     style={{ width: 400 }}
                     value={txtContents}
                     onChange={(e: any) => setTxtContents(e.target.value)}
@@ -79,7 +79,5 @@ export const FileEditText = ({ fileId, fileTitle, src, uploadPUTSrc, uploadPOSTS
                 </div>
             </div>
         );
-    } else {
-        return <></>
     }
 }

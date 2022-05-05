@@ -31,7 +31,7 @@ export const FilePreview = ({ id, title, src }: IFilePreviewProps): JSX.Element 
             aria-label="minimum height"
             disabled
             minRows={3}
-            maxRows={10}
+            maxRows={20}
             style={{ width: 400 }}
             value={contents}
         />
