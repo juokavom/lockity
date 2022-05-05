@@ -26,6 +26,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
+import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -93,6 +94,24 @@ internal class FileServiceTest {
                 Arguments.of(null, randomUser, true),
                 Arguments.of(file, randomUser, true),
                 Arguments.of(file, fileUser, false)
+            )
+        }
+
+        @JvmStatic
+        fun getUserEditFileParamsProvider(): List<Arguments> {
+            val user = UserRecord()
+            user.id = Misc.uuidToBin(UUID.randomUUID())
+            user.storageSize = 10L
+            val fileRecord = FileRecord()
+            fileRecord.id = Misc.uuidToBin(UUID.randomUUID())
+            fileRecord.user = Misc.uuidToBin(UUID.randomUUID())
+            val fileRecordWithUser = FileRecord()
+            fileRecordWithUser.id = Misc.uuidToBin(UUID.randomUUID())
+            fileRecordWithUser.user = user.id
+            return listOf<Arguments>(
+                Arguments.of(null, user, 20L, NotFoundException::class),
+                Arguments.of(fileRecord, user, 20L, NoPermissionException::class),
+                Arguments.of(fileRecordWithUser, user, 20L, NoPermissionException::class)
             )
         }
 
@@ -317,6 +336,69 @@ internal class FileServiceTest {
         every { fileService.uploadFile(any(), any(), any()) } returns FileRecord()
         assertFailsWith<NoPermissionException> {
             fileService.uploadUserFile(userRecord, mockk(), 10L)
+        }
+    }
+
+    @Test
+    fun `it must upload edited user file`() {
+        val userRecord = UserRecord()
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        userRecord.storageSize = 100L
+        val fileRecord = FileRecord()
+        fileRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        fileRecord.title = "title"
+        fileRecord.user = userRecord.id
+        fileRecord.link = "link"
+        every { fileRepository.fetch(any()) } returns fileRecord
+        every { fileRepository.userFileSizeSum(any()) } returns 10L
+        every { fileService.uploadFile(any(), any(), any(), any(), any()) } returns FileRecord()
+        fileService.editUserFile(UUID.randomUUID().toString(), userRecord, mockk(relaxed = true), 10L)
+        verify { fileRepository.update(any()) }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserEditFileParamsProvider")
+    fun `it must fail to edit user file`(fileRecord: FileRecord?, user: UserRecord, userSizeSum: Long, exception: KClass<Exception>) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        every { fileRepository.userFileSizeSum(any()) } returns userSizeSum
+        assertFailsWith(exceptionClass = exception) {
+            fileService.editUserFile(UUID.randomUUID().toString(), user, mockk(relaxed = true), 10L)
+        }
+    }
+
+    @Test
+    fun `it must upload edited user received file`() {
+        val userRecord = UserRecord()
+        userRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        val ownerUserRecord = UserRecord()
+        ownerUserRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        ownerUserRecord.storageSize = 100L
+        val sharedAccessRecord = SharedAccessRecord()
+        sharedAccessRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        sharedAccessRecord.fileId = Misc.uuidToBin(UUID.randomUUID())
+        sharedAccessRecord.canEdit = "1".toByte()
+        sharedAccessRecord.ownerId = Misc.uuidToBin(UUID.randomUUID())
+        sharedAccessRecord.recipientId = userRecord.id
+        val fileRecord = FileRecord()
+        fileRecord.id = Misc.uuidToBin(UUID.randomUUID())
+        fileRecord.user = sharedAccessRecord.ownerId
+        fileRecord.title = "title"
+        every { sharedAccessRepository.fetch(any()) } returns sharedAccessRecord
+        every { fileRepository.fetch(any()) } returns fileRecord
+        every { userRepository.fetch(any()) } returns ownerUserRecord
+        every { fileRepository.userFileSizeSum(any()) } returns 10L
+        every { fileService.uploadFile(any(), any(), any(), any(), any()) } returns FileRecord()
+        fileService.editUserReceivedFile(UUID.randomUUID().toString(), userRecord, mockk(relaxed = true), 10L)
+        verify { fileRepository.update(any()) }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserEditFileParamsProvider")
+    fun `it must fail to edit user received file`(fileRecord: FileRecord?, user: UserRecord, userSizeSum: Long, exception: KClass<Exception>) {
+        every { fileRepository.fetch(any()) } returns fileRecord
+        every { fileRepository.userFileSizeSum(any()) } returns userSizeSum
+        assertFailsWith(exceptionClass = exception) {
+            fileService.editUserFile(UUID.randomUUID().toString(), user, mockk(relaxed = true), 10L)
         }
     }
 
