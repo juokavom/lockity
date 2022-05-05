@@ -6,7 +6,7 @@ import { LoadingSpinner } from '../../main/components/LoadingSpinnerComponent'
 import { blobToDataURL, dataURItoBlob, fetchBlob, IFileEditProps } from "../model/FileModels"
 import { uploadEditedFileBlob } from '../request/FilesRequests'
 
-export const FileEditImage = ({ fileId, fileTitle, src, uploadSrc, callback }: IFileEditProps): JSX.Element => {
+export const FileEditImage = ({ fileId, fileTitle, src, uploadPUTSrc, uploadPOSTSrc, callback }: IFileEditProps): JSX.Element => {
     const imageEditor = useRef<any>(null)
     const [imgContents, setImgContents] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
@@ -55,26 +55,51 @@ export const FileEditImage = ({ fileId, fileTitle, src, uploadSrc, callback }: I
                         usageStatistics={false}
                     />
                 </div>
-                <div className="selected-file-wrapper">
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        className="upload-button"
-                        sx={{ mt: 3, mb: 2 }}
-                        onClick={() => {
-                            setLoading(true)
-                            //@ts-ignore
-                            const fileDataUrl = imageEditor.current.getInstance().toDataURL()
-                            const filePayload = dataURItoBlob(fileDataUrl)
-                            uploadEditedFileBlob(uploadSrc, fileId, fileTitle, filePayload,
-                                "Your image was edited successfully!", () => {
-                                    setLoading(false)
-                                    callback(true)
-                                })
-                        }}
-                    >
-                        Save
-                    </Button>
+                <div className="row justify-content-center mt-2">
+                    {
+                        uploadPOSTSrc &&
+                        <div className="col-auto m-1">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                className="upload-button"
+                                sx={{ mt: 3, mb: 2 }}
+                                onClick={() => {
+                                    setLoading(true)
+                                    //@ts-ignore
+                                    const fileDataUrl = imageEditor.current.getInstance().toDataURL()
+                                    const filePayload = dataURItoBlob(fileDataUrl)
+                                    uploadEditedFileBlob(uploadPOSTSrc, "POST", "copy_" + fileTitle, filePayload,
+                                        "Your image was saved successfully!", () => {
+                                            setLoading(false)
+                                            callback(true)
+                                        })
+                                }}>
+                                Save as copy
+                            </Button>
+                        </div>
+                    }
+                    <div className="col-auto m-1">
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            className="upload-button"
+                            sx={{ mt: 3, mb: 2 }}
+                            onClick={() => {
+                                setLoading(true)
+                                //@ts-ignore
+                                const fileDataUrl = imageEditor.current.getInstance().toDataURL()
+                                const filePayload = dataURItoBlob(fileDataUrl)
+                                uploadEditedFileBlob(uploadPUTSrc, "PUT", fileTitle, filePayload,
+                                    "Your image was edited successfully!", () => {
+                                        setLoading(false)
+                                        callback(true)
+                                    })
+                            }}
+                        >
+                            Save
+                        </Button>
+                    </div>
                 </div>
             </div>
         );

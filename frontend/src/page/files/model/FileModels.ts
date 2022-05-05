@@ -34,7 +34,8 @@ export interface IFileEditProps {
     fileId: string,
     fileTitle: string,
     src: string,
-    uploadSrc: string,
+    uploadPOSTSrc: string | undefined,
+    uploadPUTSrc: string,
     callback: (success: boolean) => void
 }
 

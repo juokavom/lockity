@@ -62,7 +62,8 @@ export function ReceivedPage() {
                     fileId: modalData.receivedMetadata.id,
                     fileTitle: modalData.receivedMetadata.title,
                     src: ENDPOINTS.FILE.streamReceivedWithFileId(modalData.receivedMetadata.id),
-                    uploadSrc: ENDPOINTS.FILE.fileWithReceivedId(modalData.receivedMetadata.id),
+                    uploadPOSTSrc: undefined,
+                    uploadPUTSrc: ENDPOINTS.FILE.fileWithReceivedId(modalData.receivedMetadata.id),
                     callback: modalCallback
                 }
                 switch (modalData.action) {

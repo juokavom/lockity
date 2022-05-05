@@ -50,7 +50,7 @@ export const fetchFileMetadataInfo = () => async (dispatch: Dispatch<Action>) =>
         }, () => dispatch(FileActionCreators.setFileMetadataInfo(null))
         )
 
-export const uploadEditedFileBlob = (src: string, fileId: string, title: string, filePayload: Blob,
+export const uploadEditedFileBlob = (src: string, method: "PUT" | "POST", title: string, filePayload: Blob,
     message: string, callback: (success: boolean) => void) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
@@ -75,7 +75,7 @@ export const uploadEditedFileBlob = (src: string, fileId: string, title: string,
         }
     }
 
-    xhr.open("PUT", src);
+    xhr.open(method, src);
     xhr.withCredentials = true;
     xhr.send(formData);
 }

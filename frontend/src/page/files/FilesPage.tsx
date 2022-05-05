@@ -82,7 +82,8 @@ export function FilesPage() {
                     fileId: modalData.fileMetadata.id,
                     fileTitle: modalData.fileMetadata.title,
                     src: ENDPOINTS.FILE.streamWithFileId(modalData.fileMetadata.id),
-                    uploadSrc: ENDPOINTS.FILE.fileId(modalData.fileMetadata.id),
+                    uploadPOSTSrc: ENDPOINTS.FILE.file,
+                    uploadPUTSrc: ENDPOINTS.FILE.fileId(modalData.fileMetadata.id),
                     callback: modalCallback
                 }
                 switch (modalData.action) {

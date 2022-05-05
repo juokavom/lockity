@@ -80,7 +80,7 @@ const VolumeSlider = ({ wavesurferRef }: IWavesurferProps) => {
     );
 }
 
-export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: IFileEditProps): JSX.Element => {
+export const FileEditAudio = ({ fileId, fileTitle, src, uploadPUTSrc, uploadPOSTSrc, callback }: IFileEditProps): JSX.Element => {
     const [isPlaying, setIsPlaying] = useState(false)
     const [loading, setLoading] = useState(false)
     const [audioContents, setAudioContents] = useState<Blob | null>(null)
@@ -226,6 +226,49 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
         setRegion(editedRegion)
     }, []);
 
+    const preUploadFile = async (uploadFile: (audioBlob: Blob) => void) => {
+        stop()
+        setLoading(true)
+        // @ts-ignore
+        const offlineCtx = new OfflineAudioContext(
+            // @ts-ignore
+            wavesurferRef.current.backend.buffer.numberOfChannels,
+            // @ts-ignore
+            wavesurferRef.current.backend.buffer.length,
+            // @ts-ignore
+            wavesurferRef.current.backend.buffer.sampleRate
+        );
+        const obs = offlineCtx.createBufferSource();
+        // @ts-ignore
+        obs.buffer = wavesurferRef.current.backend.buffer;
+        const gain = offlineCtx.createGain();
+        // @ts-ignore
+        gain.gain.value = wavesurferRef.current.getVolume();
+        // @ts-ignore
+        const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => {
+            // @ts-ignore
+            const filter = offlineCtx.createBiquadFilter();
+            filter.type = "peaking"
+            filter.gain.value = appliedFilter.gain.value
+            filter.Q.value = 1
+            filter.frequency.value = appliedFilter.frequency.value
+            return filter
+        })
+        obs.connect(filters[0])
+        for (var i = 0; i < filters.length - 1; i++) {
+            filters[i].connect(filters[i + 1])
+        }
+        filters[filters.length - 1].connect(gain).connect(offlineCtx.destination)
+        obs.start();
+        await offlineCtx.startRendering().then(r => {
+            const format = "audio/" + fileTitleToFormat(fileTitle)
+            const audioOffset = Math.floor(region.start * r.sampleRate)
+            const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
+            const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
+            uploadFile(audioBlob)
+        });
+    }
+
     const buttons = (
         <>
             <div className="col-auto">
@@ -276,60 +319,46 @@ export const FileEditAudio = ({ fileId, fileTitle, src, uploadSrc, callback }: I
                     {filtersData}
                     {volumeData}
                 </Stack>
-                <div className="selected-file-wrapper">
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        className="upload-button"
-                        sx={{ mt: 3, mb: 2 }}
-                        onClick={async () => {
-                            stop()
-                            setLoading(true)
-                            // @ts-ignore
-                            const offlineCtx = new OfflineAudioContext(
-                                // @ts-ignore
-                                wavesurferRef.current.backend.buffer.numberOfChannels,
-                                // @ts-ignore
-                                wavesurferRef.current.backend.buffer.length,
-                                // @ts-ignore
-                                wavesurferRef.current.backend.buffer.sampleRate
-                            );
-                            const obs = offlineCtx.createBufferSource();
-                            // @ts-ignore
-                            obs.buffer = wavesurferRef.current.backend.buffer;
-                            const gain = offlineCtx.createGain();
-                            // @ts-ignore
-                            gain.gain.value = wavesurferRef.current.getVolume();
-                            // @ts-ignore
-                            const filters = wavesurferRef.current.backend.filters.map((appliedFilter) => {
-                                // @ts-ignore
-                                const filter = offlineCtx.createBiquadFilter();
-                                filter.type = "peaking"
-                                filter.gain.value = appliedFilter.gain.value
-                                filter.Q.value = 1
-                                filter.frequency.value = appliedFilter.frequency.value
-                                return filter
-                            })
-                            obs.connect(filters[0])
-                            for (var i = 0; i < filters.length - 1; i++) {
-                                filters[i].connect(filters[i + 1])
-                            }
-                            filters[filters.length - 1].connect(gain).connect(offlineCtx.destination)
-                            obs.start();
-                            await offlineCtx.startRendering().then(r => {
-                                const format = "audio/" + fileTitleToFormat(fileTitle)
-                                const audioOffset = Math.floor(region.start * r.sampleRate)
-                                const audioLength = Math.floor((region.end - region.start) * r.sampleRate)
-                                const audioBlob = bufferToWave(r, audioOffset, audioLength, format);
-                                uploadEditedFileBlob(uploadSrc, fileId, fileTitle, audioBlob,
-                                    "Your audio was edited successfully!", () => {
-                                        setLoading(false)
-                                        callback(true)
+                <div className="row justify-content-center">
+                    {
+                        uploadPOSTSrc &&
+                        <div className="col-auto m-1">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                className="upload-button"
+                                sx={{ mt: 3, mb: 2, mr: 2 }}
+                                onClick={async () => {
+                                    preUploadFile((audioBlob: Blob) => {
+                                        uploadEditedFileBlob(uploadPOSTSrc, "POST", "copy_" + fileTitle, audioBlob,
+                                            "Your audio was saved successfully!", () => {
+                                                setLoading(false)
+                                                callback(true)
+                                            })
                                     })
-                            });
-                        }}>
-                        Save
-                    </Button>
+                                }}>
+                                Save as copy
+                            </Button>
+                        </div>
+                    }
+                    <div className="col-auto m-1">
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            className="upload-button"
+                            sx={{ mt: 3, mb: 2 }}
+                            onClick={async () => {
+                                preUploadFile((audioBlob: Blob) => {
+                                    uploadEditedFileBlob(uploadPUTSrc, "PUT", fileTitle, audioBlob,
+                                        "Your audio was edited successfully!", () => {
+                                            setLoading(false)
+                                            callback(true)
+                                        })
+                                })
+                            }}>
+                            Save
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
