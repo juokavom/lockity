@@ -191,7 +191,8 @@ class FileService(
                 id = Misc.binToUuid(it.id!!).toString(),
                 title = it.title!!,
                 size = it.size!!,
-                link = it.link
+                link = it.link,
+                uploaded = it.uploaded!!
             )
         }
     }

@@ -8,6 +8,7 @@ export interface IFileMetadata {
     title: string,
     size: number,
     link: string | null,
+    uploaded: string
 }
 
 export interface StorageData {

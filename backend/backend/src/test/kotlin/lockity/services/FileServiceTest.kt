@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.time.LocalDateTime
 import java.util.*
 import javax.naming.NoPermissionException
 import kotlin.test.assertEquals
@@ -139,7 +140,8 @@ internal class FileServiceTest {
                             id = Misc.uuidToBin(UUID.randomUUID()),
                             title = "test",
                             size = 205L,
-                            link = UUID.randomUUID().toString()
+                            link = UUID.randomUUID().toString(),
+                            uploaded = LocalDateTime.now()
                         )
                     ),
                     15,

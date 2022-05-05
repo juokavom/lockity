@@ -29,7 +29,8 @@ data class FileMetadata(
     val id: String,
     val title: String,
     val size: Long,
-    val link: String?
+    val link: String?,
+    val uploaded: LocalDateTime
 )
 
 @Serializable

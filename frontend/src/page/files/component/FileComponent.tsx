@@ -10,6 +10,12 @@ import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import ContentCutOutlinedIcon from '@mui/icons-material/ContentCutOutlined';
 
+const formatDateString = (dateString: string) => {
+    const splittedDate = dateString.split('T')
+    const splittedTime = splittedDate[1].split(':')
+    return splittedDate[0] + " " + splittedTime[0] + ":" + splittedTime[1]
+}
+
 export const File = ({ fileMetadata, action }: IFileProps) => {
     const format = fileTitleToFormat(fileMetadata.title);
     const windowState = useTypedSelector((state) => state.windowReducer)
@@ -62,22 +68,45 @@ export const File = ({ fileMetadata, action }: IFileProps) => {
         </>
     );
 
-    return (
-        <div className="file container" >
-            <div className="row align-items-center d-flex justify-content-center">
-                <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
-                    <p className="ellipse-text" style={{ maxWidth: "400px" }}>{fileMetadata.title}</p>
+    if (windowState.smallView) {
+        return (
+            <div className="file container" >
+                <div className="row align-items-center d-flex justify-content-center">
+                    <div className="col col-lg-4 ellipse-text d-flex justify-content-center">
+                        <p className="ellipse-text" style={{ maxWidth: "400px" }}>{fileMetadata.title}</p>
+                    </div>
                 </div>
-                <div className="col-4 col-lg-2 d-flex justify-content-center">
-                    {formattedSize.size + " " + formattedSize.unit}
+                <div className="row align-items-center d-flex justify-content-center">
+                    <div className="col-auto">
+                        {formattedSize.size + " " + formattedSize.unit}
+                    </div>
+                    <div className="col-auto">
+                        {formatDateString(fileMetadata.uploaded)}
+                    </div>
                 </div>
-                {!windowState.smallView && buttons}
-            </div>
-            {windowState.smallView &&
                 <div className="row align-items-center d-flex justify-content-center">
                     {buttons}
                 </div>
-            }
-        </div>
-    );
+            </div>
+        );
+    } else {
+        return (
+            <div className="file container" >
+                <div className="row align-items-center d-flex justify-content-center">
+                    <div className="col col-lg-6 ellipse-text d-flex justify-content-center">
+                        <p className="ellipse-text" style={{ maxWidth: "600px" }}>{fileMetadata.title}</p>
+                    </div>
+                    <div className="col-auto">
+                        {formattedSize.size + " " + formattedSize.unit}
+                    </div>
+                    <div className="col-auto">
+                        {formatDateString(fileMetadata.uploaded)}
+                    </div>
+                </div>
+                <div className="row align-items-center d-flex justify-content-center">
+                    {buttons}
+                </div>
+            </div>
+        );
+    }
 }
